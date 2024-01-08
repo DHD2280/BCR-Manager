@@ -2,7 +2,7 @@
 
 A simple manager for BCR.
 
-[![Android](https://img.shields.io/badge/Platform-Android-green.svg?style=flat-square)](https://www.android.com) [![API](https://img.shields.io/badge/API-28%2B-orange.svg?logo=android&style=flat-square)](https://developer.android.com/studio/releases/platforms) [![Release](https://img.shields.io/github/v/release/DHD2280/BCR-Manager?style=for-the-badge)](https://github.com/DHD2280/BCR-Manager/releases)
+[![Android](https://img.shields.io/badge/Platform-Android-green.svg?style=flat-square)](https://www.android.com) [![API](https://img.shields.io/badge/API-28%2B-orange.svg?logo=android&style=flat-square)](https://developer.android.com/studio/releases/platforms)
 
 <img src="app/images/icon.png" alt="app icon" width="144" />
 <img src="app/images/Screenshots.png" alt="app icon" width="2350" />
