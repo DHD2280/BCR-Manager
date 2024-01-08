@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="direction_array">
+        <item>@string/ingoing</item>
+        <item>@string/outgoing</item>
+        <item>@string/both_direction</item>
+    </array>
+</resources>

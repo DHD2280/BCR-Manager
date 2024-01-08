@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <PreferenceCategory
+        android:title="@string/style_settings"
+        app:iconSpaceReserved="false" >
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="show_headers"
+            android:title="@string/show_headers"
+            android:summary="@string/show_headers_summary" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="show_colored_tiles"
+            android:title="@string/show_colored_tiles"
+            android:summary="@string/show_colored_tiles_summary" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="dark_letter_on_dark_mode"
+            android:dependency="show_colored_tiles"
+            android:title="@string/show_dark_letters_title"
+            android:summary="@string/show_dark_letters_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/app_settings"
+        app:iconSpaceReserved="false">
+        <Preference
+            app:iconSpaceReserved="false"
+            android:id="@+id/bcr_directory"
+            android:key="bcr_directory"
+            android:title="@string/bcr_directory_title" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:key="vibrate"
+            android:defaultValue="true"
+            android:title="@string/vibrate_title"
+            android:summary="@string/vibrate_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/miscellaneous"
+        app:iconSpaceReserved="false">
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="version"
+            android:title="@string/version"
+            android:summary="" />
+    </PreferenceCategory>
+</PreferenceScreen>

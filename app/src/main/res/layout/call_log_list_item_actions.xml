@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2014 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/call_log_action_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:importantForAccessibility="1"
+    android:orientation="vertical"
+    android:visibility="visible">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_height="1dp"
+        android:background="@color/dialer_divider_line_color"/>
+
+    <LinearLayout
+        android:id="@+id/call_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_call"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/call"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/create_new_contact_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_add_contact"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/create_new_contact"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/edit_contact_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_edit"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/edit_contact"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/send_message_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_message"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/send_message"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/open_with_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_open_with"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/open_with"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/share_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_share"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/share"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/delete_action"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_delete"/>
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/delete"/>
+
+    </LinearLayout>
+</LinearLayout>

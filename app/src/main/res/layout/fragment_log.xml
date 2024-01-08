@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="visible"
+        android:layout_marginBottom="4dp"
+        app:trackCornerRadius="4dp"
+        app:trackThickness="8dp" />
+
+    <FrameLayout
+        android:id="@+id/filterLayout"
+        android:layout_below="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:visibility="gone">
+
+        <include
+            android:id="@+id/filter_card_layout"
+            layout="@layout/filter_card"
+            android:layout_margin="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:visibility="visible"/>
+
+    </FrameLayout>
+
+    <Chronometer
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chronometer"
+        android:layout_below="@+id/filterLayout"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
+        android:paddingBottom="@dimen/bottom_padding"
+        android:clipToPadding="false"
+        android:layout_below="@id/chronometer"
+        android:layout_above="@+id/playerInfoBarContainer"/>
+
+
+    <LinearLayout
+        android:id="@+id/playerInfoBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="8dp"
+        android:visibility="invisible">
+
+        <!-- Your player info layout goes here -->
+        <!-- This could include TextViews, SeekBar, etc. to display MediaPlayer information -->
+        <!-- LinearLayout for defaultLayout -->
+        <include
+            android:id="@+id/bottom_player_layout"
+            layout="@layout/bottom_player_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:visibility="visible" />
+
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="TODO"
+        app:srcCompat="@drawable/ic_up" />
+
+</RelativeLayout>

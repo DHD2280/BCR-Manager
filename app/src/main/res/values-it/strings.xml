@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Permission Fragment Strings -->
+    <string name="wellcome_title">Benvenuto in BCR Manager!</string>
+    <string name="wellcome_message">Quest\'app va usata insieme al modulo Magisk BCR. Ti semplificherà la vita quando ascolterai e riprodurrai le registrazioni delle chiamate.\nRicorda di selezionare una cartella predefinita in BCR diversa da quella di default (dal momento che nessun\'app può leggere il contenuto delle cartelle delle altre app) e abilita \'Scrivi metadati JSON\' nelle impostazioni di BCR!</string>
+    <string name="setup_permissions_title">Setup Permessi</string>
+    <string name="setup_permissions_call_log_title">Leggi registro chiamate</string>
+    <string name="setup_permissions_call_log_message">Questo permesso è richiesto per leggere nel registro chiamate il nome del contatto.</string>
+    <string name="setup_permissions_contact_title">Leggi contatti</string>
+    <string name="setup_permissions_contact_message">Il permesso per leggere i contatti è richiesto per controllare il nome del contatto e mostrare l\'immagine del contatto.</string>
+    <string name="setup_permissions_phone_state_title">Stato Telefono</string>
+    <string name="setup_permissions_phone_state_message">Il permesso per leggere lo stato del telefono è richiesto per controllare i numeri di Emergenza e segreteria, e inoltre per controllare il numero di SIM attive (utile per mostrare con quale SIM si ha effettuato la chiamata).</string>
+    <string name="setup_permissions_grant">Concedi Permessi</string>
+    <string name="setup_permissions_granted">Fatto!</string>
+
+    <!-- BCR Dialog Strings -->
+    <string name="bcr_not_installed_title">BCR non installato</string>
+    <string name="bcr_not_installed_message">BCR non è installato sul tuo dispositivo. Installalo da GitHub.</string>
+    <string name="bcr_not_installed_positive">Installa</string>
+
+
+    <!-- BCR Directory Dialog Strings -->
+    <string name="bcr_directory_title">Cartella BCR</string>
+    <string name="bcr_directory_message">Seleziona la cartella in cui BCR salva le registrazioni.</string>
+    <string name="bcr_directory_positive">Seleziona</string>
+
+    <!-- Action Mode -->
+    <string name="selected_count">%d selezionati</string>
+
+    <!-- Menu Strings -->
+    <string name="search">Cerca</string>
+    <string name="batch_delete">Cancella multipli</string>
+    <string name="settings">Impostazioni</string>
+
+    <!-- Filter Menu Strings -->
+    <string name="filter_none">Off</string>
+    <string name="date">Data</string>
+    <string name="single_date">Data Singola</string>
+    <string name="pick_date">Scegli Data</string>
+    <string name="range_date">Range di date</string>
+    <string name="contact">Contatto</string>
+    <string name="direction">Direzione</string>
+    <string name="ingoing">In entrata</string>
+    <string name="outgoing">In uscita</string>
+    <string name="both_direction">Entrambe</string>
+    <string name="duration">Durata</string>
+
+    <!-- Delete Dialog -->
+    <string name="delete_dialog_title">Cancella</string>
+    <string name="delete_dialog_message">Sei sicuro che vuoi cancellare questo elemento?</string>
+    <string name="delete_dialog_positive">Cancella</string>
+    <string name="delete_dialog_negative">Annulla</string>
+
+    <!-- Breakpoints Strings -->
+    <string name="breakpoints">Breakpoints</string>
+    <string name="delete_breakpoint">Cancella</string>
+    <string name="edit_breakpoint">Modifica</string>
+    <string name="title_breakpoint">Titolo</string>
+    <string name="breakpoints_title_empty">Il titolo non può essere vuoto!</string>
+    <string name="description_breakpoint">Descrizione</string>
+    <string name="add_breakpoint">Aggiungi</string>
+    <string name="add_breakpoint_title">Nuovo Breakpoint</string>
+    <string name="cancel_breakpoint">Annulla</string>
+
+    <!-- Time Strings -->
+    <string name="today">Oggi</string>
+    <string name="yesterday">Ieri</string>
+    <string name="last_month">Ultimo mese</string>
+    <string name="format_sec">%d sec</string>
+    <string name="format_min">%1$s min %2$s sec</string>
+
+    <string name="starred">Preferiti</string>
+
+    <!-- Expanded Layout -->
+    <string name="call">Chiama</string>
+    <string name="create_new_contact">Crea nuovo contatto</string>
+    <string name="edit_contact">Modifica contatto</string>
+    <string name="send_message">Invia un messaggio</string>
+    <string name="send_sms">Invia SMS</string>
+    <string name="save_contact">Salva</string>
+    <string name="share">Condividi</string>
+    <string name="open_with">Apri con</string>
+    <string name="delete">Cancella</string>
+
+    <!-- Batch Delete Strings -->
+    <string name="select_criteria">Seleziona almeno un criterio</string>
+    <string name="no_items">Nessun elemento nei criteri selezionati</string>
+    <plurals name="deleted_registrations">
+        <item quantity="one">%1$d Registrazione cancellata.</item>
+        <item quantity="many">%1$d Registrazioni cancellate.</item>
+        <item quantity="other">%1$d Registrazioni cancellate.</item>
+    </plurals>
+    <string name="sure_delete">Sei sicuro?</string>
+    <string name="sure_delete_message">Quest\'azione non può essere annullata!</string>
+    <string name="unsaved_contacts">Contatti non salvati</string>
+
+    <!-- Settings Strings -->
+    <string name="style_settings">Stile app</string>
+    <string name="show_headers">Mostra Intestazioni</string>
+    <string name="show_headers_summary">Mostra intestazioni nel log delle registrazioni</string>
+    <string name="show_colored_tiles">Mostra icone colorate</string>
+    <string name="show_colored_tiles_summary">Mostra icone colorate quando i contatti salvati non hanno un\'immagine.</string>
+    <string name="show_dark_letters_title">Mostra lettere scure</string>
+    <string name="show_dark_letters_summary">Mostra lettere scure nelle icone dei contatti quando hai il tema scuro.</string>
+    <string name="app_settings">Impostazioni app</string>
+    <string name="vibrate_title">Vibrazione</string>
+    <string name="vibrate_summary">Vibra nei cambiamenti dell\'UI</string>
+    <string name="miscellaneous">Varie</string>
+    <string name="version">Versione</string>
+    <string name="opensource_licenses">License Open Source</string>
+
+    <!-- Player Strings -->
+    <string name="speed">Velocità</string>
+</resources>

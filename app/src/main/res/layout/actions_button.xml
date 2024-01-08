@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:baselineAligned="false"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:id="@+id/actionCall"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:contentDescription="@string/call"
+            app:srcCompat="@drawable/ic_call"
+            app:tint="?colorPrimary"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/call"
+            android:layout_marginTop="5dp"
+            android:textAppearance="?attr/textAppearanceHeadline5" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:id="@+id/actionMessage"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:contentDescription="@string/send_sms"
+            app:srcCompat="@drawable/ic_message"
+            app:tint="?colorPrimary"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send_sms"
+            android:layout_marginTop="5dp"
+            android:textAppearance="?attr/textAppearanceHeadline5" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:id="@+id/actionCreateContact"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:contentDescription="@string/create_new_contact"
+            app:srcCompat="@drawable/ic_add_contact"
+            app:tint="?colorPrimary"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/save_contact"
+            android:layout_marginTop="5dp"
+            android:textAppearance="?attr/textAppearanceHeadline5" />
+
+    </LinearLayout>
+
+</LinearLayout>

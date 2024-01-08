@@ -1,0 +1,116 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">BCR Manager</string>
+
+    <!-- Permission Fragment Strings -->
+    <string name="wellcome_title">Welcome to BCR Manager!</string>
+    <string name="wellcome_message">This app is for user of BCR Magisk Module. It will simplify your life when searching and playing Call Recordings.\nRemember to set a default BCR directory different from the default one (since this app can\'t read in a folder of other app) and set ON \'Write Json Metadata\' in BCR Settings! JSON Metadata is not mandatory, but will help a lot the app loading recordings. The app tries anyway to parse recordings without JSON.</string>
+    <string name="setup_permissions_title">Setup Permissions</string>
+    <string name="setup_permissions_call_log_title">Read Call Log</string>
+    <string name="setup_permissions_call_log_message">Read Call Log permission is required to check in Call Log the current contact Name.</string>
+    <string name="setup_permissions_contact_title">Read Contacts</string>
+    <string name="setup_permissions_contact_message">Read Contacts permission is required to check in the Contact Name (if Call Log fails) and Contact Image.</string>
+    <string name="setup_permissions_phone_state_title">Read Phone State</string>
+    <string name="setup_permissions_phone_state_message">Read Phone State permission is required to check if the number of active SIMs and for checking if the caller is Voice Mail.</string>
+    <string name="setup_permissions_grant">Grant Permissions</string>
+    <string name="setup_permissions_granted">All done!</string>
+
+    <!-- BCR Dialog Strings -->
+    <string name="bcr_not_installed_title">BCR not installed</string>
+    <string name="bcr_not_installed_message">BCR is not installed on your device. Please install it from GitHub.</string>
+    <string name="bcr_not_installed_positive">Install</string>
+
+    <!-- BCR Directory Dialog Strings -->
+    <string name="bcr_directory_title">BCR Directory</string>
+    <string name="bcr_directory_message">Please select the directory where BCR saves registrations.</string>
+    <string name="bcr_directory_positive">Select</string>
+
+    <!-- Action Mode -->
+    <string name="selected_count">%d selected</string>
+
+    <!-- Menu Strings -->
+    <string name="search">Search</string>
+    <string name="batch_delete">Batch Delete</string>
+    <string name="settings">Settings</string>
+
+    <!-- Filter Menu Strings -->
+    <string name="filter_none">Off</string>
+    <string name="date">Date</string>
+    <string name="single_date">Single Date</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="range_date">Range Date</string>
+    <string name="contact">Contact</string>
+    <string name="direction">Direction</string>
+    <string name="ingoing">Ingoing</string>
+    <string name="outgoing">Outgoing</string>
+    <string name="both_direction">Both</string>
+    <string name="duration">Duration</string>
+
+    <!-- Delete Dialog -->
+    <string name="delete_dialog_title">Delete</string>
+    <string name="delete_dialog_message">Are you sure you want to delete this file?</string>
+    <string name="delete_dialog_positive">Delete</string>
+    <string name="delete_dialog_negative">Cancel</string>
+
+    <!-- Breakpoints Strings -->
+    <string name="breakpoints">Breakpoints</string>
+    <string name="delete_breakpoint">Delete</string>
+    <string name="edit_breakpoint">Edit</string>
+    <string name="title_breakpoint">Title</string>
+    <string name="breakpoints_title_empty">Title can\'t be empty!</string>
+    <string name="description_breakpoint">Description</string>
+    <string name="add_breakpoint">Add</string>
+    <string name="add_breakpoint_title">New Breakpoint</string>
+    <string name="cancel_breakpoint">Cancel</string>
+
+    <!-- Time Strings -->
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="last_month">Last Month</string>
+    <string name="format_sec">%d sec</string>
+    <string name="format_min">%1$s min %2$s sec</string>
+
+    <string name="starred">Favourites</string>
+
+    <!-- Expanded Layout -->
+    <string name="call">Call</string>
+    <string name="create_new_contact">Create new Contact</string>
+    <string name="edit_contact">Edit Contact</string>
+    <string name="send_message">Send a message</string>
+    <string name="send_sms">Send SMS</string>
+    <string name="save_contact">Save</string>
+    <string name="share">Share</string>
+    <string name="open_with">Open With</string>
+    <string name="delete">Delete</string>
+
+    <string name="divider" translatable="false">·</string>
+
+    <!-- Batch Delete Strings -->
+    <string name="select_criteria">Select at lease one criteria</string>
+    <string name="no_items">No items in selected criteria</string>
+    <plurals name="deleted_registrations">
+        <item quantity="one">%1$d Registration deleted.</item>
+        <item quantity="other">%1$d Registrations deleted.</item>
+    </plurals>
+    <string name="sure_delete">Are you sure?</string>
+    <string name="sure_delete_message">This action can\'t be undone!</string>
+    <string name="unsaved_contacts">Unsaved contacts</string>
+
+    <!-- Settings Strings -->
+    <string name="style_settings">Style Settings</string>
+    <string name="show_headers">Show Headers</string>
+    <string name="show_headers_summary">Show headers in the call log</string>
+    <string name="show_colored_tiles">Show Colored Tiles</string>
+    <string name="show_colored_tiles_summary">Show colored tiles in the call log</string>
+    <string name="show_dark_letters_title">Show Dark Letters</string>
+    <string name="show_dark_letters_summary">Show dark letters when System Theme is dark</string>
+    <string name="app_settings">App Settings</string>
+    <string name="vibrate_title">Vibrate</string>
+    <string name="vibrate_summary">Vibrate on UI changes</string>
+    <string name="miscellaneous">Miscellaneous</string>
+    <string name="version">Version</string>
+    <string name="opensource_licenses">Open Source Licenses</string>
+
+    <!-- Player Strings -->
+    <string name="speed">Speed</string>
+
+</resources>

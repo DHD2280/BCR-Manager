@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <!-- Height of the call log actions section for each call log entry -->
+    <dimen name="call_log_action_height">48dp</dimen>
+
+
+    <dimen name="call_log_action_icon_margin_start">16dp</dimen>
+    <dimen name="call_log_action_icon_dimen">24dp</dimen>
+    <dimen name="call_log_action_horizontal_padding">24dp</dimen>
+
+    <item name="letter_to_tile_ratio" type="dimen">67%</item>
+
+    <dimen name="bottom_padding">220dp</dimen>
+    <dimen name="bottom_padding_breakpoint">80dp</dimen>
+    <dimen name="bottom_sheet_overall_padding">28dp</dimen>
+    <dimen name="bottom_sheet_title_margin_bottom">12dp</dimen>
+    <dimen name="bottom_sheet_section_separation">28dp</dimen>
+
+    <dimen name ="appbar_top_padding">20dp</dimen>
+    <dimen name ="appbar_bottop_padding">20dp</dimen>
+
+
+    <dimen name="indicator_size">6dp</dimen>
+
+    <dimen name="margin_8">8dp</dimen>
+    <dimen name="margin_16">16dp</dimen>
+    <dimen name="margin_20">20dp</dimen>
+
+    <dimen name="launcher_shortcut_adaptive_icon_size">108dp</dimen>
+
+</resources>

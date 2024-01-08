@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/edit_breakpoint"
+        android:icon="@drawable/ic_edit"
+        android:iconTint="?colorPrimary"
+        android:title="@string/edit_breakpoint" />
+    <item android:id="@+id/delete_breakpoint"
+        android:icon="@drawable/ic_delete"
+        android:iconTint="?colorPrimary"
+        android:title="@string/delete_breakpoint" />
+</menu>
