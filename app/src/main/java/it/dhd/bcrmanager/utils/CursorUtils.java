@@ -6,11 +6,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
-import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import it.dhd.bcrmanager.BuildConfig;
 
@@ -213,8 +215,23 @@ public class CursorUtils {
         String date = callItem[0];
         String time = callItem[1];
         String dateTime = date + time;
-        String contactNumber = callItem[2];
-        String duration = "", type = "", sim = "", name = "", features = "";
+        Date dateTimeLong = null;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
+
+        try {
+            // Parsing della stringa combinata
+            dateTimeLong = dateFormat.parse(dateTime);
+
+            // Ottieni il valore numerico di Date.getTime()
+            long timeInMillis = dateTimeLong.getTime();
+
+            // Output del risultato
+        } catch (Exception e) {
+            // Gestisci l'eccezione di parsing
+            e.printStackTrace();
+        }
+        String phoneNumber = callItem[2];
+        String duration = "", type = "", sim = "", name = "";
         Cursor cursor = context.getContentResolver().query(
                 CallLog.Calls.CONTENT_URI,
                 new String[]{
@@ -223,29 +240,27 @@ public class CursorUtils {
                         CallLog.Calls.DURATION,
                         CallLog.Calls.TYPE,
                         CallLog.Calls.PHONE_ACCOUNT_ID,
-                        CallLog.Calls.CACHED_NAME,
-                        CallLog.Calls.FEATURES
+                        CallLog.Calls.CACHED_NAME
                 },
-                null,
-                null,
+                CallLog.Calls.NUMBER + "=?",
+                new String[]{phoneNumber},
                 null
         );
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 // Retrieve file information from the cursor
-                if (PhoneNumberUtils.compare(contactNumber, cursor.getString(0)) &&
-                        dateTime.equals(DateUtils.formatTimestamp(cursor.getLong(1)))) {
+                String timestamp = cursor.getString(1);
+                String timestampNoMillis = timestamp.substring(0, timestamp.length() - 3);
+                if (dateTimeLong == null) return null;
+                String dateTimeNoMillis = String.valueOf(dateTimeLong.getTime()).substring(0, String.valueOf(dateTimeLong.getTime()).length() - 3);
+                if (timestampNoMillis.equals(dateTimeNoMillis)) {
+                    // Retrieve file information from the cursor
                     duration = cursor.getString(2);
                     type = checkType(cursor.getInt(3));
                     sim = SimUtils.checkSimSlot(context, cursor.getString(4));
                     name = cursor.getString(5);
-                    switch (cursor.getInt(6)) {
-                        case CallLog.Calls.FEATURES_HD_CALL -> features = "hd";
-                        case CallLog.Calls.FEATURES_VOLTE -> features = "volte";
-                        case CallLog.Calls.FEATURES_WIFI -> features = "vowifi";
-                    }
+                    Log.d("CursorUtils.searchThingsInCallLog", "searchThingsInCallLog Contact: " + name + ", Number: " + phoneNumber + ", Duration: " + duration + ", Type: " + type + ", Sim: " + sim);
                     break;
-
                 }
             } while (cursor.moveToNext());
 
@@ -253,7 +268,7 @@ public class CursorUtils {
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
-        return new String[]{duration, type, sim, name, features};
+        return new String[]{duration, type, sim, name};
     }
 
     private static String checkType(int callType) {

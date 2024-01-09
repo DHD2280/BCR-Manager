@@ -2,6 +2,9 @@ package it.dhd.bcrmanager.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -9,27 +12,40 @@ import java.util.concurrent.TimeUnit;
 
 public class DateUtils {
 
+
     /**
-     * Check if two dates are the same day
-     * @param date1 The first date
-     * @param date2 The second date
-     * @return true if the two dates are the same day, false otherwise
+     * Check if the date is today
+     * @param itemDate The date to check
+     * @return true if the date is today, false otherwise
      */
+    public static boolean isToday(Date itemDate) {
+        if (itemDate == null) {
+            return false;
+        } else {
+            return android.text.format.DateUtils.isToday(itemDate.getTime());
+        }
+    }
+
     public static boolean isSameDay(Date date1, Date date2) {
         if (date1 == null || date2 == null) {
             return false;
+        } else {
+            ZoneId zoneId = ZoneId.systemDefault();
+
+            Instant oneInstant = Instant.ofEpochMilli(date1.getTime());
+            LocalDateTime oneLocalDateTime = LocalDateTime.ofInstant(oneInstant, zoneId);
+
+            Instant twoInstant = Instant.ofEpochMilli(date2.getTime());
+            LocalDateTime twoLocalDateTime = LocalDateTime.ofInstant(twoInstant, zoneId);
+
+            return (oneLocalDateTime.getYear() == twoLocalDateTime.getYear())
+                    && (oneLocalDateTime.getMonthValue() == twoLocalDateTime.getMonthValue())
+                    && (oneLocalDateTime.getDayOfMonth() == twoLocalDateTime.getDayOfMonth());
         }
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTime(date1);
-        Calendar cal2 = Calendar.getInstance();
-        cal2.setTime(date2);
-        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
-                cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
-                cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
     }
 
     /**
-     * Check if the second date is yesternday
+     * Check if the second date is yesterday
      * @param currentDate The current date
      * @param itemDate The date to check
      * @return true if the second date is yesterday, false otherwise
@@ -197,17 +213,6 @@ public class DateUtils {
     }
 
     /**
-     * Format the timestamp
-     * @param timestamp The timestamp
-     * @return The formatted timestamp in format yyyyMMddHHmmss (e.g. 20231229113232)
-     */
-    public static String formatTimestamp(long timestamp) {
-        Date date = new Date(timestamp);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-        return dateFormat.format(date);
-    }
-
-    /**
      * Format the time
      * @param time The time string (e.g. 113232.448+0100)
      * @return The formatted time in format HHmmss (e.g. 113232)
@@ -229,4 +234,6 @@ public class DateUtils {
             return null;
         }
     }
+
+
 }

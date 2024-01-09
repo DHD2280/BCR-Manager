@@ -9,7 +9,7 @@ A simple manager for BCR.
 
 
 
-Since I really love Basic Call Recorder Manager is a simple app to manage registrations saved with BCR.
+Since I really love Basic Call Recorder, I made a simple app to manage registrations saved with BCR.
 
 
 ## Table of Contents
@@ -22,6 +22,7 @@ Since I really love Basic Call Recorder Manager is a simple app to manage regist
 - [Feedback](#feedback)
 - [Issues](#issues)
 - [License](#license)
+- [Changelog](#changelog)
 - [TODOs](#todos)
 - [Acknowledgments](#acknowledgments)
 - [Screenshots](#screenshots)
@@ -56,19 +57,14 @@ A few of the things you can do with BCR Manager:
 This app requires the following permissions, but it's not mandatory:
 
 `android.permission.READ_CALL_LOG`
-
 Permission to read Call Log, for getting the contact name (and business name if contact not saved) based on Call Log
 
 
-`
-android.permission.READ_CONTACTS
-`
+`android.permission.READ_CONTACTS`
 Permission for Read Contacts: needed to get the contact name, all contact's numbers and contact pictures.
 Contacts numbers are used for dynamic shortcuts.
 
-`
-android.permission.READ_PHONE_STATE
-`
+`android.permission.READ_PHONE_STATE`
 Permission to Read Phone State: to get VoiceMail's number, Emergency number (for creating the LetterTileDrawable) and numbers of active SIMs.
 
 ## How it works
@@ -91,6 +87,10 @@ If you want to report an issue with the app, just open a new issue following
 ## License
 
 BCR Manager is licensed under GPLv3. Please see [`LICENSE`](./LICENSE.md) for the full license text.
+
+## Changelog
+
+See [`CHANGELOG`](./CHANGELOG.md) for a complete list of changes.
 
 ## TODOs
 TODOs, but I don't know if I will do it, but if the app will be popular, I will do it.

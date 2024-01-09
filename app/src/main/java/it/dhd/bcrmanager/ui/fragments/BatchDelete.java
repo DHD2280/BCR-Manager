@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.callbacks.SwipeCallback;
@@ -163,39 +165,52 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
 
     private void deleteItems() {
 
+        binding.progress.setVisibility(View.VISIBLE);
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
         int size = registrationsItems.size();
-        for (CallLogItem item : registrationsItems) {
-            NewHome.deleteCallItem(item);
-            if (item.isStarred()) {
-                NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
-            }
-
-            Uri fileUri, audioUri;
-            fileUri = Uri.parse(item.getFilePath());
-            audioUri = Uri.parse(item.getAudioFilePath());
-            if (UriUtils.areEqual(fileUri, audioUri)) {
-                FileUtils.deleteFileUri(requireContext(), audioUri);
-            } else {
-                FileUtils.deleteFileUri(requireContext(), fileUri);
-                FileUtils.deleteFileUri(requireContext(), audioUri);
-            }
-        }
         String formattedString = getResources().getQuantityString(R.plurals.deleted_registrations, size, size);
-        regLogAdapter.notifyItemRangeRemoved(0, size);
-        registrationsItems.clear();
-        List<CallLogItem> callLogItems = new ArrayList<>();
-        for (Object item : NewHome.yourListOfItems) {
-            if (item instanceof CallLogItem) {
-                callLogItems.add((CallLogItem) item);
+        executorService.execute(() -> {
+            // Esegui il tuo metodo qui
+
+            for (CallLogItem item : registrationsItems) {
+                NewHome.deleteCallItem(item);
+                if (item.isStarred()) {
+                    NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
+                }
+
+                Uri fileUri, audioUri;
+                fileUri = Uri.parse(item.getFilePath());
+                audioUri = Uri.parse(item.getAudioFilePath());
+                if (UriUtils.areEqual(fileUri, audioUri)) {
+                    FileUtils.deleteFileUri(requireContext(), audioUri);
+                } else {
+                    FileUtils.deleteFileUri(requireContext(), fileUri);
+                    FileUtils.deleteFileUri(requireContext(), audioUri);
+                }
             }
-        }
-        FileUtils.saveObjectList(requireContext(), callLogItems, FileUtils.STORED_REG, CallLogItem.class);
+            regLogAdapter.notifyItemRangeRemoved(0, size);
+            registrationsItems.clear();
+            List<CallLogItem> callLogItems = new ArrayList<>();
+            for (Object item : NewHome.yourListOfItems) {
+                if (item instanceof CallLogItem) {
+                    callLogItems.add((CallLogItem) item);
+                }
+            }
+            FileUtils.saveObjectList(requireContext(), callLogItems, FileUtils.STORED_REG, CallLogItem.class);
+
+            // Esegui nell'UI thread dopo l'esecuzione
+
+        });
+        binding.progress.setVisibility(View.GONE);
         Snackbar.make(binding.batchDeleteFab.getRootView(), formattedString, Snackbar.LENGTH_SHORT)
                 .setAnchorView(binding.batchDeleteFab)
                 .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.black))
                 .setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
                 .show();
+
+
     }
+
 
     private void reCheckList() {
         registrationsItems.clear();

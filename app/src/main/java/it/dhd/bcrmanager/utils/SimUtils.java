@@ -3,9 +3,6 @@ package it.dhd.bcrmanager.utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.telecom.PhoneAccount;
-import android.telecom.PhoneAccountHandle;
-import android.telecom.TelecomManager;
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -87,33 +84,6 @@ public class SimUtils {
         } else {
             return "1";
         }
-    }
-
-    public static int getSimSlotIndexFromAccountId(Context context, String accountIdToFind) {
-        TelecomManager telecomManager = context.getSystemService(TelecomManager.class);
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return -1;
-        }
-        for (int index = 0; index < telecomManager.getCallCapablePhoneAccounts().size(); index++) {
-            PhoneAccountHandle account = telecomManager.getCallCapablePhoneAccounts().get(index);
-            PhoneAccount phoneAccount = telecomManager.getPhoneAccount(account);
-            String accountId = phoneAccount.getAccountHandle().getId();
-            if (accountIdToFind.equals(accountId)) {
-                return index;
-            }
-        }
-        int parsedAccountId = Integer.parseInt(accountIdToFind);
-        if (parsedAccountId >= 0) {
-            return parsedAccountId;
-        }
-        return -1;
     }
 
 }

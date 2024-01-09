@@ -20,7 +20,6 @@ import java.io.CharArrayWriter;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -329,7 +328,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                 CallLogResponse callLogResponse = gson.fromJson(jsonResponse, CallLogResponse.class);
 
                                 // Access the properties you need
-                                String timestamp = callLogResponse.getTimestamp();
+                                String timestamp = callLogResponse.getUnixTimestamp();
                                 String direction = callLogResponse.getDirection();
                                 int simSlot = callLogResponse.getSimSlot();
                                 String callLogName, phoneNumber = "", phoneNumberFormatted = "";
@@ -346,9 +345,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                 String fileOutput = callLogResponse.getOutput().getFormat().getType();
                                 fileOutput = fileOutput.split("\\.")[0];
 
-                                // ... (perform further JSON parsing or processing)
-                                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault());
-                                Date timestampDate = sdf.parse(timestamp);
+                                Date timestampDate = new Date(Long.parseLong(timestamp));
                                 String replacement = "";
                                 if (fileOutput.contains("OGG")) {
                                     replacement = ".oga";
@@ -405,21 +402,28 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                 }
                                 // File not parsed yet
                                 String[] callLogSearch = null;
-                                if (hasReadCallLogPermission)
+                                if (hasReadCallLogPermission && !callItem[2].isEmpty())
                                     callLogSearch = CursorUtils.searchThingsInCallLog(getContext(), callItem);
-                                if (callLogSearch == null) continue;
                                 String date = callItem[0];
                                 String time = callItem[1];
+                                String direction = callItem[3];
                                 String dateTime = date + time;
                                 Date timeStampDate = DateUtils.parseDateTime(dateTime);
-                                String duration = callLogSearch[0];
-                                String direction = callLogSearch[1];
-                                int simSlot = Integer.parseInt(callLogSearch[2]);
-                                String callLogName = callLogSearch[3];
+                                String duration = "0", callLogName;
+                                int simSlot = 0;
+                                if (callLogSearch != null) {
+                                    if (!callLogSearch[0].isEmpty()) duration = callLogSearch[0];
+                                    direction = callLogSearch[1];
+                                    if (!callLogSearch[2].isEmpty()) simSlot = Integer.parseInt(callLogSearch[2]);
+                                    callLogName = callLogSearch[3];
+                                } else {
+                                    callLogName = getContext().getString(android.R.string.unknownName);
+                                }
+
                                 String phoneNumber = "";
                                 if (!(callItem[2].isEmpty())) phoneNumber = callItem[2];
                                 String phoneNumberFormatted = PhoneNumberUtils.formatNumber(phoneNumber, Locale.getDefault().getCountry());
-                                if (onlySelectedContact && !contactNumbers.contains(phoneNumber) && !contactNumbers.contains(phoneNumberFormatted)) {
+                                if (onlySelectedContact && PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber) && !contactNumbers.contains(phoneNumber) && !contactNumbers.contains(phoneNumberFormatted)) {
                                     continue;
                                 }
                                 ContactItem contactItemFound = searchContactItem(phoneNumber, phoneNumberFormatted, callLogName);
@@ -473,7 +477,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
             String header;
 
-            if (DateUtils.isSameDay(currentDate, itemDate)) {
+            if (DateUtils.isToday(itemDate)) {
                 // If the date is today, show 'Today'
                 header = getContext().getString(R.string.today);
             } else if (DateUtils.isYesterday(currentDate, itemDate)) {
@@ -532,6 +536,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
     private ContactItem searchContactItem(String phoneNumber, String phoneNumberFormatted,
                                           String contactNameHolder) {
+        if (phoneNumber.isEmpty() || !PhoneNumberUtils.isGlobalPhoneNumber(phoneNumber)) return new ContactItem(0, getContext().getString(android.R.string.unknownName), "", "", false, null, null, null, LetterTileDrawable.TYPE_GENERIC_AVATAR);
         boolean found = false;
         ContactItem contactItemFound = null;
         if (contactList.size() > 0) {
@@ -599,11 +604,11 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
     private String[] tryToParse(String fileName) {
         Log.d("JsonFileLoader.tryToParse", "fileName: " + fileName);
         String parseFile = fileName.substring(0, fileName.lastIndexOf("."));
-        String[] callItem = parseFile.split("_");
-        Log.d("JsonFileLoader.tryToParse", "callItem: " + Arrays.toString(callItem));
-        String date = "", time = "", contactNumber = "";
-        if (!(callItem.length > 1)) return null;
-        boolean dateFound = false, timeFound = false, numberFound = false;
+        List<String> callItem = Arrays.asList(parseFile.split("_"));
+        Log.d("JsonFileLoader.tryToParse", "callItem: " + callItem);
+        String date = "", time = "", contactNumber = "", timeInFile = "", direction = "";
+        if (!(callItem.size() > 1)) return null;
+        boolean dateFound = false, timeFound = false, numberFound = false, directionFound = false;
         for (String s : callItem) {
             if (!dateFound && DateUtils.isValidDate(s)) {
                 date = s;
@@ -612,14 +617,48 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             }
             if (!timeFound && DateUtils.isValidTime(s) != null) {
                 time = DateUtils.parseTime(s);
+                timeInFile = s;
                 timeFound = true;
                 continue;
             }
             if (!numberFound && PhoneNumberUtils.isGlobalPhoneNumber(s)) {
                 contactNumber = s;
+                numberFound = true;
+                continue;
+            }
+            if (!directionFound && (s.equalsIgnoreCase("in") || s.equalsIgnoreCase("out"))) {
+                direction = s;
+                directionFound = true;
             }
         }
-        return new String[]{date, time, contactNumber};
+        if (!numberFound) {
+            List<String> stringList = Arrays.asList(date, timeInFile);
+            callItem.remove(stringList);
+            if (stringList.size() == 0) return null;
+            for (String s : callItem) {
+                String splitString = "";
+                if (s.contains(" "))
+                    splitString = " ";
+                else if (s.contains("-"))
+                    splitString = "-";
+                String[] test = s.split(splitString);
+                for (String ss : test) {
+                    if (PhoneNumberUtils.isGlobalPhoneNumber(ss)) {
+                        contactNumber = ss;
+                        numberFound = true;
+                        break;
+                    } else if (hasReadPhoneStatePermission) {
+                        if (PhoneNumberUtils.isVoiceMailNumber(ss) || PhoneNumberUtils.isEmergencyNumber(ss)) {
+                            contactNumber = ss;
+                            numberFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        Log.d("JsonFileLoader.tryToParse", "date: " + date + ", time: " + time + ", contactNumber: " + contactNumber);
+        return new String[]{date, time, contactNumber, direction};
     }
 
     /**

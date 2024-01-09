@@ -18,7 +18,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -69,12 +68,11 @@ public class FileUtils {
     }
 
     public static void deleteFileUri(Context context, Uri fileUri) {
-        DocumentFile documentFile = DocumentFile.fromSingleUri(context, fileUri);
         ContentResolver contentResolver = context.getContentResolver();
 
         try {
             DocumentsContract.deleteDocument(contentResolver, fileUri);
-        } catch (FileNotFoundException e) {
+        } catch (Exception e) {
             Log.d("FileUtils", "File not found");
         }
     }
@@ -270,7 +268,12 @@ public class FileUtils {
     }
 
     public static boolean fileExists(Context context, Uri pickedDir, String fileName) {
-        File f = new File(getPathFromUri(context, pickedDir) + "/" + fileName);
-        return f.exists();
+        try {
+            File f = new File(getPathFromUri(context, pickedDir) + "/" + fileName);
+            return f.exists();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

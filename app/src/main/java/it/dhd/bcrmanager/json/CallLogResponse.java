@@ -1,9 +1,11 @@
 package it.dhd.bcrmanager.json;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 public class CallLogResponse {
-    private String timestamp;
+    @SerializedName("timestamp_unix_ms") private String unixTimestamp;
     private String direction;
     private int sim_slot;
     private String call_log_name;
@@ -13,12 +15,8 @@ public class CallLogResponse {
 
     // Constructors, getters, and setters
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public String getUnixTimestamp() {
+        return unixTimestamp;
     }
 
     public String getDirection() {
@@ -33,16 +31,8 @@ public class CallLogResponse {
         return sim_slot;
     }
 
-    public void setSimSlot(int simSlot) {
-        this.sim_slot = simSlot;
-    }
-
     public String getCallLogName() {
         return call_log_name;
-    }
-
-    public void setCallLogName(String callLogName) {
-        this.call_log_name = callLogName;
     }
 
     public List<Call> getCalls() {
@@ -51,9 +41,5 @@ public class CallLogResponse {
 
     public Output getOutput() {
         return output;
-    }
-
-    public void setCalls(List<Call> calls) {
-        this.calls = calls;
     }
 }
