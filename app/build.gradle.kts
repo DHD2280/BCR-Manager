@@ -28,8 +28,8 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "(" + versionCode + ")")
     }
