@@ -31,6 +31,7 @@ android {
         versionCode = 2
         versionName = "1.0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "(" + versionCode + ")")
     }
 
     buildTypes {

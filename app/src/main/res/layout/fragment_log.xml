@@ -9,10 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:indeterminate="true"
-        android:visibility="visible"
-        android:layout_marginBottom="4dp"
-        app:trackCornerRadius="4dp"
-        app:trackThickness="8dp" />
+        android:visibility="visible" />
 
     <FrameLayout
         android:id="@+id/filterLayout"

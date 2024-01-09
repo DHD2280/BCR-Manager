@@ -30,6 +30,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.Objects;
 
 import it.dhd.bcrmanager.databinding.ActivityMainBinding;
+import it.dhd.bcrmanager.handler.UncaughtExceptionHandler;
 import it.dhd.bcrmanager.ui.fragments.BatchDelete;
 import it.dhd.bcrmanager.ui.fragments.NewHome;
 import it.dhd.bcrmanager.ui.fragments.PermissionsFragment;
@@ -53,19 +54,6 @@ public class MainActivity extends AppCompatActivity {
     public TextView textFilterItems;
     public static MenuItem searchItem;
     public static boolean active = false;
-    private PreferenceUtils prefs;
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        active = true;
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        active = false;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +62,9 @@ public class MainActivity extends AppCompatActivity {
         DynamicColors.applyToActivityIfAvailable(this);
         DynamicColors.applyToActivitiesIfAvailable(getApplication());
 
-        it.dhd.bcrmanager.databinding.ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(getApplicationContext()));
+
+        ActivityMainBinding binding = ActivityMainBinding.inflate(getLayoutInflater());
 
         setContentView(binding.getRoot());
 

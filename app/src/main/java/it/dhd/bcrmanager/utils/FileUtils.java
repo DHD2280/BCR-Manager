@@ -201,7 +201,7 @@ public class FileUtils {
 
     public static <T> void saveObjectList(Context context, List<T> objectList, String fileName, Class<T> objectClass) {
         File file = new File(context.getFilesDir(), fileName);
-
+        Log.d("FileUtils", "saveObjectList: " + fileName);
         try (FileWriter writer = new FileWriter(file, false)) {
             GsonBuilder gsonBuilder = new GsonBuilder();
             gsonBuilder.registerTypeAdapter(Uri.class, new UriJsonAdapter());

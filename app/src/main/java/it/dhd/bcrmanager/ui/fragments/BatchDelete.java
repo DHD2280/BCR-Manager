@@ -1,7 +1,10 @@
 package it.dhd.bcrmanager.ui.fragments;
 
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +32,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -166,17 +171,14 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
     private void deleteItems() {
 
         binding.progress.setVisibility(View.VISIBLE);
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
         int size = registrationsItems.size();
         String formattedString = getResources().getQuantityString(R.plurals.deleted_registrations, size, size);
-        executorService.execute(() -> {
+        List<CallLogItem> itemsToRemove = new ArrayList<>(registrationsItems);
+        TaskRunner taskRunner = new TaskRunner();
+        taskRunner.executeAsync(() -> {
             // Esegui il tuo metodo qui
 
             for (CallLogItem item : registrationsItems) {
-                NewHome.deleteCallItem(item);
-                if (item.isStarred()) {
-                    NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
-                }
 
                 Uri fileUri, audioUri;
                 fileUri = Uri.parse(item.getFilePath());
@@ -188,27 +190,55 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                     FileUtils.deleteFileUri(requireContext(), audioUri);
                 }
             }
-            regLogAdapter.notifyItemRangeRemoved(0, size);
-            registrationsItems.clear();
-            List<CallLogItem> callLogItems = new ArrayList<>();
-            for (Object item : NewHome.yourListOfItems) {
-                if (item instanceof CallLogItem) {
-                    callLogItems.add((CallLogItem) item);
+            return null;
+        },
+                result -> {
+                    regLogAdapter.notifyItemRangeRemoved(0, size);
+                    registrationsItems.clear();
+                    for (CallLogItem item : itemsToRemove) {
+                        NewHome.deleteCallItem(item);
+                        if (item.isStarred()) {
+                            NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
+                        }
+                    }
+                    List<CallLogItem> callLogItems = new ArrayList<>();
+                    for (Object item : NewHome.yourListOfItems) {
+                        if (item instanceof CallLogItem) {
+                            callLogItems.add((CallLogItem) item);
+                        }
+                    }
+                    FileUtils.saveObjectList(requireContext(), callLogItems, FileUtils.STORED_REG, CallLogItem.class);
+                    binding.progress.setVisibility(View.GONE);
+                    Snackbar.make(binding.batchDeleteFab.getRootView(), formattedString, Snackbar.LENGTH_SHORT)
+                            .setAnchorView(binding.batchDeleteFab)
+                            .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.black))
+                            .setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+                            .show();
+                });
+
+    }
+
+    public static class TaskRunner {
+        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
+        public interface Callback<R> {
+            void onComplete(R result);
+        }
+
+        public <R> void executeAsync(Callable<R> callable, Callback<R> callback) {
+            executor.execute(() -> {
+                final R result;
+                try {
+                    result = callable.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
-            FileUtils.saveObjectList(requireContext(), callLogItems, FileUtils.STORED_REG, CallLogItem.class);
-
-            // Esegui nell'UI thread dopo l'esecuzione
-
-        });
-        binding.progress.setVisibility(View.GONE);
-        Snackbar.make(binding.batchDeleteFab.getRootView(), formattedString, Snackbar.LENGTH_SHORT)
-                .setAnchorView(binding.batchDeleteFab)
-                .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.black))
-                .setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-                .show();
-
-
+                handler.post(() -> {
+                    callback.onComplete(result);
+                });
+            });
+        }
     }
 
 

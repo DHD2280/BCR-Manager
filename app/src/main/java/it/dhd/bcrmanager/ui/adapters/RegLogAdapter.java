@@ -38,12 +38,11 @@ import it.dhd.bcrmanager.utils.ThemeUtils;
 public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder> implements Filterable {
 
     private final List<CallLogItem> callLogItems;
-    public List<CallLogItem> callLogItemsFiltered;
+    public final List<CallLogItem> callLogItemsFiltered;
 
     private int expandedPosition = -1;
     private final Context mContext;
     private final int nSim;
-    String today, yesterday;
     private final MediaPlayerService mediaPlayerService;
     private final boolean hasExpansion;
     private final boolean hasPlayButton;
@@ -64,8 +63,6 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
         this.callLogItemsFiltered = new ArrayList<>(callLogItems);
         this.hasPlayButton = hasPlayButton;
         showTiles = PreferenceUtils.showTiles();
-        this.today = context.getString(R.string.today);
-        this.yesterday = context.getString(R.string.yesterday);
         mediaPlayerService = mps;
         this.hasExpansion = hasExpansion;
         this.onClickListener = onClickListener;
@@ -123,7 +120,7 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
         if(item.getDirection().contains("in")) holder.binding.callIcon.setImageResource(R.drawable.ic_in);
         else holder.binding.callIcon.setImageResource(R.drawable.ic_out);
 
-        holder.binding.date.setText(item.getFormattedTimestamp(today, yesterday));
+        holder.binding.date.setText(item.getFormattedTimestamp(mContext.getString(R.string.today), mContext.getString(R.string.yesterday)));
 
         holder.binding.duration.setText(item.getStandardDuration());
 
@@ -226,6 +223,7 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 callLogItemsFiltered.clear();
                 callLogItemsFiltered.addAll((List<CallLogItem>) filterResults.values);

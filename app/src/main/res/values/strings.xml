@@ -113,4 +113,9 @@
     <!-- Player Strings -->
     <string name="speed">Speed</string>
 
+    <!-- Error Report Strings -->
+    <string name="error_report_title">Error Report</string>
+    <string name="error_report_message">Please send this report to the developer.</string>
+    <string name="save_to_file">Save to File</string>
+
 </resources>
