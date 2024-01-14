@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -17,7 +16,6 @@ import java.util.List;
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.drawable.LetterTileDrawable;
 import it.dhd.bcrmanager.objects.ContactItem;
-import it.dhd.bcrmanager.utils.CursorUtils;
 import it.dhd.bcrmanager.utils.FileUtils;
 import it.dhd.bcrmanager.utils.UriUtils;
 
