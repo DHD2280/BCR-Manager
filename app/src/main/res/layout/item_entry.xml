@@ -6,7 +6,15 @@
         <import type="android.view.View" />
 
         <variable
+            name="show_icon"
+            type="boolean" />
+
+        <variable
             name="show_sim"
+            type="boolean" />
+
+        <variable
+            name="show_label"
             type="boolean" />
 
         <variable
@@ -48,6 +56,7 @@
                     android:layout_height="48dp"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="10dp"
+                    android:visibility="@{show_icon ? View.VISIBLE : View.GONE}"
                     app:srcCompat="@drawable/ic_default_contact" />
 
                 <LinearLayout
@@ -72,7 +81,7 @@
                         android:marqueeRepeatLimit="marquee_forever"
                         android:scrollHorizontally="true"
                         android:singleLine="true"
-                        android:text="@{CallLogItem.contactSaved ? CallLogItem.contactName : CallLogItem.numberFormatted}"
+                        android:text="@{CallLogItem.contactName}"
                         android:textSize="18sp" />
 
                     <LinearLayout
@@ -117,7 +126,7 @@
                             android:id="@+id/sim_icon"
                             android:layout_width="26dp"
                             android:layout_height="26dp"
-                            android:contentDescription="@string/direction"
+                            android:contentDescription="@string/show_sim_info"
                             app:srcCompat="@drawable/ic_sim" />
 
                         <TextView style="@style/TextViewSeparator" />
@@ -145,12 +154,12 @@
 
                         <TextView
                             style="@style/TextViewSeparator"
-                            android:visibility="@{CallLogItem.contactSaved ? View.VISIBLE : View.GONE}" />
+                            android:visibility="@{(show_label &amp;&amp; CallLogItem.contactSaved) ? View.VISIBLE : View.GONE}" />
 
                         <TextView
                             style="@style/TextViewSubtitle"
-                            android:text="@{CallLogItem.contactSaved ? CallLogItem.numberLabel : CallLogItem.number }"
-                            android:visibility="@{CallLogItem.contactSaved ? View.VISIBLE : View.GONE}" />
+                            android:text="@{CallLogItem.numberLabel}"
+                            android:visibility="@{(show_label &amp;&amp; CallLogItem.contactSaved) ? View.VISIBLE : View.GONE}" />
 
                         <TextView style="@style/TextViewSeparator" />
 

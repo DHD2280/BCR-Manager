@@ -31,6 +31,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.InputMethodManager;
@@ -58,6 +59,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Slide;
 import androidx.transition.TransitionManager;
 
+import com.erkutaras.showcaseview.ShowcaseManager;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -101,6 +103,8 @@ import it.dhd.bcrmanager.utils.VibratorUtils;
 import it.dhd.bcrmanager.utils.WrapContentLinearLayoutManager;
 import me.zhanghai.android.fastscroll.FastScrollerBuilder;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
+import smartdevelop.ir.eram.showcaseviewlib.GuideView;
+import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
 
 public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<JsonFileLoader.TwoListsWrapper>,
                                                     ContactObserver.DataUpdateListener {
@@ -891,7 +895,41 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
         ((MainActivity)requireActivity()).setupBadge(-1);
 
+        //if (yourListOfItems.size() > 0) runTutorial();
 
+    }
+
+    private void runTutorial() {
+        final boolean[] isShown = {false};
+        binding.recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                if(!isShown[0]){
+                    ShowcaseManager.Builder builder = new ShowcaseManager.Builder();
+                    builder.context(requireActivity())
+                            .key("KEY")
+                            .developerMode(true)
+                            .view(binding.recyclerView.getChildAt(1).getRootView().findViewById(R.id.contactIcon))
+                            .descriptionImageRes(R.mipmap.ic_launcher)
+                            .descriptionTitle("LOREM IPSUM")
+                            .descriptionText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")
+                            .buttonText("Done")
+                            .buttonVisibility(true)
+                            .cancelButtonVisibility(true)
+                            .add()
+                            .key("KEY2")
+                            .developerMode(true)
+                            .view(binding.recyclerView.getChildAt(1).getRootView().findViewById(R.id.actionPlay))
+                            .descriptionTitle("PLAY")
+                            .add()
+                            .build()
+                            .show();
+                    isShown[0] = true;
+                }
+                // unregister listener (this is important)
+                binding.recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            }
+        });
     }
 
     private String getNearestHeader(int position, List<Object> sortedListWithHeaders) {
@@ -1286,6 +1324,9 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 CallLogItem callLogItem = ((CallLogItem) callLogItemsFiltered.get(position));
                 ((CallLogViewHolder) holder).bind(callLogItem, position);
                 ((CallLogViewHolder) holder).binding.setCallLogItem(callLogItem);
+                ((CallLogViewHolder) holder).binding.setShowIcon(PreferenceUtils.showIcon());
+                ((CallLogViewHolder) holder).binding.setShowSim(PreferenceUtils.showSim(nSim));
+                ((CallLogViewHolder) holder).binding.setShowLabel(PreferenceUtils.showLabel());
             } else if (getItemViewType(position) == VIEW_TYPE_HEADER) {
                 DateHeader dateHeader = ((DateHeader)callLogItemsFiltered.get(position));
                 ((HeaderViewHolder) holder).bind(dateHeader);
@@ -1549,8 +1590,9 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                     case "conference" -> binding.callIcon.setImageResource(R.drawable.ic_conference);
                 }
 
+
                 if (showHeaders)
-                    binding.date.setText(item.getTimeStamp());
+                    binding.date.setText(item.getTimeStamp(requireContext()));
                 else
                     binding.date.setText(item.getFormattedTimestamp(getAppContext().getString(R.string.today), getAppContext().getString(R.string.yesterday)));
 
@@ -1558,8 +1600,13 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
                 switch (item.getNumberType()) {
                     case ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM,
-                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE -> binding.numberIcon.setImageResource(R.drawable.ic_call);
+                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
+                            ContactsContract.CommonDataKinds.Phone.TYPE_MAIN -> binding.numberIcon.setImageResource(R.drawable.ic_call);
                     case ContactsContract.CommonDataKinds.Phone.TYPE_HOME -> binding.numberIcon.setImageResource(R.drawable.ic_home);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME,
+                            ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK -> binding.numberIcon.setImageResource(R.drawable.ic_fax);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_WORK -> binding.numberIcon.setImageResource(R.drawable.ic_work);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_COMPANY_MAIN -> binding.numberIcon.setImageResource(R.drawable.ic_business);
                 }
 
                 binding.starredIcon.setVisibility(item.isStarred() ? View.VISIBLE : View.GONE);

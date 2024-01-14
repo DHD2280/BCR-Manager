@@ -8,7 +8,6 @@ import android.provider.CallLog;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +38,6 @@ public class CursorUtils {
                 // Retrieve file information from the cursor
                 contactName = cursor.getString(0);
                 if (contactName == null || contactName.isEmpty()) contactName = phoneNumber;
-                Log.d("CursorUtils.getContactName", "Contact: " + contactName + ", Number: " + phoneNumber);
             } while (cursor.moveToNext());
 
         }
@@ -164,7 +162,6 @@ public class CursorUtils {
                             null,
                             null);
                     while (phones != null && phones.moveToNext()) {
-                        Log.d("CursorUtils.getContactInfo", "Phone number: " + phones.getString(0) + ", Type: " + phones.getString(1) + ", Label: " + phones.getString(2));
                         if (PhoneNumberUtils.compare(phoneNumber, phones.getString(0))) {
                             if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
                                 numberLabel = phones.getString(2);
@@ -225,6 +222,13 @@ public class CursorUtils {
         return callLogName;
     }
 
+    /**
+     * Get contact information from call log.
+     * Here we need at least date for searching in call log
+     * @param context The application context
+     * @param date The date of the call log to search in millis from epoc
+     * @return String[] {phoneNumber, duration, type, sim, name}
+     */
     public static String[] searchThingsInCallLog(Context context, long date) {
         if (date == 0) return null;
         String dateNoMillis = String.valueOf(date).substring(0, String.valueOf(date).length() - 3);

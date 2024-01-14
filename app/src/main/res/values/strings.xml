@@ -106,7 +106,6 @@
     <string name="unsaved_contacts">Unsaved contacts</string>
 
     <!-- Settings Strings -->
-    <string name="theme_settings">Theme Settings</string>
     <string name="style_settings">Style Settings</string>
     <string name="show_headers">Show Headers</string>
     <string name="show_headers_summary">Show headers in the call log</string>
@@ -121,10 +120,17 @@
     <string name="version">Version</string>
 
     <!-- Item Entry Settings -->
+    <string name="refresh">Refresh</string>
     <string name="contact_icon_category">Contact Icon</string>
     <string name="show_contact">Show Contact Icon</string>
     <string name="date_settings">Date Settings</string>
     <string name="date_format">Date Format</string>
+    <string name="call_info">Call Info\'s</string>
+    <string name="show_sim_info">Show SIM number</string>
+    <string name="never">Never</string>
+    <string name="automatic">Automatic</string>
+    <string name="always">Always</string>
+    <string name="show_number_label">Show Number Label</string>
 
 
     <!-- Player Strings -->

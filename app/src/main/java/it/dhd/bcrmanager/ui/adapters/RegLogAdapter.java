@@ -92,7 +92,9 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
 
         CallLogItem item = callLogItemsFiltered.get(position);
 
-        holder.binding.setShowSim(nSim > 1);
+        holder.binding.setShowSim(PreferenceUtils.showSim(nSim));
+        holder.binding.setShowIcon(PreferenceUtils.showIcon());
+        holder.binding.setShowLabel(PreferenceUtils.showLabel());
         holder.binding.setCallLogItem(item);
 
         // Set click listener for the entire item (excluding contact icon)

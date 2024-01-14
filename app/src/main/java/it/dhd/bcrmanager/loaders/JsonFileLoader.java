@@ -190,6 +190,10 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     if (hasChanged) {
                                         contactNumbersBuilder.append("N:").append(contact.getPhoneNumber()).append(";");
                                     }
+                            } else {
+                                // Probably contact was deleted
+                                hasChanged = true;
+                                contact.resetContact();
                             }
                             if(cursor != null && !cursor.isClosed()) {
                                 cursor.close();
@@ -211,6 +215,8 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     item.setLookupKey(contact.getLookupKey());
                                     item.setContactSaved(contact.isContactSaved());
                                     item.setContactType(contact.getContactType());
+                                    item.setNumberLabel(contact.getNumberLabel());
+                                    item.setNumberType(contact.getNumberType());
                                 }
                             }
                         }
@@ -375,15 +381,6 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
                                 String direction = getDirection(fileName);
 
-                                String regex = "(\\d{8}_\\d{6}\\.\\d{3}\\+\\d{4})";
-                                String reg = "[0-9]{4}[^a-zA-Z0-9][0-9]{2}[^a-zA-Z0-9][0-9]{2}[^a-zA-Z0-9][0-9]{2}[^a-zA-Z0-9][0-9]{2}[^a-zA-Z0-9][0-9]{2}";
-                                Pattern pattern = Pattern.compile(reg);
-
-                                // Cerca il match nella stringa di input
-                                Matcher matcher = pattern.matcher(fileName);
-
-
-
                                 try {
                                     dateCheck = DateUtils.parse(fileName);
                                 } catch (ParseException e) {
@@ -506,7 +503,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             }
         }
 
-        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(yourListOfItems.size() > 0);
+        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(starredListWithHeaders.size() > 0);
 
         // Now, sortedListWithHeaders contains both CallLogItem and DateHeader objects
         List<Object> sortedOrderedList = new ArrayList<>(sortedListWithHeaders);
@@ -525,19 +522,6 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
         } catch (ParseException e) {
             return new Date(0);
         }
-    }
-
-    private Date tryToGetDateTime(String fileName) {
-        Log.d("JsonFileLoader.tryToGetDateTime", "fileName: " + fileName);
-        String parseFile = fileName.substring(0, fileName.lastIndexOf("."));
-        String dateTimeFormat = DateUtils.determineDateFormat(parseFile);
-        if (!TextUtils.isEmpty(dateTimeFormat)) {
-            if (dateTimeFormat.contains("*")) {
-                // date time has separators everywhere
-                dateTimeFormat = dateTimeFormat.replace("*", "");
-            }
-        }
-        return null;
     }
 
     private void removeFiles() {
@@ -625,41 +609,6 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             contactItemFound = item;
         }
         return contactItemFound;
-    }
-
-    private String[] tryToParse(String fileName) {
-        Log.d("JsonFileLoader.tryToParse", "fileName: " + fileName);
-        String parseFile = fileName.substring(0, fileName.lastIndexOf("."));
-        String[] parseFileSplit = parseFile.split("-");
-        List<String> callItem = new ArrayList<>(Arrays.asList(parseFile.split("_")));
-        Log.d("JsonFileLoader.tryToParse", "callItem: " + callItem);
-        String date = "", time = "", contactNumber = "", timeInFile = "", direction = "";
-        if (!(callItem.size() > 1)) return null;
-        boolean dateFound = false, timeFound = false, numberFound = false, directionFound = false;
-        for (String s : callItem) {
-            if (!dateFound && DateUtils.isValidDate(s)) {
-                date = s;
-                dateFound = true;
-                continue;
-            }
-            if (!timeFound && DateUtils.isValidTime(s) != null) {
-                time = DateUtils.parseTime(s);
-                timeInFile = s;
-                timeFound = true;
-                continue;
-            }
-            if (!numberFound) {
-                contactNumber = s;
-                numberFound = true;
-                continue;
-            }
-            if (!directionFound && (s.equalsIgnoreCase("in") || s.equalsIgnoreCase("out"))) {
-                direction = s.toLowerCase();
-                directionFound = true;
-            }
-        }
-        if (!dateFound && !timeFound) return null;
-        return new String[]{date, time, contactNumber, direction};
     }
 
     /**

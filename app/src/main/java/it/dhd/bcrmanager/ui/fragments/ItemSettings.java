@@ -2,16 +2,18 @@ package it.dhd.bcrmanager.ui.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.Gravity;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.preference.DropDownPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
@@ -28,6 +30,7 @@ import it.dhd.bcrmanager.databinding.ItemSettingsBinding;
 import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.utils.CircleTransform;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
+import it.dhd.bcrmanager.utils.SimUtils;
 import it.dhd.bcrmanager.utils.ThemeUtils;
 
 public class ItemSettings extends Fragment {
@@ -35,9 +38,34 @@ public class ItemSettings extends Fragment {
     private static ItemSettingsBinding binding;
     private static SharedPreferences prefs;
     private static CallLogItem randomItem;
+    private List<CallLogItem> itemHolder;
 
     public ItemSettings() {
         // Required empty public constructor
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.refresh_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.refresh_item) {
+            randomItem = itemHolder.get(new Random().nextInt(itemHolder.size()));
+            binding.itemEntry.setCallLogItem(randomItem);
+            setupItem();
+        }
+        super.onOptionsItemSelected(item);
+        return true;
     }
 
     @Override
@@ -46,9 +74,9 @@ public class ItemSettings extends Fragment {
         binding = ItemSettingsBinding.inflate(inflater, container, false);
         binding.itemEntry.rootLayout.setStrokeColor(ThemeUtils.getOnBackgroundColor());
         binding.itemEntry.expandingLayout.setVisibility(View.GONE);
-        binding.itemEntry.setShowSim(true);
+        binding.itemEntry.setShowLabel(true);
         if (NewHome.yourListOfItems.size() > 0) {
-            List<CallLogItem> itemHolder = NewHome.yourListOfItems.stream()
+            itemHolder = NewHome.yourListOfItems.stream()
                     .filter(CallLogItem.class::isInstance) // Filter only CallLogItem
                     .map(CallLogItem.class::cast) // Converts Object to CallLogItem
                     .collect(Collectors.toList()); // Collects in a new list of CallLogItem
@@ -63,37 +91,39 @@ public class ItemSettings extends Fragment {
     }
 
     private void setupItem() {
-        setupContactIcon(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_CONTACT_ICON, true));
+        setupContactIcon(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_CONTACT_ICON, true), prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_TILES, true));
         setupDate();
+        binding.itemEntry.setShowSim(PreferenceUtils.showSim(SimUtils.getNumberOfSimCards(requireContext())));
+        setupNumberLabel(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_NUMBER_LABEL, true));
     }
 
     private void setupDate() {
-        //binding.itemEntry.date.setText(randomItem.getFormattedTimestamp());
+        binding.itemEntry.date.setText(randomItem.getFormattedTimestamp(getString(R.string.today), getString(R.string.yesterday)));
     }
 
-    private static void setupContactIcon(boolean enabled) {
+    private static void setupContactIcon(boolean enabled, boolean tiles) {
         binding.itemEntry.contactIcon.setImageDrawable(null);
-        if (enabled) {
-            binding.itemEntry.contactIcon.setVisibility(View.VISIBLE);
-            int dp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 48, MainActivity.getAppContext().getResources().getDisplayMetrics());
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams
-                    (dp, dp);
-            params.gravity = Gravity.CENTER_VERTICAL;
-
-            binding.itemEntry.contactIcon.setLayoutParams(params);
-
-        } else {
-            binding.itemEntry.contactIcon.setVisibility(View.GONE);
-            binding.itemEntry.contactIcon.setLayoutParams(new LinearLayout.LayoutParams(0, 0));
-            return;
-        }
+        binding.itemEntry.setShowIcon(enabled);
         Picasso.get().cancelRequest(binding.itemEntry.contactIcon);
         if (randomItem.getContactIcon()!=null)
             Picasso.get().load(randomItem.getContactIcon()).transform(new CircleTransform()).placeholder(R.drawable.ic_default_contact).into(binding.itemEntry.contactIcon);
-        else if (prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_TILES, true))
+        else if (tiles)
             binding.itemEntry.contactIcon.setImageDrawable(randomItem.getContactDrawable(MainActivity.getAppContext()));
         else
             binding.itemEntry.contactIcon.setImageResource(R.drawable.ic_default_contact);
+    }
+
+    private static void setupSim(String pref) {
+        Log.d("ItemSettings", "setupSim: " + pref);
+        switch (pref) {
+            case "0" -> binding.itemEntry.setShowSim(false);
+            case "1" -> binding.itemEntry.setShowSim(NewHome.nSim > 1);
+            case "2" -> binding.itemEntry.setShowSim(true);
+        }
+    }
+
+    private static void setupNumberLabel(boolean showLabel) {
+        binding.itemEntry.setShowLabel(showLabel);
     }
 
     public static class ItemPreferences extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener {
@@ -102,11 +132,24 @@ public class ItemSettings extends Fragment {
         @Override
         public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
             setPreferencesFromResource(R.xml.item_entry_settings, rootKey);
-            SwitchPreferenceCompat contactIcon, contactTile, darkTile;
+            SwitchPreferenceCompat contactIcon, contactTile, darkTile, numberLabel;
+            DropDownPreference simInfo;
             contactIcon = findPreference("show_contact_icon");
             contactTile = findPreference("show_colored_tiles");
-            contactIcon.setOnPreferenceChangeListener(this);
-            contactTile.setOnPreferenceChangeListener(this);
+            darkTile = findPreference("show_dark_tiles");
+            simInfo = findPreference("show_sim_info");
+            numberLabel = findPreference("show_number_label");
+
+            if (contactIcon != null)
+                contactIcon.setOnPreferenceChangeListener(this);
+            if (contactTile != null)
+                contactTile.setOnPreferenceChangeListener(this);
+            if (darkTile != null)
+                darkTile.setOnPreferenceChangeListener(this);
+            if (simInfo != null)
+                simInfo.setOnPreferenceChangeListener(this);
+            if (numberLabel != null)
+                numberLabel.setOnPreferenceChangeListener(this);
         }
 
         /**
@@ -120,9 +163,11 @@ public class ItemSettings extends Fragment {
         @Override
         public boolean onPreferenceChange(@NonNull Preference preference, Object newValue) {
             switch (preference.getKey()) {
-                case "show_contact_icon" -> setupContactIcon((boolean) newValue);
-                case "show_colored_tiles" -> setupContactIcon(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_CONTACT_ICON, true));
-                case "h" -> { }
+                case "show_contact_icon" -> setupContactIcon((boolean) newValue, prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_TILES, true));
+                case "show_colored_tiles" -> setupContactIcon(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_CONTACT_ICON, true), (boolean) newValue);
+                case "show_dark_tiles" -> setupContactIcon(prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_CONTACT_ICON, true), prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_SHOW_TILES, true));
+                case "show_number_label" -> setupNumberLabel((boolean) newValue);
+                case "show_sim_info" -> setupSim((String) newValue);
             }
             return true;
         }

@@ -208,12 +208,50 @@ public class PreferenceUtils {
 
     }
 
+    public static boolean showLabel() {
+        SharedPreferences pref = getAppPreferences();
+        return pref.getBoolean(Keys.PREFS_KEY_SHOW_NUMBER_LABEL, true);
+    }
+
+    public static boolean showIcon() {
+        SharedPreferences pref = getAppPreferences();
+        return pref.getBoolean(Keys.PREFS_KEY_SHOW_CONTACT_ICON, true);
+    }
+
+    public static boolean showSim(int nSim) {
+        SharedPreferences pref = getAppPreferences();
+        String sim = pref.getString(Keys.PREFS_KEY_SHOW_SIM_NUMBER, "1");
+        // 0 never
+        // 1 only if available (iy you have 1 sim it will not show)
+        // 2 always
+        switch (sim) {
+            case "0" -> {
+                return false;
+            }
+            case "1" -> {
+                return nSim > 1;
+            }
+            case "2" -> {
+                return true;
+            }
+        }
+        return true;
+    }
+
     /**
      * Keys for the SharedPreferences
      */
     public static class Keys {
+        // Item Entry Prefs
+        // Contact Icon
         public static final String PREFS_KEY_SHOW_CONTACT_ICON = "show_contact_icon";
         public static final String PREFS_KEY_SHOW_TILES = "show_colored_tiles";
+        // Sim
+        public static final String PREFS_KEY_SHOW_SIM_NUMBER = "show_sim_info";
+        // Number Label
+        public static final String PREFS_KEY_SHOW_NUMBER_LABEL = "show_number_label";
+
+        // Style Prefs
         public static final String PREFS_KEY_SHOW_HEADERS = "show_headers";
         public static final String PREFS_KEY_DARK_LETTER = "dark_letter_on_dark_mode";
         public static final String PREFS_KEY_VIBRATE = "vibrate";

@@ -28,8 +28,8 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0.3"
+        versionCode = 8
+        versionName = "1.0.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
     }
@@ -58,7 +58,7 @@ android {
 }
 dependencies {
 
-    val lifecycleVersion = "2.6.2"
+    val lifecycleVersion = "2.7.0"
     val workVersion = "2.9.0"
 
     // AndroidX support
@@ -83,6 +83,10 @@ dependencies {
 
     // FastScroll
     implementation("me.zhanghai.android.fastscroll:library:1.3.0")
+
+    // ShowCase
+    implementation("com.github.mreram:showcaseview:1.4.1")
+    implementation("com.github.erkutaras:ShowcaseView:1.5.0")
 
     // Rx Java
     implementation("io.reactivex.rxjava3:rxjava:3.1.8")

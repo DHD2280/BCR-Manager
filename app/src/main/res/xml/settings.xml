@@ -12,11 +12,11 @@
             android:key="show_headers"
             android:title="@string/show_headers"
             android:summary="@string/show_headers_summary" />
-        <!-- <Preference TODO: Implement this
+        <Preference
             app:iconSpaceReserved="false"
             android:key="item_entry_appearance"
             android:title="Item Entry Appearance"
-            android:summary="Customize Item Entry"/> -->
+            android:summary="Customize Item Entry"/>
         <SwitchPreferenceCompat
             app:iconSpaceReserved="false"
             android:defaultValue="true"
