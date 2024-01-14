@@ -2,7 +2,6 @@ package it.dhd.bcrmanager.loaders;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.ContactsContract;
 import android.provider.DocumentsContract;

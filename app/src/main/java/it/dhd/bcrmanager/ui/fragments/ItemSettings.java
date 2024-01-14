@@ -2,7 +2,6 @@ package it.dhd.bcrmanager.ui.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -26,7 +25,6 @@ import java.util.stream.Collectors;
 import it.dhd.bcrmanager.MainActivity;
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.databinding.ItemSettingsBinding;
-import it.dhd.bcrmanager.drawable.LetterTileDrawable;
 import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.utils.CircleTransform;
 import it.dhd.bcrmanager.utils.PreferenceUtils;

@@ -1,17 +1,7 @@
 package it.dhd.bcrmanager.utils;
 
-import android.annotation.SuppressLint;
-import android.content.ContentResolver;
-import android.content.ContentUris;
-import android.content.Context;
-import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.provider.MediaStore;
-
-import java.io.File;
-import java.util.List;
 
 /** Utility methods for dealing with URIs. */
 public class UriUtils {

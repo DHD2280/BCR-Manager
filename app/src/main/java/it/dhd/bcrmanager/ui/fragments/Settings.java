@@ -3,15 +3,12 @@ package it.dhd.bcrmanager.ui.fragments;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreferenceCompat;
 
 import java.util.Objects;
 
@@ -40,7 +37,7 @@ public class Settings extends  PreferenceFragmentCompat {
             return true;
         });
 
-        findPreference("item_entry_appearance").setOnPreferenceClickListener(pref -> {
+        /*findPreference("item_entry_appearance").setOnPreferenceClickListener(pref -> {
             requireActivity().getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.frame_layout, new ItemSettings(), ItemSettings.class.getSimpleName())
@@ -49,7 +46,7 @@ public class Settings extends  PreferenceFragmentCompat {
                     .commit();
             return true;
         });
-
+*/
         mVersionPref = findPreference("version");
         mVersionPref.setSummary(BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
         mVersionPref.setOnPreferenceClickListener(pref -> {
