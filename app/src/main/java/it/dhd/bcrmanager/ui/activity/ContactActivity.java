@@ -77,8 +77,6 @@ public class ContactActivity
     private static Runnable mUpdateProgressTask;
     private boolean isBound = false;
     private boolean onlyStarred = false;
-    private Uri lookupUri;
-    private long contactId;
     private String lookupKey;
 
 
@@ -95,23 +93,12 @@ public class ContactActivity
 
         Intent intent = getIntent();
         contactName = intent.getStringExtra("contact");
-        /*
-
-        .putExtra("contact", item.getContactName())
-                        .putExtra("contactId", item.getContactId())
-                        .putExtra("lookupKey", item.getLookupKey())
-                        .putExtra("contactUri", item.getLookupUri().toString()))
-         */
-        if (intent.getLongExtra("contactId", 0)!=0) contactId = Long.parseLong(Objects.requireNonNull(intent.getStringExtra("contactId")));
         if (intent.getStringExtra("lookupKey")!=null) lookupKey = intent.getStringExtra("lookupKey");
-        if (intent.getStringExtra("contactUri")!=null) lookupUri = Uri.parse(intent.getStringExtra("contactUri"));
         assert contactName != null;
         if (contactName.equals("starred_contacts")) {
             lookupKey = "starred_contacts";
             onlyStarred = true;
         }
-
-        Log.d("ContactActivity", " -*-ContactActivity-*- " + "contactName: " + contactName + ", contactId: " + contactId + ", lookupKey: " + lookupKey + ", lookupUri: " + lookupUri);
 
         PreferenceUtils.init(this);
         PermissionsUtil.init(this);
@@ -276,7 +263,6 @@ public class ContactActivity
 
         setSupportActionBar(binding.toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        String finalContactName = contactName;
         binding.appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             boolean isShow = true;
             int scrollRange = -1;
@@ -287,7 +273,8 @@ public class ContactActivity
                     scrollRange = appBarLayout.getTotalScrollRange();
                 }
                 if (scrollRange + verticalOffset == 0) {
-                    binding.collapsingToolbarLayout.setTitle(finalContactName);
+                    if (contactName.equals("starred_contacts")) binding.collapsingToolbarLayout.setTitle(getString(R.string.starred));
+                    else binding.collapsingToolbarLayout.setTitle(contactName);
                     isShow = true;
                 } else if(isShow) {
                     binding.collapsingToolbarLayout.setTitle(" ");//careful there should a space between double quote otherwise it wont work

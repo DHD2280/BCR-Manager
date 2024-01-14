@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/playerCardView"
+    style="?attr/materialCardViewFilledStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="5dp"
     android:layout_margin="8dp"
-    style="?attr/materialCardViewFilledStyle"
-    app:cardBackgroundColor="?attr/colorPrimaryContainer">
+    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+    app:cardCornerRadius="5dp">
+
     <LinearLayout
         android:id="@+id/playerLayout"
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:layout_marginStart="10dp"
-            app:srcCompat="@drawable/ic_default_contact"/>
+            app:srcCompat="@drawable/ic_default_contact" />
 
         <LinearLayout
             android:id="@+id/textLayoutPlayer"
@@ -39,8 +39,8 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="Contact Name"
-                android:textSize="18sp"
-                android:textColor="?attr/colorOnPrimaryContainer"/>
+                android:textColor="?attr/colorOnPrimaryContainer"
+                android:textSize="18sp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -56,32 +56,32 @@
                 <TextView
                     android:id="@+id/dividerSimPlayer"
                     style="@style/TextViewSubtitlePlayer"
-                    android:textStyle="bold"
-                    android:text="@string/divider"/>
+                    android:text="@string/divider"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/simSlotPlayer"
-                    style="@style/TextViewSubtitlePlayer"/>
+                    style="@style/TextViewSubtitlePlayer" />
 
                 <TextView
                     android:id="@+id/dividerDatePlayer"
                     style="@style/TextViewSubtitlePlayer"
-                    android:textStyle="bold"
-                    android:text="@string/divider"/>
+                    android:text="@string/divider"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/datePlayer"
-                    style="@style/TextViewSubtitlePlayer"/>
+                    style="@style/TextViewSubtitlePlayer" />
 
                 <TextView
                     android:id="@+id/dividerDurationPlayer"
                     style="@style/TextViewSubtitlePlayer"
                     android:text="@string/divider"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/durationPlayer"
-                    style="@style/TextViewSubtitlePlayer"/>
+                    style="@style/TextViewSubtitlePlayer" />
 
                 <View
                     android:layout_width="0dp"
@@ -93,9 +93,9 @@
                     android:layout_width="26dp"
                     android:layout_height="26dp"
                     android:contentDescription="@string/starred"
+                    android:visibility="visible"
                     app:srcCompat="@drawable/ic_star"
-                    app:tint="?colorOnPrimaryContainer"
-                    android:visibility="visible"/>
+                    app:tint="?colorOnPrimaryContainer" />
 
             </LinearLayout>
         </LinearLayout>
@@ -103,37 +103,37 @@
         <RelativeLayout
             android:id="@+id/RelativeLayoutLeftButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content">
 
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/playerProgressBar"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                app:indicatorSize="50dp"
-                android:indeterminate="false"
-                android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:indeterminate="false"
                 android:progress="50"
                 android:progressTint="?attr/colorOnPrimaryContainer"
                 app:indicatorColor="@color/cardview_dark_background"
+                app:indicatorSize="50dp"
                 app:trackColor="?attr/colorControlNormal" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/playPauseButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 android:background="@android:color/transparent"
-                app:icon="@drawable/ic_play"
-                app:iconTint="?attr/colorOnPrimaryContainer"
-                app:iconSize="40dp"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
                 android:insetBottom="0dp"
+                app:icon="@drawable/ic_play"
                 app:iconGravity="textStart"
-                app:iconPadding="0dp"/>
+                app:iconPadding="0dp"
+                app:iconSize="40dp"
+                app:iconTint="?attr/colorOnPrimaryContainer" />
         </RelativeLayout>
 
     </LinearLayout>

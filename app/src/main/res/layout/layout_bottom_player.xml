@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayoutPlayer"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/rootLayoutPlayer">
+    android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center_horizontal"
+        android:orientation="vertical"
         android:paddingStart="22dp"
-        android:paddingEnd="22dp"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:paddingEnd="22dp">
 
         <TextView
             android:id="@+id/contactNamePlayerDialog"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="Contact Name"
-            android:textColor="?colorOnBackground"
-            android:textAppearance="@style/TextAppearanceTitle"
             android:textAlignment="textStart"
-            app:layout_constraintTop_toTopOf="parent"
+            android:textAppearance="@style/TextAppearanceTitle"
+            android:textColor="?colorOnBackground"
+            app:layout_constraintEnd_toStartOf="@+id/favoritePlayerDialog"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/favoritePlayerDialog"/>
-
+            app:layout_constraintTop_toTopOf="parent" />
 
 
         <!--
@@ -46,63 +45,63 @@
         <LinearLayout
             android:id="@+id/callInfoLayout"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:orientation="horizontal"
+            android:layout_weight="1"
             android:gravity="start"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toStartOf="@+id/favoritePlayerDialog"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/contactNamePlayerDialog">
 
             <ImageView
+                android:id="@+id/callTypeIconPlayerDialog"
                 android:layout_width="26dp"
                 android:layout_height="26dp"
-                android:id="@+id/callTypeIconPlayerDialog"
                 android:contentDescription="@string/direction"
                 android:src="@drawable/ic_in"
-                app:tint="?colorOnBackground"/>
+                app:tint="?colorOnBackground" />
 
             <TextView
                 android:id="@+id/dividerSimPlayerDialog"
                 style="@style/TextViewSubtitle"
-                android:textStyle="bold"
-                android:text="@string/divider"/>
+                android:text="@string/divider"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/simSlotPlayerDialog"
-                style="@style/TextViewSubtitle"/>
+                style="@style/TextViewSubtitle" />
 
             <TextView
                 android:id="@+id/dividerDatePlayerDialog"
                 style="@style/TextViewSubtitle"
                 android:text="@string/divider"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/datePlayerDialog"
-                style="@style/TextViewSubtitle"/>
+                style="@style/TextViewSubtitle" />
 
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/favoritePlayerDialog"
             android:layout_width="62dp"
             android:layout_height="62dp"
-            android:id="@+id/favoritePlayerDialog"
-            app:srcCompat="@drawable/ic_star"
-            app:tint="?colorPrimary"
             android:contentDescription="@string/starred"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:srcCompat="@drawable/ic_star"
+            app:tint="?colorPrimary" />
 
         <RelativeLayout
+            android:id="@+id/relativeLayout"
             android:layout_width="match_parent"
             android:layout_height="300dp"
-            android:id="@+id/relativeLayout"
             android:layout_marginTop="@dimen/bottom_sheet_title_margin_bottom"
-            app:layout_constraintTop_toBottomOf="@+id/callInfoLayout"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@+id/callInfoLayout">
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/viewPager"
@@ -114,11 +113,11 @@
                 android:id="@+id/into_tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="24dp"
+                android:layout_alignParentBottom="true"
                 android:background="@color/trans"
                 app:tabBackground="@drawable/tab_pager_selector"
                 app:tabGravity="center"
-                app:tabIndicatorHeight="0dp"
-                android:layout_alignParentBottom="true" />
+                app:tabIndicatorHeight="0dp" />
         </RelativeLayout>
 
 
@@ -127,9 +126,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/relativeLayout">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -145,70 +145,72 @@
                     android:valueFrom="0.0"
                     android:valueTo="100.0" />
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/currentTimePlayer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="00:00"
-                    android:textColor="?colorOnBackground"
                     android:gravity="start"
-                    android:textAppearance="?attr/textAppearanceHeadline6" />
+                    android:text="00:00"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textColor="?colorOnBackground" />
 
                 <TextView
                     android:id="@+id/totalTimePlayer"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="?colorOnBackground"
-                    android:text="00:00"
                     android:gravity="end"
-                    android:textAppearance="?attr/textAppearanceHeadline6" />
+                    android:text="00:00"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textColor="?colorOnBackground" />
             </LinearLayout>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="?attr/textAppearanceHeadline5"
                 android:gravity="center_horizontal"
-                android:textColor="?colorOnBackground"
-                android:text="@string/speed" />
+                android:text="@string/speed"
+                android:textAppearance="?attr/textAppearanceHeadline5"
+                android:textColor="?colorOnBackground" />
 
             <com.google.android.material.slider.Slider
+                android:id="@+id/seekBarSpeed"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="1"
-                android:id="@+id/seekBarSpeed"
+                android:layout_gravity="center_vertical"
                 android:layout_marginLeft="6dp"
                 android:layout_marginRight="6dp"
-                android:layout_gravity="center_vertical"
-                android:valueFrom="0.25"
-                android:valueTo="2.0"
+                android:layout_weight="1"
+                android:stepSize="0.25"
                 android:value="1.0"
-                android:stepSize="0.25" />
+                android:valueFrom="0.25"
+                android:valueTo="2.0" />
 
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/controlsLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:id="@+id/controlsLayout"
-            android:orientation="horizontal"
             android:gravity="center_horizontal|center_vertical"
-            app:layout_constraintStart_toStartOf="parent"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/infoLayout"
-            app:layout_constraintBottom_toBottomOf="parent">
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/infoLayout">
             <!-- Previous Button -->
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
             <!-- Play/Pause Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPrevious"
@@ -222,7 +224,7 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPrevious10"
@@ -236,23 +238,23 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPlayPause"
+                style="@style/PlayButton"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
-                style="@style/PlayButton"
-                app:icon="@drawable/ic_play"
-                app:iconSize="68dp"
-                app:iconGravity="textStart"
                 android:layout_gravity="center"
-                app:backgroundTint="?attr/colorPrimary"/>
+                app:backgroundTint="?attr/colorPrimary"
+                app:icon="@drawable/ic_play"
+                app:iconGravity="textStart"
+                app:iconSize="68dp" />
 
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnForward10"
@@ -266,21 +268,22 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
 
             <!-- Next Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNext"
+                style="@style/MaterialButtonIcon"
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
-                style="@style/MaterialButtonIcon"
                 app:icon="@drawable/ic_next"
-                app:iconTint="?attr/colorOnBackground"
-                app:iconSize="56dp"/>
+                app:iconSize="56dp"
+                app:iconTint="?attr/colorOnBackground" />
+
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
-                android:layout_weight="1"/>
+                android:layout_weight="1" />
         </LinearLayout>
 
 

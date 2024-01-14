@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
@@ -23,10 +24,7 @@ import it.dhd.bcrmanager.utils.PreferenceUtils;
 public class Settings extends  PreferenceFragmentCompat {
 
     private Preference mDirPref;
-    private Toast mDevHitToast;
-    private final int TAPS_TO_BE_A_DEVELOPER = 7;
     private Preference mVersionPref;
-    private int mDevHitCountdown = 7;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -41,22 +39,14 @@ public class Settings extends  PreferenceFragmentCompat {
             ((MainActivity) requireActivity()).openSomeActivityForResult();
             return true;
         });
-        SwitchPreferenceCompat switchTiles = findPreference("show_colored_tiles");
-        SwitchPreferenceCompat darkLetters = findPreference("dark_letter_on_dark_mode");
 
-        Objects.requireNonNull(switchTiles).setOnPreferenceChangeListener((preference1, newValue) -> {
-            if (darkLetters != null) darkLetters.setEnabled((boolean) newValue);
-            NewHome f = (NewHome) getParentFragmentManager().findFragmentByTag(NewHome.class.getSimpleName());
-            if (f != null) {
-                f.notifyAdapter();
-            }
-            return true;
-        });
-        Objects.requireNonNull(darkLetters).setOnPreferenceChangeListener((preference1, newValue) -> {
-            NewHome f = (NewHome) getParentFragmentManager().findFragmentByTag(NewHome.class.getSimpleName());
-            if (f != null) {
-                f.notifyAdapter();
-            }
+        findPreference("item_entry_appearance").setOnPreferenceClickListener(pref -> {
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.frame_layout, new ItemSettings(), ItemSettings.class.getSimpleName())
+                    .addToBackStack(ItemSettings.class.getSimpleName())
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                    .commit();
             return true;
         });
 

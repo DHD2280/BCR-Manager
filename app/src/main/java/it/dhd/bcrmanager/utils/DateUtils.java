@@ -1,17 +1,131 @@
 package it.dhd.bcrmanager.utils;
 
+import android.util.Log;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DateUtils {
 
+    /** Date and time formats are specified by date and time pattern strings.
+     * <a href="https://developer.android.com/reference/java/time/format/DateTimeFormatterBuilder#appendPattern(java.lang.String)">...</a>
+     *   Symbol  Meaning                     Presentation      Examples
+     *   ------  -------                     ------------      -------
+     *    G       era                         text              AD; Anno Domini; A
+     *    u       year                        year              2004; 04
+     *    y       year-of-era                 year              2004; 04
+     *    D       day-of-year                 number            189
+     *    M/L     month-of-year               number/text       7; 07; Jul; July; J
+     *    d       day-of-month                number            10
+     *    g       modified-julian-day         number            2451334
+     *
+     *    Q/q     quarter-of-year             number/text       3; 03; Q3; 3rd quarter
+     *    Y       week-based-year             year              1996; 96
+     *    w       week-of-week-based-year     number            27
+     *    W       week-of-month               number            4
+     *    E       day-of-week                 text              Tue; Tuesday; T
+     *    e/c     localized day-of-week       number/text       2; 02; Tue; Tuesday; T
+     *    F       day-of-week-in-month        number            3
+     *
+     *    a       am-pm-of-day                text              PM
+     *    h       clock-hour-of-am-pm (1-12)  number            12
+     *    K       hour-of-am-pm (0-11)        number            0
+     *    k       clock-hour-of-day (1-24)    number            24
+     *
+     *    H       hour-of-day (0-23)          number            0
+     *    m       minute-of-hour              number            30
+     *    s       second-of-minute            number            55
+     *    S       fraction-of-second          fraction          978
+     *    A       milli-of-day                number            1234
+     *    n       nano-of-second              number            987654321
+     *    N       nano-of-day                 number            1234000000
+     *
+     *    V       time-zone ID                zone-id           America/Los_Angeles; Z; -08:30
+     *    v       generic time-zone name      zone-name         PT, Pacific Time
+     *    z       time-zone name              zone-name         Pacific Standard Time; PST
+     *    O       localized zone-offset       offset-O          GMT+8; GMT+08:00; UTC-08:00;
+     *    X       zone-offset 'Z' for zero    offset-X          Z; -08; -0830; -08:30; -083015; -08:30:15
+     *    x       zone-offset                 offset-x          +0000; -08; -0830; -08:30; -083015; -08:30:15
+     *    Z       zone-offset                 offset-Z          +0000; -0800; -08:00
+     */
+
+
+    private static final Map<String, String> DATE_REGEX = new HashMap<>() {{
+        // Numbers
+        put("([0-9]{4}[^a-zA-Z0-9][0-9]{2}[^a-zA-Z0-9][0-9]{2})", "yyyy*MM*dd*");
+        put("([0-9]{1,2}-[0-9]{1,2}-[0-9]{4})", "dd-MM-yyyy");
+        // Letters
+    }};
+
+
+    public record DatePattern(String regexPattern, String dateTimeFormat, boolean shouldReplace) {
+        public DatePattern(String regexPattern, String dateTimeFormat) {
+            this(regexPattern, dateTimeFormat, false);
+        }
+
+    }
+
+    private static final List<DatePattern> DATE_TIME_PATTERNS = new ArrayList<>() {{
+        add(new DatePattern("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}-[0-9]{1,2}-[0-9]{2}-[0-9]{2}", "dd-MM-yyyy-HH-mmss"));
+        add(new DatePattern("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd-MM-yyyy HH:mm:ss"));
+        add(new DatePattern("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "yyyy-MM-dd HH:mm:ss"));
+        add(new DatePattern("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{2}-[0-9]{2}", "yyyy-MM-dd-HH-mm-ss"));
+        add(new DatePattern("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "MM/dd/yyyy HH:mm:ss"));
+        add(new DatePattern("[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "yyyy/MM/dd HH:mm:ss"));
+        add(new DatePattern("[0-9]{1,2}\\s[a-z]{3}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd MMM yyyy HH:mm:ss"));
+        add(new DatePattern("[0-9]{1,2}\\s[a-z]{4,}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd MMMM yyyy HH:mm:ss"));
+        add(new DatePattern("[0-9]{14}", "yyyyMMddHHmmss"));
+        add(new DatePattern("[0-9]{8}\\s[0-9]{6}", "yyyyMMdd HHmmss"));
+        add(new DatePattern("[0-9]{8}_[0-9]{6}", "yyyyMMdd_HHmmss"));
+
+        // Full Date + Partial Time
+        add(new DatePattern("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd-MM-yyyy HH:mm"));
+        add(new DatePattern("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}", "yyyy-MM-dd HH:mm"));
+        add(new DatePattern("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "MM/dd/yyyy HH:mm"));
+        add(new DatePattern("[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}", "yyyy/MM/dd HH:mm"));
+        add(new DatePattern("[0-9]{1,2}\\s[a-z]{3}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd MMM yyyy HH:mm"));
+        add(new DatePattern("[0-9]{1,2}\\s[a-z]{4,}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd MMMM yyyy HH:mm"));
+
+    }};
+
+    /**
+     * The date formats
+     */
+    private static final Map<String, String> DATE_FORMAT_REGEXPS = new HashMap<>() {{
+        put("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}-[0-9]{1,2}-[0-9]{2}-[0-9]{2}", "dd-MM-yyyy-HH-mmss");
+        put("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd-MM-yyyy HH:mm:ss");
+        put("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "yyyy-MM-dd HH:mm:ss");
+        put("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{1,2}-[0-9]{2}-[0-9]{2}", "yyyy-MM-dd-HH-mm-ss");
+        put("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "MM/dd/yyyy HH:mm:ss");
+        put("[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "yyyy/MM/dd HH:mm:ss");
+        put("[0-9]{1,2}\\s[a-z]{3}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd MMM yyyy HH:mm:ss");
+        put("[0-9]{1,2}\\s[a-z]{4,}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}:[0-9]{2}", "dd MMMM yyyy HH:mm:ss");
+        put("[0-9]{14}", "yyyyMMddHHmmss");
+        put("[0-9]{8}\\s[0-9]{6}", "yyyyMMdd HHmmss");
+        put("[0-9]{8}_[0-9]{6}", "yyyyMMdd_HHmmss");
+
+        // Full Date + Partial Time
+        put("[0-9]{1,2}-[0-9]{1,2}-[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd-MM-yyyy HH:mm");
+        put("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}", "yyyy-MM-dd HH:mm");
+        put("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "MM/dd/yyyy HH:mm");
+        put("[0-9]{4}/[0-9]{1,2}/[0-9]{1,2}\\s[0-9]{1,2}:[0-9]{2}", "yyyy/MM/dd HH:mm");
+        put("[0-9]{1,2}\\s[a-z]{3}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd MMM yyyy HH:mm");
+        put("[0-9]{1,2}\\s[a-z]{4,}\\s[0-9]{4}\\s[0-9]{1,2}:[0-9]{2}", "dd MMMM yyyy HH:mm");
+
+    }};
 
     /**
      * Check if the date is today
@@ -26,21 +140,25 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Check if two dates are the same day
+     * @param date1 The first date
+     * @param date2 The second date
+     * @return true if the two dates are the same day, false otherwise
+     */
     public static boolean isSameDay(Date date1, Date date2) {
         if (date1 == null || date2 == null) {
             return false;
         } else {
-            ZoneId zoneId = ZoneId.systemDefault();
+            Calendar cal1 = Calendar.getInstance();
+            cal1.setTime(date1);
 
-            Instant oneInstant = Instant.ofEpochMilli(date1.getTime());
-            LocalDateTime oneLocalDateTime = LocalDateTime.ofInstant(oneInstant, zoneId);
+            Calendar cal2 = Calendar.getInstance();
+            cal2.setTime(date2);
 
-            Instant twoInstant = Instant.ofEpochMilli(date2.getTime());
-            LocalDateTime twoLocalDateTime = LocalDateTime.ofInstant(twoInstant, zoneId);
-
-            return (oneLocalDateTime.getYear() == twoLocalDateTime.getYear())
-                    && (oneLocalDateTime.getMonthValue() == twoLocalDateTime.getMonthValue())
-                    && (oneLocalDateTime.getDayOfMonth() == twoLocalDateTime.getDayOfMonth());
+            return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                    cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH) &&
+                    cal1.get(Calendar.DAY_OF_MONTH) == cal2.get(Calendar.DAY_OF_MONTH);
         }
     }
 
@@ -172,19 +290,76 @@ public class DateUtils {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 
+    /**
+     * Parse the given date string to date object and return a date instance based on the given
+     * date string. This makes use of the {@link DateUtils#determineDateFormat(String)} to determine
+     * the SimpleDateFormat pattern to be used for parsing.
+     * @param dateString The date string to be parsed to date object.
+     * @return The parsed date object.
+     * @throws ParseException If the date format pattern of the given date string is unknown, or if
+     * the given date string or its actual date is invalid based on the date format pattern.
+     */
+    public static Date parse(String dateString) throws ParseException {
+        String dateFormat = determineDateFormat(dateString);
+        if (dateFormat == null) {
+            throw new ParseException("Unknown date format.", 0);
+        }
+        return parse(dateString, dateFormat);
+    }
+
+    /**
+     * Validate the actual date of the given date string based on the given date format pattern and
+     * return a date instance based on the given date string.
+     * @param dateString The date string.
+     * @param dateFormat The date format pattern which should respect the SimpleDateFormat rules.
+     * @return The parsed date object.
+     * @throws ParseException If the given date string or its actual date is invalid based on the
+     * given date format pattern.
+     * @see SimpleDateFormat
+     */
+    public static Date parse(String dateString, String dateFormat) throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.getDefault());
+        simpleDateFormat.setLenient(false); // Don't automatically convert invalid date.
+        return simpleDateFormat.parse(dateString);
+    }
+
+    /**
+     * Checks whether the actual date of the given date string is valid. This makes use of the
+     * {@link DateUtils#determineDateFormat(String)} to determine the SimpleDateFormat pattern to be
+     * used for parsing.
+     * @param dateString The date string.
+     * @return True if the actual date of the given date string is valid.
+     */
     public static boolean isValidDate(String dateString) {
-        // 20231229
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd", Locale.getDefault());
-        sdf.setLenient(false);
         try {
-            // true if date is not null
-            return sdf.parse(dateString) != null;
+            parse(dateString);
+            return true;
         } catch (ParseException e) {
-            // false if parsing fails
-            e.printStackTrace();
             return false;
         }
     }
+
+    /**
+     * Determine SimpleDateFormat pattern matching with the given date string. Returns null if
+     * format is unknown. You can simply extend DateUtil with more formats if needed.
+     * @param dateString The date string to determine the SimpleDateFormat pattern for.
+     * @return The matching SimpleDateFormat pattern, or null if format is unknown.
+     * @see SimpleDateFormat
+     */
+    public static String determineDateFormat(String dateString) {
+        for (DatePattern pat : DATE_TIME_PATTERNS) {
+            Pattern pattern = Pattern.compile(pat.regexPattern);
+            Matcher matcher = pattern.matcher(dateString);
+
+            // Se trovi un match, estrai la parte interessante
+            if (matcher.find()) {
+                Log.d("DateUtils", "dateString : " + dateString + " determineDateFormat: " + pat.dateTimeFormat);
+                return pat.dateTimeFormat;
+            }
+        }
+        return null; // Unknown format.
+    }
+
 
     public static Date isValidTime(String timeString) {
         // 113232

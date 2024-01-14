@@ -13,28 +13,28 @@ import it.dhd.bcrmanager.drawable.LetterTileDrawable;
 
 public class CallLogItem {
 
-    private String contactName;
+    public String contactName;
     private final String number;
     private final String numberFormatted;
+    private String numberLabel;
+    private int numberType;
     private Uri contactIcon;
     private String lookupKey;
     private boolean contactSaved;
     private int contactType;
     private final String direction;
-    private final String date;
-    private final String formattedDate;
     private final double duration;
     private final Integer simSlot;
     private final String audioFilePath;
     private final String filePath;
     public Boolean isPlaying;
     public Boolean starred;
-    private final Date timestampDate;
+    private final long timestampDate;
     private final String fileName;
 
     public CallLogItem(Uri contactIcon, String lookupKey, boolean contactSaved,
                        int contactType, String contactName, String number,
-                       String numberFormatted, String direction, String date, Date timestampDate,
+                       String numberFormatted, String numberLabel, int numberType, String direction, long timestampDate,
                        double duration, Integer simSlot,
                        String audioFilePath, String filePath, String fileName, boolean starred) {
         this.contactIcon = contactIcon;
@@ -44,10 +44,10 @@ public class CallLogItem {
         this.contactType = contactType;
         this.number = number;
         this.numberFormatted = numberFormatted;
+        this.numberLabel = numberLabel;
+        this.numberType = numberType;
         this.direction = direction;
-        this.date = date;
         this.timestampDate = timestampDate;
-        this.formattedDate = formatDate();
         this.duration = duration;
         this.simSlot = simSlot;
         this.audioFilePath = audioFilePath;
@@ -64,6 +64,13 @@ public class CallLogItem {
     public String getNumber() {
         return number;
     }
+    public String getNumberLabel() {
+        return numberLabel;
+    }
+
+    public int getNumberType() {
+        return numberType;
+    }
 
     public Uri getContactIcon() {
         return contactIcon;
@@ -73,11 +80,7 @@ public class CallLogItem {
         return direction;
     }
 
-    public String getDate() {
-        return date;
-    }
-
-    public Date getTimestampDate() {
+    public long getTimestampDate() {
         return timestampDate;
     }
 
@@ -87,7 +90,7 @@ public class CallLogItem {
 
         Calendar now = Calendar.getInstance();
         Calendar itemTime = Calendar.getInstance();
-        itemTime.setTime(timestampDate);
+        itemTime.setTime(new Date(timestampDate));
 
         if ((now.get(Calendar.YEAR) == itemTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == itemTime.get(Calendar.DAY_OF_YEAR)) ||
@@ -101,13 +104,13 @@ public class CallLogItem {
         }
     }
 
-    public String getFormattedTimestampComplete(String today, String yesternday) {
+    public String getFormattedTimestampComplete(String today, String yesterday) {
         SimpleDateFormat sdfToday = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
         SimpleDateFormat sdfOtherDays = new SimpleDateFormat("EEEE dd MMM HH:mm", Locale.getDefault());
 
         Calendar now = Calendar.getInstance();
         Calendar itemTime = Calendar.getInstance();
-        itemTime.setTime(timestampDate);
+        itemTime.setTime(new Date(timestampDate));
 
         if (now.get(Calendar.YEAR) == itemTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == itemTime.get(Calendar.DAY_OF_YEAR)) {
@@ -116,7 +119,7 @@ public class CallLogItem {
         } else if (now.get(Calendar.YEAR) == itemTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) - itemTime.get(Calendar.DAY_OF_YEAR) == 1) {
             // Yesterday
-            return yesternday + " " + sdfToday.format(timestampDate);
+            return yesterday + " " + sdfToday.format(timestampDate);
         } else {
             // Older than yesterday
             return sdfOtherDays.format(timestampDate);
@@ -129,7 +132,7 @@ public class CallLogItem {
 
         Calendar now = Calendar.getInstance();
         Calendar itemTime = Calendar.getInstance();
-        itemTime.setTime(timestampDate);
+        itemTime.setTime(new Date(timestampDate));
 
         if (now.get(Calendar.YEAR) == itemTime.get(Calendar.YEAR) &&
                 now.get(Calendar.DAY_OF_YEAR) == itemTime.get(Calendar.DAY_OF_YEAR)) {

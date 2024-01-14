@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +43,7 @@ import it.dhd.bcrmanager.callbacks.SwipeCallback;
 import it.dhd.bcrmanager.databinding.BatchDeleteLayoutBinding;
 import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.objects.ContactItem;
+import it.dhd.bcrmanager.runner.TaskRunner;
 import it.dhd.bcrmanager.ui.adapters.FilterAdapter;
 import it.dhd.bcrmanager.ui.adapters.RegLogAdapter;
 import it.dhd.bcrmanager.utils.DateUtils;
@@ -97,6 +99,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
         Log.d("BatchDelete", "setupViews registrationsItems: " + registrationsItems.size());
 
         List<ContactItem> contactItems = NewHome.contactList;
+        contactItems.removeIf(contact -> TextUtils.isEmpty(contact.getContactName()));
         contactItems.sort((o1, o2) -> o1.getContactName().compareToIgnoreCase(o2.getContactName()));
         contactNames = new ArrayList<>();
         List<ContactItem> contactsList = new ArrayList<>();
@@ -201,6 +204,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                             NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
                         }
                     }
+                    itemsToRemove.clear();
                     List<CallLogItem> callLogItems = new ArrayList<>();
                     for (Object item : NewHome.yourListOfItems) {
                         if (item instanceof CallLogItem) {
@@ -218,29 +222,6 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
 
     }
 
-    public static class TaskRunner {
-        private final Executor executor = Executors.newSingleThreadExecutor(); // change according to your requirements
-        private final Handler handler = new Handler(Looper.getMainLooper());
-
-        public interface Callback<R> {
-            void onComplete(R result);
-        }
-
-        public <R> void executeAsync(Callable<R> callable, Callback<R> callback) {
-            executor.execute(() -> {
-                final R result;
-                try {
-                    result = callable.call();
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-                handler.post(() -> {
-                    callback.onComplete(result);
-                });
-            });
-        }
-    }
-
 
     private void reCheckList() {
         registrationsItems.clear();
@@ -251,10 +232,10 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                 mFilterAdapter.isChecked(mFilterAdapter.DURATION)) {
             for (Object item : NewHome.yourListOfItems) {
                 if (item instanceof CallLogItem currentItem) {
-                    if (isDateInRange(currentItem.getTimestampDate()) &&
+                    if (isDateInRange(new Date(currentItem.getTimestampDate())) &&
                             isContactInList(currentItem) &&
                             isDirectionInList(currentItem.getDirection()) &&
-                            isDurationInList(currentItem))
+                            isDurationInList(currentItem) && !TextUtils.isEmpty(currentItem.getContactName()))
                         registrationsItems.add((CallLogItem) item);
                 }
             }
@@ -315,7 +296,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
 
             CallLogItem lastItemLog = (CallLogItem)NewHome.yourListOfItems.get(NewHome.yourListOfItems.size()-1);
             // Start date is today
-            long startDate = lastItemLog.getTimestampDate().getTime();
+            long startDate = lastItemLog.getTimestampDate();
             // Get the end date (in milliseconds) for today
             long endDate = Calendar.getInstance().getTime().getTime();
             // Set the calendar constraints to restrict the range
@@ -421,6 +402,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
 
     private boolean isContactInList(CallLogItem currentItem) {
         if (mFilterAdapter.mContactPicked && mFilterAdapter.isChecked(mFilterAdapter.CONTACT)) {
+            if (TextUtils.isEmpty(currentItem.getContactName())) return false;
             if (mFilterAdapter.mUnsaved) return !currentItem.isContactSaved();
             else return currentItem.getContactName().equals(mFilterAdapter.getContact());
         }

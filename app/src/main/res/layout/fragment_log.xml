@@ -13,39 +13,39 @@
 
     <FrameLayout
         android:id="@+id/filterLayout"
-        android:layout_below="@+id/progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@+id/progress"
         android:layout_alignParentTop="true"
         android:visibility="gone">
 
         <include
             android:id="@+id/filter_card_layout"
             layout="@layout/filter_card"
-            android:layout_margin="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:visibility="visible"/>
+            android:layout_margin="4dp"
+            android:visibility="visible" />
 
     </FrameLayout>
 
     <Chronometer
+        android:id="@+id/chronometer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chronometer"
-        android:layout_below="@+id/filterLayout"/>
+        android:layout_below="@+id/filterLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"
-        android:paddingBottom="@dimen/bottom_padding"
-        android:clipToPadding="false"
+        android:layout_above="@+id/playerInfoBarContainer"
         android:layout_below="@id/chronometer"
-        android:layout_above="@+id/playerInfoBarContainer"/>
+        android:layout_alignParentBottom="true"
+        android:clipToPadding="false"
+        android:paddingBottom="@dimen/bottom_padding"
+        app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed" />
 
 
     <LinearLayout

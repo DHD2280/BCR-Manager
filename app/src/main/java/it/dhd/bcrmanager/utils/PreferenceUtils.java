@@ -31,6 +31,10 @@ public class PreferenceUtils {
         mDir = getStoredFolderFromPreference();
     }
 
+    public static Context getAppContext() {
+        return mAppContext;
+    }
+
     public static SharedPreferences getSharedPreferences() {
         return mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
@@ -191,6 +195,13 @@ public class PreferenceUtils {
         editor.apply();
     }
 
+    public static void resetStarred() {
+        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+        editor.clear();
+        editor.apply();
+    }
+
     public static class PermissionsKeys {
         public static final String PERMISSION_READ_CONTACTS = "permission_read_contacts";
         public static final String PERMISSION_READ_CALL_LOG = "permission_read_call_log";
@@ -201,6 +212,7 @@ public class PreferenceUtils {
      * Keys for the SharedPreferences
      */
     public static class Keys {
+        public static final String PREFS_KEY_SHOW_CONTACT_ICON = "show_contact_icon";
         public static final String PREFS_KEY_SHOW_TILES = "show_colored_tiles";
         public static final String PREFS_KEY_SHOW_HEADERS = "show_headers";
         public static final String PREFS_KEY_DARK_LETTER = "dark_letter_on_dark_mode";

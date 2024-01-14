@@ -22,6 +22,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 import it.dhd.bcrmanager.json.UriJsonAdapter;
@@ -58,6 +59,13 @@ public class FileUtils {
         /*if (documentFile != null && documentFile.exists()) {
             documentFile.delete();
         }*/
+    }
+
+    public static void deleteCachedFiles(Context context) {
+        if (new File(context.getFilesDir(), FileUtils.STORED_REG).exists())
+            new File(context.getFilesDir(), FileUtils.STORED_REG).delete();
+        if (new File(context.getFilesDir(), FileUtils.STORED_CONTACTS).exists())
+            new File(context.getFilesDir(), FileUtils.STORED_CONTACTS).delete();
     }
 
     public static long getLastModifiedFolder(Context context) {
@@ -233,7 +241,7 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
             // Gestire l'eccezione in base alle esigenze dell'app
-            return null;
+            return new ArrayList<>();
         }
     }
 

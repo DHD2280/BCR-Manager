@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
+import android.telephony.PhoneNumberUtils;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.dhd.bcrmanager.BuildConfig;
+import it.dhd.bcrmanager.objects.ContactItem;
 
 public class CursorUtils {
 
@@ -86,7 +89,7 @@ public class CursorUtils {
      */
     public static List<String> getPhoneNumbersForContact(Context context, String lookupKey) {
         List<String> phoneNumbers = new ArrayList<>();
-
+        if (TextUtils.isEmpty(lookupKey)) return phoneNumbers;
         ContentResolver cr = context.getContentResolver();
         Cursor cursor = cr.query(
                 ContactsContract.Contacts.CONTENT_URI,
@@ -119,7 +122,6 @@ public class CursorUtils {
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
-        Log.d("CursorUtils.getPhoneNumbersForContact", "Contact: " + lookupKey + ", Numbers: " + phoneNumbers);
         return phoneNumbers;
     }
 
@@ -132,9 +134,9 @@ public class CursorUtils {
      */
     public static String[] getContactInfo(Context context, String phoneNumber) {
         long contactId = 0;
-        String contactName = null, contactIcon = null, lookupKey = null;
+        String contactName = null, contactIcon = null, lookupKey = null, numberLabel = null;
+        int numberType = 0;
         boolean isContactSaved = false, defaultIcon = true;
-        int version = 0;
         Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
         Cursor cursor = context.getContentResolver().query(
                 uri,
@@ -142,32 +144,50 @@ public class CursorUtils {
                         ContactsContract.PhoneLookup._ID,
                         ContactsContract.PhoneLookup.DISPLAY_NAME,
                         ContactsContract.PhoneLookup.PHOTO_URI,
-                        ContactsContract.PhoneLookup.LOOKUP_KEY
+                        ContactsContract.PhoneLookup.LOOKUP_KEY,
                 },
                 null,
                 null,
                 null
         );
         if (cursor != null && cursor.moveToFirst()) {
-            do {
                 // Retrieve file information from the cursor
                 contactId = cursor.getLong(0);
                 contactName = cursor.getString(1);
                 contactIcon = cursor.getString(2);
                 lookupKey = cursor.getString(3);
-                if (contactName == null || contactName.isEmpty()) contactName = phoneNumber;
-                if (contactName!=null) {
+                if (TextUtils.isEmpty(lookupKey)) contactName = phoneNumber;
+                else {
                     isContactSaved = true;
                     if (contactIcon != null) defaultIcon = false;
+                    Cursor phones = context.getContentResolver().query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            new String[] {
+                                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                    ContactsContract.CommonDataKinds.Phone.TYPE,
+                                    ContactsContract.CommonDataKinds.Phone.LABEL } ,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId,
+                            null,
+                            null);
+                    while (phones != null && phones.moveToNext()) {
+                        Log.d("CursorUtils.getContactInfo", "Phone number: " + phones.getString(0) + ", Type: " + phones.getString(1) + ", Label: " + phones.getString(2));
+                        if (PhoneNumberUtils.compare(phoneNumber, phones.getString(0))) {
+                            if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                                numberLabel = phones.getString(2);
+                            else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(context.getResources(), phones.getInt(1), "");
+                            numberType = phones.getInt(1);
+                            break;
+                        }
+                    }
+                    if(phones != null && !phones.isClosed()) {
+                        phones.close();
+                    }
                 }
-            } while (cursor.moveToNext());
         }
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
-        if (BuildConfig.DEBUG)
-            Log.d("CursorUtils.getContactInfo", "Contact: " + contactName + ", ID:" + contactId + ", Number: " + phoneNumber + ", saved: " + (contactName != null) + ", default icon" + (contactIcon== null));
-        return new String[] {String.valueOf(contactId), contactName, contactIcon, String.valueOf(isContactSaved), String.valueOf(defaultIcon), lookupKey, String.valueOf(version)};
+        return new String[] {String.valueOf(contactId), contactName, contactIcon, String.valueOf(isContactSaved), String.valueOf(defaultIcon), lookupKey, numberLabel, String.valueOf(numberType)};
     }
 
     /**
@@ -189,11 +209,13 @@ public class CursorUtils {
     public static String getContactNameFromCallLogs(Context context, String phoneNumber) {
         String callLogName = "";
         Cursor cursor = context.getContentResolver().query(
-                CallLog.Calls.CONTENT_URI,
+                CallLog.Calls.CONTENT_URI.buildUpon().appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "1")
+                        .build(),
                 new String[]{
                         CallLog.Calls.NUMBER,
                         CallLog.Calls.DATE,
                         CallLog.Calls.CACHED_NAME,
+                        CallLog.Calls.CACHED_LOOKUP_URI,
                         CallLog.Calls.FEATURES
                 },
                 CallLog.Calls.NUMBER + "=?",
@@ -202,7 +224,6 @@ public class CursorUtils {
         );
         if (cursor != null && cursor.moveToFirst()) {
             callLogName = cursor.getString(2);
-            Log.d("CursorUtils.getContactNameFromCallLogs", "getContactNameFromCallLogs Contact: " + callLogName + ", Number: " + phoneNumber);
         }
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();
@@ -210,28 +231,10 @@ public class CursorUtils {
         return callLogName;
     }
 
-    public static String[] searchThingsInCallLog(Context context, String[] callItem) {
-        // String[]{date, time, contactNumber};
-        String date = callItem[0];
-        String time = callItem[1];
-        String dateTime = date + time;
-        Date dateTimeLong = null;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-
-        try {
-            // Parsing della stringa combinata
-            dateTimeLong = dateFormat.parse(dateTime);
-
-            // Ottieni il valore numerico di Date.getTime()
-            long timeInMillis = dateTimeLong.getTime();
-
-            // Output del risultato
-        } catch (Exception e) {
-            // Gestisci l'eccezione di parsing
-            e.printStackTrace();
-        }
-        String phoneNumber = callItem[2];
-        String duration = "", type = "", sim = "", name = "";
+    public static String[] searchThingsInCallLog(Context context, long date) {
+        if (date == 0) return null;
+        String dateNoMillis = String.valueOf(date).substring(0, String.valueOf(date).length() - 3);
+        String phoneNumber, duration, type, sim, name;
         Cursor cursor = context.getContentResolver().query(
                 CallLog.Calls.CONTENT_URI,
                 new String[]{
@@ -242,8 +245,8 @@ public class CursorUtils {
                         CallLog.Calls.PHONE_ACCOUNT_ID,
                         CallLog.Calls.CACHED_NAME
                 },
-                CallLog.Calls.NUMBER + "=?",
-                new String[]{phoneNumber},
+                CallLog.Calls.DATE + " LIKE " + "'" + dateNoMillis + "%'",
+                null,
                 null
         );
         if (cursor != null && cursor.moveToFirst()) {
@@ -251,16 +254,15 @@ public class CursorUtils {
                 // Retrieve file information from the cursor
                 String timestamp = cursor.getString(1);
                 String timestampNoMillis = timestamp.substring(0, timestamp.length() - 3);
-                if (dateTimeLong == null) return null;
-                String dateTimeNoMillis = String.valueOf(dateTimeLong.getTime()).substring(0, String.valueOf(dateTimeLong.getTime()).length() - 3);
-                if (timestampNoMillis.equals(dateTimeNoMillis)) {
+
+                if (timestampNoMillis.equals(dateNoMillis)) {
                     // Retrieve file information from the cursor
+                    phoneNumber = cursor.getString(0);
                     duration = cursor.getString(2);
                     type = checkType(cursor.getInt(3));
                     sim = SimUtils.checkSimSlot(context, cursor.getString(4));
                     name = cursor.getString(5);
-                    Log.d("CursorUtils.searchThingsInCallLog", "searchThingsInCallLog Contact: " + name + ", Number: " + phoneNumber + ", Duration: " + duration + ", Type: " + type + ", Sim: " + sim);
-                    break;
+                    return new String[]{phoneNumber, duration, type, sim, name};
                 }
             } while (cursor.moveToNext());
 
@@ -268,7 +270,7 @@ public class CursorUtils {
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();
         }
-        return new String[]{duration, type, sim, name};
+        return null;
     }
 
     private static String checkType(int callType) {
@@ -284,4 +286,5 @@ public class CursorUtils {
             }
         }
     }
+
 }

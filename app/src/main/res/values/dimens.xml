@@ -5,7 +5,6 @@
     <!-- Height of the call log actions section for each call log entry -->
     <dimen name="call_log_action_height">48dp</dimen>
 
-
     <dimen name="call_log_action_icon_margin_start">16dp</dimen>
     <dimen name="call_log_action_icon_dimen">24dp</dimen>
     <dimen name="call_log_action_horizontal_padding">24dp</dimen>
@@ -21,7 +20,6 @@
     <dimen name ="appbar_top_padding">20dp</dimen>
     <dimen name ="appbar_bottop_padding">20dp</dimen>
 
-
     <dimen name="indicator_size">6dp</dimen>
 
     <dimen name="margin_8">8dp</dimen>
@@ -29,5 +27,13 @@
     <dimen name="margin_20">20dp</dimen>
 
     <dimen name="launcher_shortcut_adaptive_icon_size">108dp</dimen>
+
+    <!-- Cards Dimens -->
+    <dimen name="card_corner_radius">28dp</dimen>
+    <dimen name="card_start_margin">8dp</dimen>
+    <dimen name="card_end_margin">8dp</dimen>
+    <dimen name="card_top_margin">3dp</dimen>
+    <dimen name="card_bottom_margin">4dp</dimen>
+    <dimen name="filter_card_radius">12dp</dimen>
 
 </resources>

@@ -28,10 +28,10 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 6
+        versionName = "1.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "(" + versionCode + ")")
+        setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
     }
 
     buildTypes {
@@ -48,6 +48,7 @@ android {
     }
     buildFeatures{
         viewBinding = true
+        dataBinding = true
         buildConfig = true
     }
     compileOptions {
@@ -82,6 +83,10 @@ dependencies {
 
     // FastScroll
     implementation("me.zhanghai.android.fastscroll:library:1.3.0")
+
+    // Rx Java
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+    implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion")

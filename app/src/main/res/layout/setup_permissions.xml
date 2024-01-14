@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:transitionGroup="true">
@@ -33,32 +32,32 @@
             android:layout_height="match_parent">
 
             <TextView
+                android:id="@+id/wellcome_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/wellcome_title"
-                app:layout_constraintTop_toTopOf="parent"
                 android:paddingStart="8dp"
                 android:paddingEnd="16dp"
                 android:text="@string/wellcome_title"
-                android:textAppearance="?attr/textAppearanceTitleLarge"/>
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
+                android:id="@+id/wellcome_message"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/wellcome_message"
-                app:layout_constraintTop_toBottomOf="@+id/wellcome_title"
                 android:paddingStart="16dp"
-                android:paddingEnd="16dp"
                 android:paddingTop="16dp"
+                android:paddingEnd="16dp"
                 android:text="@string/wellcome_message"
-                android:textAppearance="?attr/textAppearanceBodyLarge"/>
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                app:layout_constraintTop_toBottomOf="@+id/wellcome_title" />
 
             <TextView
                 android:id="@+id/setup_permissions_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_16"
                 android:layout_marginStart="@dimen/margin_20"
+                android:layout_marginTop="@dimen/margin_16"
                 android:layout_marginEnd="@dimen/margin_20"
                 android:text="@string/setup_permissions_title"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
@@ -68,11 +67,11 @@
                 android:id="@+id/setup_permissions_call_log_icon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                app:srcCompat="@drawable/ic_permission_call_log"
-                app:tint="?colorPrimary"
                 app:layout_constraintBottom_toBottomOf="@+id/setup_permissions_call_log_content"
                 app:layout_constraintStart_toStartOf="@+id/setup_permissions_content"
-                app:layout_constraintTop_toTopOf="@+id/setup_permissions_call_log_title" />
+                app:layout_constraintTop_toTopOf="@+id/setup_permissions_call_log_title"
+                app:srcCompat="@drawable/ic_permission_call_log"
+                app:tint="?colorPrimary" />
 
             <TextView
                 android:id="@+id/setup_permissions_call_log_title"
@@ -103,11 +102,11 @@
                 android:id="@+id/setup_permissions_contact_icon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                app:srcCompat="@drawable/ic_permission_contacts"
-                app:tint="?colorPrimary"
                 app:layout_constraintBottom_toBottomOf="@+id/setup_permissions_contact_content"
                 app:layout_constraintStart_toStartOf="@+id/setup_permissions_content"
-                app:layout_constraintTop_toTopOf="@+id/setup_permissions_contact_title" />
+                app:layout_constraintTop_toTopOf="@+id/setup_permissions_contact_title"
+                app:srcCompat="@drawable/ic_permission_contacts"
+                app:tint="?colorPrimary" />
 
             <TextView
                 android:id="@+id/setup_permissions_contact_title"
@@ -127,8 +126,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_16"
-                android:text="@string/setup_permissions_contact_message"
                 android:layout_marginTop="@dimen/margin_8"
+                android:text="@string/setup_permissions_contact_message"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 app:layout_constraintEnd_toEndOf="@+id/setup_permissions_content"
                 app:layout_constraintStart_toEndOf="@+id/setup_permissions_contact_icon"
@@ -138,11 +137,11 @@
                 android:id="@+id/setup_permissions_phone_state_icon"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
-                app:srcCompat="@drawable/ic_permission_phone_state"
-                app:tint="?colorPrimary"
                 app:layout_constraintBottom_toBottomOf="@+id/setup_permissions_phone_state_content"
                 app:layout_constraintStart_toStartOf="@+id/setup_permissions_content"
-                app:layout_constraintTop_toTopOf="@+id/setup_permissions_phone_state_title" />
+                app:layout_constraintTop_toTopOf="@+id/setup_permissions_phone_state_title"
+                app:srcCompat="@drawable/ic_permission_phone_state"
+                app:tint="?colorPrimary" />
 
             <TextView
                 android:id="@+id/setup_permissions_phone_state_title"
@@ -162,8 +161,8 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/margin_16"
-                android:text="@string/setup_permissions_phone_state_message"
                 android:layout_marginTop="@dimen/margin_8"
+                android:text="@string/setup_permissions_phone_state_message"
                 android:textAppearance="?attr/textAppearanceBodyMedium"
                 app:layout_constraintEnd_toEndOf="@+id/setup_permissions_content"
                 app:layout_constraintStart_toEndOf="@+id/setup_permissions_phone_state_icon"

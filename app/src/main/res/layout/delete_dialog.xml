@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
-    style="@style/CallLogCardStyle"
-    app:strokeColor="@color/trans"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:layout_marginBottom="12dp"
     android:orientation="vertical"
     android:padding="16dp"
-    android:elevation="2dp"
-    android:layout_marginTop="12dp"
-    android:layout_marginBottom="12dp">
+    app:strokeColor="@color/trans">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -33,7 +31,7 @@
                 android:layout_width="60dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="10dp"
-                app:srcCompat="@drawable/ic_default_contact"/>
+                app:srcCompat="@drawable/ic_default_contact" />
 
             <LinearLayout
                 android:id="@+id/textLayout"
@@ -131,10 +129,10 @@
             android:id="@+id/buttonLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:layout_marginTop="24dp"
             android:layout_marginBottom="24dp"
             android:gravity="end"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -144,21 +142,21 @@
                 android:id="@+id/btnNegative"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:backgroundTint="@color/trans"
                 android:layout_marginEnd="12dp"
+                android:text="@string/delete_dialog_negative"
                 android:textColor="?colorPrimary"
-                android:text="@string/delete_dialog_negative"/>
+                app:backgroundTint="@color/trans" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPositive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:text="@string/delete_dialog_positive"
-                app:backgroundTint="@color/trans"
                 android:textColor="?colorPrimary"
-                android:layout_marginEnd="8dp"/>
+                app:backgroundTint="@color/trans" />
 
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+</LinearLayout>

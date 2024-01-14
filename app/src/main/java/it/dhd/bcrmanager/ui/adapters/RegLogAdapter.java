@@ -82,6 +82,7 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         ItemEntryBinding binding = ItemEntryBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+
         return new ViewHolder(binding);
     }
 
@@ -91,14 +92,13 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
 
         CallLogItem item = callLogItemsFiltered.get(position);
 
-        // Set Contact Name
-        if (item.getContactName()!=null) holder.binding.contactName.setText(item.getContactName());
-        else holder.binding.contactName.setText(item.getNumberFormatted());
+        holder.binding.setShowSim(nSim > 1);
+        holder.binding.setCallLogItem(item);
 
         // Set click listener for the entire item (excluding contact icon)
         if (hasExpansion) holder.binding.rootLayout.setOnClickListener(v -> toggleExpansion(position));
         if (!hasPlayButton) holder.binding.actionPlay.setVisibility(View.GONE);
-        // Set click listener for the entire item (excluding contact icon)
+
         holder.binding.expandingLayout.setVisibility(position == expandedPosition ? View.VISIBLE : View.GONE);
         if (position == expandedPosition) {
             holder.binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(mContext, com.google.android.material.R.color.material_dynamic_primary10));
@@ -109,20 +109,10 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
         // Set click listener for the expand button
         //holder.rootLayout.setOnClickListener(v -> toggleExpansion(position));
 
-        if (nSim<=1) {
-            holder.binding.dividerSim.setVisibility(View.GONE);
-            holder.binding.simSlot.setVisibility(View.GONE);
-            holder.binding.dividerDate.setVisibility(View.GONE);
-        } else {
-            holder.binding.simSlot.setText(item.getSimSlot());
-        }
-
         if(item.getDirection().contains("in")) holder.binding.callIcon.setImageResource(R.drawable.ic_in);
         else holder.binding.callIcon.setImageResource(R.drawable.ic_out);
 
         holder.binding.date.setText(item.getFormattedTimestamp(mContext.getString(R.string.today), mContext.getString(R.string.yesterday)));
-
-        holder.binding.duration.setText(item.getStandardDuration());
 
         holder.binding.contactIcon.setImageDrawable(null);
 

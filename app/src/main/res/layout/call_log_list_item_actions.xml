@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2014 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,10 +24,10 @@
 
     <View
         android:layout_width="match_parent"
+        android:layout_height="1dp"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
-        android:layout_height="1dp"
-        android:background="@color/dialer_divider_line_color"/>
+        android:background="@color/dialer_divider_line_color" />
 
     <LinearLayout
         android:id="@+id/call_action"
@@ -36,11 +35,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_call"/>
+            android:src="@drawable/ic_call" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/call"/>
+            android:text="@string/call" />
 
     </LinearLayout>
 
@@ -50,11 +49,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_add_contact"/>
+            android:src="@drawable/ic_add_contact" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/create_new_contact"/>
+            android:text="@string/create_new_contact" />
 
     </LinearLayout>
 
@@ -64,11 +63,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_edit"/>
+            android:src="@drawable/ic_edit" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/edit_contact"/>
+            android:text="@string/edit_contact" />
 
     </LinearLayout>
 
@@ -78,11 +77,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_message"/>
+            android:src="@drawable/ic_message" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/send_message"/>
+            android:text="@string/send_message" />
 
     </LinearLayout>
 
@@ -92,11 +91,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_open_with"/>
+            android:src="@drawable/ic_open_with" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/open_with"/>
+            android:text="@string/open_with" />
 
     </LinearLayout>
 
@@ -106,11 +105,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_share"/>
+            android:src="@drawable/ic_share" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/share"/>
+            android:text="@string/share" />
 
     </LinearLayout>
 
@@ -120,11 +119,11 @@
 
         <ImageView
             style="@style/CallLogActionIconStyle"
-            android:src="@drawable/ic_delete"/>
+            android:src="@drawable/ic_delete" />
 
         <TextView
             style="@style/CallLogActionTextStyle"
-            android:text="@string/delete"/>
+            android:text="@string/delete" />
 
     </LinearLayout>
 </LinearLayout>

@@ -42,7 +42,8 @@
     <string name="direction">Direzione</string>
     <string name="ingoing">In entrata</string>
     <string name="outgoing">In uscita</string>
-    <string name="both_direction">Entrambe</string>
+    <string name="conference">Conferenza</string>
+    <string name="all">Tutto</string>
     <string name="duration">Durata</string>
 
     <!-- Delete Dialog -->
@@ -107,7 +108,6 @@
     <string name="vibrate_summary">Vibra nei cambiamenti dell\'UI</string>
     <string name="miscellaneous">Varie</string>
     <string name="version">Versione</string>
-    <string name="opensource_licenses">License Open Source</string>
 
     <!-- Player Strings -->
     <string name="speed">Velocità</string>

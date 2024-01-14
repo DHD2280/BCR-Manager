@@ -14,11 +14,11 @@
     </group>
 
     <group
-        android:translateX="34"
-        android:translateY="15"
+        android:rotation="90"
         android:scaleX="0.6"
         android:scaleY="0.6"
-        android:rotation="90">
+        android:translateX="34"
+        android:translateY="15">
         <path
             android:name="up"
             android:fillColor="@android:color/white"
@@ -26,18 +26,16 @@
     </group>
 
     <group
-        android:translateX="34"
-        android:translateY="15"
+        android:rotation="90"
         android:scaleX="0.6"
         android:scaleY="0.6"
-        android:rotation="90">
-    <path
-        android:name="down"
-        android:fillColor="@android:color/white"
-        android:pathData="M9,16l3-3h-2V8H8v5H6L9,16z" />
-        </group>
-
-
+        android:translateX="34"
+        android:translateY="15">
+        <path
+            android:name="down"
+            android:fillColor="@android:color/white"
+            android:pathData="M9,16l3-3h-2V8H8v5H6L9,16z" />
+    </group>
 
 
 </vector>

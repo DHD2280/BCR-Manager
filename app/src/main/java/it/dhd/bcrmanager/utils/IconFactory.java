@@ -33,7 +33,7 @@ public class IconFactory {
      */
     @NonNull
     public IconCompat create(
-            @NonNull Uri lookupUri, @NonNull String displayName, @NonNull String lookupKey) {
+            Uri lookupUri, @NonNull String displayName, @NonNull String lookupKey) {
 
         // In testing, there was no difference between high-res and thumbnail.
         InputStream inputStream =

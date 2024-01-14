@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:animateLayoutChanges="true"
     android:layout_height="wrap_content"
-    android:paddingBottom="16dp"
-    android:orientation="vertical">
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    android:paddingBottom="16dp">
+
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/batchDeleteContactCardView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="2dp" >
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="8dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,16 +25,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="@string/contact"
-                android:layout_marginStart="16dp"/>
+                android:layout_marginStart="16dp"
+                android:text="@string/contact" />
 
             <LinearLayout
                 android:id="@+id/contactFilterLayout"
-                android:visibility="gone"
-                android:animateLayoutChanges="true"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal">
+                android:animateLayoutChanges="true"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <ImageView
                     android:id="@+id/contactImage"
@@ -42,7 +42,7 @@
                     android:layout_height="52dp"
                     android:layout_gravity="center"
                     android:layout_marginStart="16dp"
-                    android:visibility="visible"/>
+                    android:visibility="visible" />
 
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -50,16 +50,17 @@
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
                     android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
                     android:layout_marginBottom="4dp"
-                    android:visibility="visible"
-                    android:hint="@string/contact">
+                    android:hint="@string/contact"
+                    android:visibility="visible">
+
                     <AutoCompleteTextView
+                        android:id="@+id/contactMenuAutoCompleteTextView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:id="@+id/contactMenuAutoCompleteTextView"
-                        android:inputType="none"/>
+                        android:inputType="none" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -74,11 +75,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/batchDeleteContactCardView"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/batchDeleteContactCardView">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -95,8 +96,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="@string/date"
-                    android:layout_marginStart="16dp" />
+                    android:layout_marginStart="16dp"
+                    android:text="@string/date" />
 
                 <View
                     android:layout_width="0dp"
@@ -104,12 +105,12 @@
                     android:layout_weight="1" />
 
                 <TextView
+                    android:id="@+id/batchDeleteDateTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:id="@+id/batchDeleteDateTextView"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginEnd="16dp"
-                    android:text=""
-                    android:layout_gravity="center_vertical" />
+                    android:text="" />
 
             </LinearLayout>
 
@@ -120,8 +121,8 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginBottom="6dp"
                 android:animateLayoutChanges="true"
-                android:visibility="gone"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <RadioGroup
                     android:layout_width="wrap_content"
@@ -129,35 +130,35 @@
                     android:orientation="vertical">
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioSingleDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/radioSingleDate"
-                        android:text="@string/single_date"/>
+                        android:text="@string/single_date" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radioRangeDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:id="@+id/radioRangeDate"
-                        android:text="@string/range_date"/>
+                        android:text="@string/range_date" />
                 </RadioGroup>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
                     android:layout_marginStart="10dp"
-                    android:gravity="center_horizontal">
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/pickDateButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:enabled="true"
                         android:text="@string/pick_date"
+                        app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        android:enabled="true"/>
+                        app:layout_constraintTop_toTopOf="parent" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -172,11 +173,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/batchDeleteDateCardView"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/batchDeleteDateCardView">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -188,8 +189,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="@string/direction"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:text="@string/direction" />
 
             <View
                 android:layout_width="0dp"
@@ -201,17 +202,17 @@
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
                 android:layout_marginTop="4dp"
+                android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
                 android:hint="@string/direction">
 
                 <AutoCompleteTextView
+                    android:id="@+id/directionMenuAutoCompleteTextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:simpleItems="@array/direction_array"
-                    android:id="@+id/directionMenuAutoCompleteTextView"
-                    android:inputType="none"/>
+                    android:inputType="none"
+                    app:simpleItems="@array/direction_array" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -225,10 +226,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
         android:layout_marginTop="4dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/batchDeleteDirectionCardView">
 
         <LinearLayout
@@ -241,42 +242,42 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="@string/duration"
-                android:layout_marginStart="16dp" />
+                android:layout_marginStart="16dp"
+                android:text="@string/duration" />
 
             <LinearLayout
                 android:id="@+id/durationFilterLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:animateLayoutChanges="true"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
                     android:id="@+id/durationStartText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="00:00"
-                    android:gravity="start" />
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="00:00" />
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:layout_height="wrap_content"
                     android:id="@+id/durationEndText"
-                    android:text="00:00"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:gravity="end" />
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="00:00" />
             </LinearLayout>
 
             <com.google.android.material.slider.RangeSlider
+                android:id="@+id/durationSlider"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:animateLayoutChanges="true"
-                android:id="@+id/durationSlider" />
+                android:visibility="gone" />
 
         </LinearLayout>
 

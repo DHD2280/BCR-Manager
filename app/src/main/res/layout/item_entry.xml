@@ -1,179 +1,232 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rootLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_marginStart="8dp"
-    android:layout_marginEnd="12dp"
-    app:cardCornerRadius="28dp"
-    android:layout_marginBottom="4dp"
-    app:strokeColor="@color/trans">
+<layout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="show_sim"
+            type="boolean" />
+
+        <variable
+            name="CallLogItem"
+            type="it.dhd.bcrmanager.objects.CallLogItem" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/rootLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/card_start_margin"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:strokeColor="@color/trans">
 
-
-        <!-- LinearLayout for defaultLayout -->
-        <LinearLayout
-            android:id="@+id/defaultLayout"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:layout_marginStart="4dp"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/contactIcon"
-                android:layout_gravity="center_vertical"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="10dp"
-                app:srcCompat="@drawable/ic_default_contact"/>
 
+            <!-- LinearLayout for defaultLayout -->
             <LinearLayout
-                android:id="@+id/textLayout"
-                android:layout_width="0dp"
+                android:id="@+id/defaultLayout"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:gravity="center_vertical"
-                android:orientation="vertical">
+                android:layout_marginStart="4dp"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-
-                <TextView
-                    android:id="@+id/contactName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Contact Name"
-                    android:textSize="18sp"
-                    android:ellipsize="marquee"
-                    android:singleLine="true"
-                    android:marqueeRepeatLimit ="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:duplicateParentState="true" />
+                <ImageView
+                    android:id="@+id/contactIcon"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="10dp"
+                    app:srcCompat="@drawable/ic_default_contact" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/textLayout"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
 
-                    <ImageView
-                        android:id="@+id/call_icon"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
-                        android:contentDescription="@string/direction"
-                        app:srcCompat="@drawable/ic_out" />
 
                     <TextView
-                        android:id="@+id/dividerSim"
-                        style="@style/TextViewSubtitle"
-                        android:textStyle="bold"
-                        android:text="@string/divider"/>
+                        android:id="@+id/contactName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:duplicateParentState="true"
+                        android:ellipsize="marquee"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
+                        android:text="@{CallLogItem.contactSaved ? CallLogItem.contactName : CallLogItem.numberFormatted}"
+                        android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/simSlot"
-                        style="@style/TextViewSubtitle"/>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/dividerDate"
-                        style="@style/TextViewSubtitle"
-                        android:text="@string/divider"
-                        android:textStyle="bold"/>
+                        <ImageView
+                            android:id="@+id/call_icon"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@string/direction"
+                            app:srcCompat="@drawable/ic_out" />
 
-                    <TextView
-                        android:id="@+id/date"
-                        style="@style/TextViewSubtitle"/>
+                        <TextView
+                            android:id="@+id/dividerDate"
+                            style="@style/TextViewSubtitle"
+                            android:text="@string/divider"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/dividerDuration"
-                        style="@style/TextViewSubtitle"
-                        android:text="@string/divider"
-                        android:textStyle="bold"/>
+                        <TextView
+                            android:id="@+id/date"
+                            style="@style/TextViewSubtitle" />
 
-                    <TextView
-                        android:id="@+id/duration"
-                        style="@style/TextViewSubtitle"/>
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1" />
 
-                    <View
-                        android:layout_width="0dp"
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/simLayout"
+                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_weight="1" />
+                        android:layout_marginTop="2dp"
+                        android:orientation="horizontal"
+                        android:visibility="@{show_sim ? View.VISIBLE : View.GONE}">
+
+                        <ImageView
+                            android:id="@+id/sim_icon"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@string/direction"
+                            app:srcCompat="@drawable/ic_sim" />
+
+                        <TextView style="@style/TextViewSeparator" />
+
+                        <TextView
+                            style="@style/TextViewSubtitle"
+                            android:text="@{CallLogItem.simSlot.toString()}" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/numberLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/number_icon"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:contentDescription="@string/direction"
+                            app:srcCompat="@drawable/ic_call" />
+
+                        <TextView
+                            style="@style/TextViewSeparator"
+                            android:visibility="@{CallLogItem.contactSaved ? View.VISIBLE : View.GONE}" />
+
+                        <TextView
+                            style="@style/TextViewSubtitle"
+                            android:text="@{CallLogItem.contactSaved ? CallLogItem.numberLabel : CallLogItem.number }"
+                            android:visibility="@{CallLogItem.contactSaved ? View.VISIBLE : View.GONE}" />
+
+                        <TextView style="@style/TextViewSeparator" />
+
+                        <TextView
+                            style="@style/TextViewSubtitle"
+                            android:text="@{CallLogItem.standardDuration}" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionPlay"
+                    style="@style/MaterialButtonIcon"
+                    android:layout_width="52dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_vertical|end"
+                    android:layout_marginEnd="10dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    app:icon="@drawable/play_to_pause"
+                    app:iconSize="40dp"
+                    app:iconTint="?colorOnBackground" />
+
             </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/actionPlay"
-                android:layout_width="52dp"
-                android:layout_height="60dp"
-                android:layout_gravity="end"
-                android:layout_marginEnd="10dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                app:icon="@drawable/play_to_pause"
-                app:iconTint="?colorOnBackground"
-                app:iconSize="40dp"
-                style="@style/MaterialButtonIcon" />
+            <ImageView
+                android:id="@+id/starred_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="end|top"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="3dp"
+                android:contentDescription="@string/starred"
+                android:visibility="visible"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_star"
+                app:tint="?colorPrimary" />
 
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/starred_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end|top"
-            android:layout_marginEnd="3dp"
-            android:layout_marginTop="2dp"
-            android:contentDescription="@string/starred"
-            app:srcCompat="@drawable/ic_star"
-            app:tint="?colorPrimary"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
-
-        <!-- LinearLayout for expandingLayout -->
-        <LinearLayout
-            android:id="@+id/expandingLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/defaultLayout">
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_height="1dp"
-                android:id="@+id/breakpointsDiv"
-                android:background="@color/dialer_divider_line_color"
-                android:visibility="gone"/>
-
-            <androidx.recyclerview.widget.RecyclerView
+            <!-- LinearLayout for expandingLayout -->
+            <LinearLayout
+                android:id="@+id/expandingLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:id="@+id/breakpointsRecycler"
-                android:visibility="gone" />
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/defaultLayout">
 
-            <include
-                android:id="@+id/call_log_entry_actions"
-                layout="@layout/call_log_list_item_actions"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:visibility="visible"/>
+                <View
+                    android:id="@+id/breakpointsDiv"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@color/dialer_divider_line_color"
+                    android:visibility="gone" />
 
-        </LinearLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/breakpointsRecycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</com.google.android.material.card.MaterialCardView>
+                <include
+                    android:id="@+id/call_log_entry_actions"
+                    layout="@layout/call_log_list_item_actions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:visibility="visible" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</layout>

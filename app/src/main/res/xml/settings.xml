@@ -2,6 +2,7 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
+    <!-- TODO implement Theme Settings -->
     <PreferenceCategory
         android:title="@string/style_settings"
         app:iconSpaceReserved="false" >
@@ -11,6 +12,11 @@
             android:key="show_headers"
             android:title="@string/show_headers"
             android:summary="@string/show_headers_summary" />
+        <!-- <Preference TODO: Implement this
+            app:iconSpaceReserved="false"
+            android:key="item_entry_appearance"
+            android:title="Item Entry Appearance"
+            android:summary="Customize Item Entry"/> -->
         <SwitchPreferenceCompat
             app:iconSpaceReserved="false"
             android:defaultValue="true"

@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
-    app:strokeColor="@color/trans"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:layout_marginStart="8dp"
     android:layout_marginEnd="8dp"
-    app:cardCornerRadius="28dp"
     android:layout_marginBottom="4dp"
+    android:checkable="true"
     android:clickable="true"
     android:focusable="true"
-    android:checkable="true">
+    android:orientation="vertical"
+    app:cardCornerRadius="28dp"
+    app:strokeColor="@color/trans">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -56,10 +55,10 @@
             android:id="@+id/breakPointTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:text="01:00"
             android:layout_marginStart="6dp"
             android:layout_marginEnd="16dp"
+            android:maxLines="1"
+            android:text="01:00"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

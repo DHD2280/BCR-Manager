@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="?attr/actionButtonStyle"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:clipToPadding="false"
@@ -11,20 +10,20 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_gravity="center"
-        android:src="@drawable/ic_filter"/>
+        android:src="@drawable/ic_filter" />
 
     <TextView
         android:id="@+id/cart_badge"
         android:layout_width="20dp"
         android:layout_height="20dp"
         android:layout_gravity="end|top"
-        android:layout_marginEnd="-5dp"
         android:layout_marginTop="3dp"
+        android:layout_marginEnd="-5dp"
         android:background="@drawable/badge_background"
         android:gravity="center"
-        android:textColor="?colorOnPrimary"
         android:text=""
-        android:visibility="gone"
-        android:textSize="11sp"/>
+        android:textColor="?colorOnPrimary"
+        android:textSize="11sp"
+        android:visibility="gone" />
 
 </FrameLayout>

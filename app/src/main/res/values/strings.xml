@@ -42,8 +42,18 @@
     <string name="direction">Direction</string>
     <string name="ingoing">Ingoing</string>
     <string name="outgoing">Outgoing</string>
-    <string name="both_direction">Both</string>
+    <string name="conference">Conference</string>
+    <string name="all">All</string>
     <string name="duration">Duration</string>
+
+    <!-- File Error string -->
+    <string name="error_files">Those files aren\'t correctly parsed.\nMaybe you are using a different date/time format.</string>
+
+    <!-- Contact Observer string -->
+    <plurals name="contact_changed">
+        <item quantity="one">Contact changed: %1$s</item>
+        <item quantity="other">%1$d Contacts changed.</item>
+    </plurals>
 
     <!-- Delete Dialog -->
     <string name="delete_dialog_title">Delete</string>
@@ -96,6 +106,7 @@
     <string name="unsaved_contacts">Unsaved contacts</string>
 
     <!-- Settings Strings -->
+    <string name="theme_settings">Theme Settings</string>
     <string name="style_settings">Style Settings</string>
     <string name="show_headers">Show Headers</string>
     <string name="show_headers_summary">Show headers in the call log</string>
@@ -108,7 +119,13 @@
     <string name="vibrate_summary">Vibrate on UI changes</string>
     <string name="miscellaneous">Miscellaneous</string>
     <string name="version">Version</string>
-    <string name="opensource_licenses">Open Source Licenses</string>
+
+    <!-- Item Entry Settings -->
+    <string name="contact_icon_category">Contact Icon</string>
+    <string name="show_contact">Show Contact Icon</string>
+    <string name="date_settings">Date Settings</string>
+    <string name="date_format">Date Format</string>
+
 
     <!-- Player Strings -->
     <string name="speed">Speed</string>

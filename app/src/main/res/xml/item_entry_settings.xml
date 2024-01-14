@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/contact_icon_category"
+        app:iconSpaceReserved="false" >
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="show_contact_icon"
+            android:title="@string/show_contact" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="show_colored_tiles"
+            android:title="@string/show_colored_tiles"
+            android:summary="@string/show_colored_tiles_summary" />
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="dark_letter_on_dark_mode"
+            android:dependency="show_colored_tiles"
+            android:title="@string/show_dark_letters_title"
+            android:summary="@string/show_dark_letters_summary" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/date_settings"
+        app:iconSpaceReserved="false">
+        <ListPreference
+            app:iconSpaceReserved="false"
+            android:id="@+id/date_format"
+            android:key="date_format"
+            android:title="@string/date_format"
+            android:defaultValue="0"/>
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

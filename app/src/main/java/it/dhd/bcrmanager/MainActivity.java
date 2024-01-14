@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 public boolean onQueryTextSubmit(String query) {
                     LogUtil.i("MainActivity.onQueryTextSubmit", "Query: " + query);
                     if (NewHome.callLogAdapter != null) NewHome.callLogAdapter.getFilter().filter(query);
-                    if (NewHome.callStarredLogAdapter != null) NewHome.callStarredLogAdapter.getFilterStarred().filter(query);
+                    //if (NewHome.callStarredLogAdapter != null) NewHome.callStarredLogAdapter.getFilterStarred().filter(query);
                     searchQuery = query;
                     return false;
                 }

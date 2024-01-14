@@ -2,6 +2,7 @@ package it.dhd.bcrmanager.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -52,6 +53,7 @@ public class ShortcutUtils {
      * It will set rank based on the number of calls
      */
     public void addDynamicShortcut(ContactItem item) {
+        if (!item.isContactSaved() || TextUtils.isEmpty(item.getLookupKey()) || item.getLookupUri() == null) return;
         Log.d("JsonFileLoader.loadInBackground", "addDynamicShortcut: " + item.getContactName() + ", " + item.getPhoneNumber() + ", image null: " + (item.getContactImage() != null));
         ShortcutInfoCompat shortcut = new ShortcutInfoCompat.Builder(mContext, item.getLookupKey())
                 .setShortLabel(item.getContactName())
