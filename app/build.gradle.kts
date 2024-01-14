@@ -28,8 +28,8 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0.3"
+        versionCode = 8
+        versionName = "1.0.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
     }
@@ -58,7 +58,7 @@ android {
 }
 dependencies {
 
-    val lifecycleVersion = "2.6.2"
+    val lifecycleVersion = "2.7.0"
     val workVersion = "2.9.0"
 
     // AndroidX support

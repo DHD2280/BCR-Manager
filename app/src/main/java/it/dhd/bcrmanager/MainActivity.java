@@ -3,6 +3,7 @@ package it.dhd.bcrmanager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -59,8 +60,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DynamicColors.applyToActivityIfAvailable(this);
-        DynamicColors.applyToActivitiesIfAvailable(getApplication());
+        PreferenceUtils.init(getApplicationContext());
+        SharedPreferences prefs = PreferenceUtils.getAppPreferences();
+        if (prefs.getBoolean("dynamic_colors", true)) {
+            DynamicColors.applyToActivityIfAvailable(this);
+            DynamicColors.applyToActivitiesIfAvailable(getApplication());
+        }
 
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(getApplicationContext()));
 
@@ -68,7 +73,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(binding.getRoot());
 
-        PreferenceUtils.init(getApplicationContext());
         PermissionsUtil.init(getApplicationContext());
         ThemeUtils.init(this);
         BreakpointUtils.init(getApplicationContext());
@@ -321,10 +325,9 @@ public class MainActivity extends AppCompatActivity {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
             builder.setTitle(R.string.bcr_not_installed_title);
             builder.setMessage(R.string.bcr_not_installed_message);
-            //builder.setOnDismissListener(dialog -> finish());
             builder.setPositiveButton(R.string.bcr_not_installed_positive, (dialog, which) -> {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/chenxiaolong/BCR"));
-                //startActivity(browserIntent);
+                startActivity(browserIntent);
             });
             builder.show();
         }

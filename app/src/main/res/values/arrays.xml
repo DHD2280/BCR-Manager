@@ -6,4 +6,14 @@
         <item>@string/conference</item>
         <item>@string/all</item>
     </array>
+    <array name="sim_info_entries">
+        <item>@string/never</item>
+        <item>@string/automatic</item>
+        <item>@string/always</item>
+    </array>
+    <string-array name="sim_info_entries_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
 </resources>

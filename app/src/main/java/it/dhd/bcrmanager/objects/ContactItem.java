@@ -101,6 +101,8 @@ public class ContactItem {
         this.lookupKey = null;
         this.contactType = LetterTileDrawable.TYPE_GENERIC_AVATAR;
         this.lookupUri = null;
+        this.numberLabel = null;
+        this.numberType = 0;
     }
 
     public String getNumberLabel() {

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 1.0.4 - 2024-01-14
+- Added item customization in Settings
+
 ## 1.0.3 - 2024-01-14
 - Improved parsing logic: we need only date, then will search in call log for the call.
 - Using first contact found in Contacts.

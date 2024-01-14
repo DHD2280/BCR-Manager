@@ -3,6 +3,7 @@ package it.dhd.bcrmanager.objects;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.format.DateFormat;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -64,6 +65,7 @@ public class CallLogItem {
     public String getNumber() {
         return number;
     }
+
     public String getNumberLabel() {
         return numberLabel;
     }
@@ -84,9 +86,15 @@ public class CallLogItem {
         return timestampDate;
     }
 
-    public String getTimeStamp() {
-        SimpleDateFormat sdfToday = new SimpleDateFormat("HH:mm", Locale.getDefault());
-        SimpleDateFormat sdfOtherDays = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
+    public String getTimeStamp(Context c) {
+        SimpleDateFormat sdfToday, sdfOtherDays;
+        if (DateFormat.is24HourFormat(c)) {
+            sdfToday = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            sdfOtherDays = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
+        } else {
+            sdfToday = new SimpleDateFormat("hh:mm aa", Locale.getDefault());
+            sdfOtherDays = new SimpleDateFormat("dd MMM hh:mm aa", Locale.getDefault());
+        }
 
         Calendar now = Calendar.getInstance();
         Calendar itemTime = Calendar.getInstance();
@@ -223,14 +231,22 @@ public class CallLogItem {
         return sdfOtherDays.format(timestampDate);
     }
 
-    public String getLookupKey() { return lookupKey; }
+    public String getLookupKey() {
+        return lookupKey;
+    }
 
-    public int getContactType() { return contactType; }
+    public int getContactType() {
+        return contactType;
+    }
 
-    public Drawable getContactDrawable(Context context) { return new LetterTileDrawable(context).setCanonicalDialerLetterTileDetails(
-            getContactName(), isContactSaved() ? getLookupKey() : getNumber(), LetterTileDrawable.SHAPE_CIRCLE, getContactType()); }
+    public Drawable getContactDrawable(Context context) {
+        return new LetterTileDrawable(context).setCanonicalDialerLetterTileDetails(
+                getContactName(), isContactSaved() ? getLookupKey() : getNumber(), LetterTileDrawable.SHAPE_CIRCLE, getContactType());
+    }
 
-    public String getFilePath() { return filePath; }
+    public String getFilePath() {
+        return filePath;
+    }
 
     public void setContactName(String contactName) {
         this.contactName = contactName;
@@ -251,4 +267,13 @@ public class CallLogItem {
     public void setContactType(int contactType) {
         this.contactType = contactType;
     }
+
+    public void setNumberLabel(String numberLabel) {
+        this.numberLabel = numberLabel;
+    }
+
+    public void setNumberType(int numberType) {
+        this.numberType = numberType;
+    }
+
 }

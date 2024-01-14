@@ -29,12 +29,24 @@
     <PreferenceCategory
         android:title="@string/date_settings"
         app:iconSpaceReserved="false">
-        <ListPreference
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/call_info"
+        app:iconSpaceReserved="false">
+        <DropDownPreference
             app:iconSpaceReserved="false"
-            android:id="@+id/date_format"
-            android:key="date_format"
-            android:title="@string/date_format"
-            android:defaultValue="0"/>
+            android:title="@string/show_sim_info"
+            android:defaultValue="1"
+            app:useSimpleSummaryProvider="true"
+            android:key="show_sim_info"
+            android:entries="@array/sim_info_entries"
+            android:entryValues="@array/sim_info_entries_values"/>
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:defaultValue="true"
+            android:key="show_number_label"
+            android:title="@string/show_number_label" />
     </PreferenceCategory>
 
 

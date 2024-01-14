@@ -1286,6 +1286,9 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 CallLogItem callLogItem = ((CallLogItem) callLogItemsFiltered.get(position));
                 ((CallLogViewHolder) holder).bind(callLogItem, position);
                 ((CallLogViewHolder) holder).binding.setCallLogItem(callLogItem);
+                ((CallLogViewHolder) holder).binding.setShowIcon(PreferenceUtils.showIcon());
+                ((CallLogViewHolder) holder).binding.setShowSim(PreferenceUtils.showSim(nSim));
+                ((CallLogViewHolder) holder).binding.setShowLabel(PreferenceUtils.showLabel());
             } else if (getItemViewType(position) == VIEW_TYPE_HEADER) {
                 DateHeader dateHeader = ((DateHeader)callLogItemsFiltered.get(position));
                 ((HeaderViewHolder) holder).bind(dateHeader);
@@ -1549,8 +1552,9 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                     case "conference" -> binding.callIcon.setImageResource(R.drawable.ic_conference);
                 }
 
+
                 if (showHeaders)
-                    binding.date.setText(item.getTimeStamp());
+                    binding.date.setText(item.getTimeStamp(requireContext()));
                 else
                     binding.date.setText(item.getFormattedTimestamp(getAppContext().getString(R.string.today), getAppContext().getString(R.string.yesterday)));
 
@@ -1558,8 +1562,13 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
                 switch (item.getNumberType()) {
                     case ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM,
-                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE -> binding.numberIcon.setImageResource(R.drawable.ic_call);
+                            ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE,
+                            ContactsContract.CommonDataKinds.Phone.TYPE_MAIN -> binding.numberIcon.setImageResource(R.drawable.ic_call);
                     case ContactsContract.CommonDataKinds.Phone.TYPE_HOME -> binding.numberIcon.setImageResource(R.drawable.ic_home);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_FAX_HOME,
+                            ContactsContract.CommonDataKinds.Phone.TYPE_FAX_WORK -> binding.numberIcon.setImageResource(R.drawable.ic_fax);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_WORK -> binding.numberIcon.setImageResource(R.drawable.ic_work);
+                    case ContactsContract.CommonDataKinds.Phone.TYPE_COMPANY_MAIN -> binding.numberIcon.setImageResource(R.drawable.ic_business);
                 }
 
                 binding.starredIcon.setVisibility(item.isStarred() ? View.VISIBLE : View.GONE);
