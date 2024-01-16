@@ -4,8 +4,6 @@ import static it.dhd.bcrmanager.ui.fragments.NewHome.mediaPlayerService;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.InsetDrawable;
 import android.os.Bundle;
@@ -35,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import it.dhd.bcrmanager.MainActivity;
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.databinding.BreakpointsLayoutBinding;
 import it.dhd.bcrmanager.objects.Breakpoints;
@@ -50,8 +47,6 @@ public class BreakPointsFragment extends Fragment {
 
     static List<Breakpoints> breakpointsList;
     static BreakpointAdapter breakpointAdapter;
-
-    int clickedPosition = -1;
 
     private BreakpointsLayoutBinding binding;
 
@@ -119,7 +114,7 @@ public class BreakPointsFragment extends Fragment {
                         TypedValue.COMPLEX_UNIT_DIP, 16, v.getResources().getDisplayMetrics());
                 if (item.getIcon() != null) {
                     Drawable icon = item.getIcon();
-                    icon.setTint(ThemeUtils.getPrimaryColor());
+                    icon.setTint(ThemeUtils.getPrimaryColor(requireContext()));
                     item.setIcon(new InsetDrawable(item.getIcon(), iconMarginPx, 0, iconMarginPx, 0));
                 }
             }
@@ -205,11 +200,6 @@ public class BreakPointsFragment extends Fragment {
             breakpointsList.get(position).setDescription(description);
             breakpointAdapter.notifyItemChanged(position);
         }
-    }
-
-    private static SharedPreferences getSharedPreferences() {
-        // Use your application context to get SharedPreferences
-        return MainActivity.getAppContext().getSharedPreferences(PREF_KEY_BREAKPOINTS, Context.MODE_PRIVATE);
     }
 
     public static class BreakpointDialog extends AppCompatDialogFragment {

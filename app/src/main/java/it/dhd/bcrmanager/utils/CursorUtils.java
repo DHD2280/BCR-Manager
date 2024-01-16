@@ -148,7 +148,7 @@ public class CursorUtils {
                 contactName = cursor.getString(1);
                 contactIcon = cursor.getString(2);
                 lookupKey = cursor.getString(3);
-                if (TextUtils.isEmpty(lookupKey)) contactName = phoneNumber;
+                if (TextUtils.isEmpty(contactName) && TextUtils.isEmpty(lookupKey)) contactName = phoneNumber;
                 else {
                     isContactSaved = true;
                     if (contactIcon != null) defaultIcon = false;

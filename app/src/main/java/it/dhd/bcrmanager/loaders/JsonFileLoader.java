@@ -100,6 +100,8 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
     @Override
     public TwoListsWrapper loadInBackground() {
 
+        boolean needToParse = true, contactsChanged = false;
+
         hasReadContactsPermission = PermissionsUtil.hasReadContactsPermissions();
         hasWriteContactsPermission = PermissionsUtil.hasWriteContactsPermissions();
         hasReadCallLogPermission = PermissionsUtil.hasReadCallLogPermissions();
@@ -116,7 +118,6 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
 
             Log.d("JsonFileLoader.loadInBackground", "treeUri: " + treeUri + ", pickedDir: " + pickedDir);
-            boolean needToParse = true;
             if (pickedDir != null && pickedDir.isDirectory()) {
                 long lastModified = pickedDir.lastModified();
                 long lastTimeParsed = PreferenceUtils.getLastTime();
@@ -140,7 +141,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                     yourListOfItems = FileUtils.loadObjectList(getContext(), FileUtils.STORED_REG, CallLogItem.class);
                     contactList = FileUtils.loadObjectList(getContext(), FileUtils.STORED_CONTACTS, ContactItem.class);
                     StringBuilder contactNumbersBuilder = new StringBuilder();
-                    if (contactList.size() != 0 && hasReadContactsPermission && hasReadCallLogPermission) {
+                    if (contactList != null && contactList.size() != 0 && yourListOfItems != null  && yourListOfItems.size() > 0 && hasReadContactsPermission && hasReadCallLogPermission) {
                         for (ContactItem contact : contactList) {
                             boolean hasChanged = false;
 
@@ -187,6 +188,39 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                         hasChanged = true;
                                         contact.setContactId(cursor.getLong(0));
                                     }
+                                    // Check number label
+                                    if (!TextUtils.isEmpty(cursor.getString(3))) {
+                                        Cursor phones = getContext().getContentResolver().query(
+                                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                                new String[] {
+                                                        ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                                        ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                        ContactsContract.CommonDataKinds.Phone.LABEL } ,
+                                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + cursor.getLong(0),
+                                                null,
+                                                null);
+                                        while (phones != null && phones.moveToNext()) {
+                                            if (PhoneNumberUtils.compare(contact.getPhoneNumber(), phones.getString(0))) {
+                                                // Number Type changed
+                                                if (contact.getNumberType() != phones.getInt(1)) {
+                                                    hasChanged = true;
+                                                    contact.setContactType(phones.getInt(1));
+                                                }
+                                                String numberLabel;
+                                                                                                if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                                                    numberLabel = phones.getString(2);
+                                                else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(getContext().getResources(), phones.getInt(1), "");
+                                                if (TextUtils.equals(contact.getNumberLabel(), numberLabel)) {
+                                                    hasChanged = true;
+                                                    contact.setNumberLabel(numberLabel);
+                                                }
+                                                break;
+                                            }
+                                        }
+                                        if(phones != null && !phones.isClosed()) {
+                                            phones.close();
+                                        }
+                                    }
                                     if (hasChanged) {
                                         contactNumbersBuilder.append("N:").append(contact.getPhoneNumber()).append(";");
                                     }
@@ -203,6 +237,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                             }
                         }
                         String[] changedContacts = contactNumbersBuilder.toString().split(";");
+                        contactsChanged = !(changedContacts.length > 0);
                         for (String changedContact : changedContacts) {
                             String[] contactInfo = changedContact.split(":");
                             if (contactInfo[0].equals("N")) {
@@ -452,9 +487,12 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
         for(CallLogItem item : yourListOfItems) {
             item.setStarred(PreferenceUtils.isStarred(item.getFileName()));
         }
-        FileUtils.saveObjectList(getContext(), yourListOfItems, FileUtils.STORED_REG, CallLogItem.class);
-        FileUtils.saveObjectList(getContext(), contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
+        if (contactsChanged || needToParse) {
+            FileUtils.saveObjectList(getContext(), yourListOfItems, FileUtils.STORED_REG, CallLogItem.class);
+            FileUtils.saveObjectList(getContext(), contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
+        }
         PreferenceUtils.saveLastFolder();
+
         // Iterate through the sorted list and add DateHeader objects
         List<Object> sortedListWithHeaders = new ArrayList<>();
         List<Object> starredListWithHeaders = new ArrayList<>();
@@ -618,7 +656,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
     private void setupContactShortcuts(boolean addStarred) {
         ShortcutManagerCompat.removeAllDynamicShortcuts(getContext());
         int shortCount;
-        if (contactList.size() > 0) {
+        if (contactList != null && contactList.size() > 0) {
             switch (contactList.size()) {
                 case 1 -> shortCount = 1;
                 case 2 -> shortCount = 2;

@@ -95,7 +95,7 @@
                             android:layout_width="26dp"
                             android:layout_height="26dp"
                             android:contentDescription="@string/direction"
-                            app:srcCompat="@drawable/ic_out" />
+                            app:srcCompat="@drawable/ic_out"/>
 
                         <TextView
                             android:id="@+id/dividerDate"

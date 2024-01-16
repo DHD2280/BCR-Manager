@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
@@ -55,6 +56,7 @@ public class ContactObserver extends ContentObserver {
         if (contacts.size() == 0) return;
         boolean hasChanged = false;
         if (!TextUtils.isEmpty(contactNumber)) {
+            Log.d("ContactObserver", "QUERY SINGLE NUMBER: " + contactNumber);
             // Query for a single number
             ContactItem contactFound = null;
             for (ContactItem contact : contacts) {
@@ -77,32 +79,65 @@ public class ContactObserver extends ContentObserver {
                     null,
                     null);
             if (cursor != null && cursor.moveToFirst()) {
-                    if (!TextUtils.isEmpty(cursor.getString(1))) {
-                        // Name changed
-                        if (!TextUtils.equals(contactFound.getContactName(), cursor.getString(1))) {
-                            hasChanged = true;
-                            contactFound.setContactName(cursor.getString(1));
-                            if (!contactFound.isContactSaved()) {
-                                contactFound.setContactSaved(true);
-                                contactFound.setContactType(LetterTileDrawable.TYPE_PERSON);
-                            }
+                if (!TextUtils.isEmpty(cursor.getString(1))) {
+                    // Name changed
+                    if (!TextUtils.equals(contactFound.getContactName(), cursor.getString(1))) {
+                        hasChanged = true;
+                        contactFound.setContactName(cursor.getString(1));
+                        if (!contactFound.isContactSaved()) {
+                            contactFound.setContactSaved(true);
+                            contactFound.setContactType(LetterTileDrawable.TYPE_PERSON);
                         }
                     }
-                    // Check contact Image
-                    if (!UriUtils.areEqual(contactFound.getContactImage(), UriUtils.parseUriOrNull(cursor.getString(2)))) {
-                        hasChanged = true;
-                        contactFound.setContactImage(UriUtils.parseUriOrNull(cursor.getString(2)));
+                }
+                // Check contact Image
+                if (!UriUtils.areEqual(contactFound.getContactImage(), UriUtils.parseUriOrNull(cursor.getString(2)))) {
+                    hasChanged = true;
+                    contactFound.setContactImage(UriUtils.parseUriOrNull(cursor.getString(2)));
+                }
+                // Check contact LookupKey
+                if (!TextUtils.equals(contactFound.getLookupKey(), cursor.getString(3))) {
+                    hasChanged = true;
+                    contactFound.setLookupKey(cursor.getString(3));
+                }
+                // Check contact ID
+                if (contactFound.getContactId() == cursor.getLong(0)) {
+                    hasChanged = true;
+                    contactFound.setContactId(cursor.getLong(0));
+                }
+                // Check Number Type and Label
+                if (!TextUtils.isEmpty(cursor.getString(3))) {
+                    Cursor phones = context.getContentResolver().query(
+                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                            new String[] {
+                                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                    ContactsContract.CommonDataKinds.Phone.TYPE,
+                                    ContactsContract.CommonDataKinds.Phone.LABEL } ,
+                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + cursor.getLong(0),
+                            null,
+                            null);
+                    while (phones != null && phones.moveToNext()) {
+                        if (PhoneNumberUtils.compare(contactFound.getPhoneNumber(), phones.getString(0))) {
+                            // Number Type changed
+                            if (contactFound.getNumberType() != phones.getInt(1)) {
+                                hasChanged = true;
+                                contactFound.setNumberType(phones.getInt(1));
+                            }
+                            String numberLabel;
+                            if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                                numberLabel = phones.getString(2);
+                            else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(context.getResources(), phones.getInt(1), "");
+                            if (!TextUtils.equals(contactFound.getNumberLabel(), numberLabel)) {
+                                hasChanged = true;
+                                contactFound.setNumberLabel(numberLabel);
+                            }
+                            break;
+                        }
                     }
-                    // Check contact LookupKey
-                    if (!TextUtils.equals(contactFound.getLookupKey(), cursor.getString(3))) {
-                        hasChanged = true;
-                        contactFound.setLookupKey(cursor.getString(3));
+                    if(phones != null && !phones.isClosed()) {
+                        phones.close();
                     }
-                    // Check contact ID
-                    if (contactFound.getContactId() == cursor.getLong(0)) {
-                        hasChanged = true;
-                        contactFound.setContactId(cursor.getLong(0));
-                    }
+                }
             } else {
                 // Probably contact was deleted
                 hasChanged = true;
@@ -162,6 +197,39 @@ public class ContactObserver extends ContentObserver {
                             hasChanged = true;
                             contact.setContactId(cursor.getLong(0));
                         }
+                        // Check Number Type and Label
+                        if (!TextUtils.isEmpty(cursor.getString(3))) {
+                            Cursor phones = context.getContentResolver().query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    new String[] {
+                                            ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                            ContactsContract.CommonDataKinds.Phone.TYPE,
+                                            ContactsContract.CommonDataKinds.Phone.LABEL } ,
+                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + cursor.getLong(0),
+                                    null,
+                                    null);
+                            while (phones != null && phones.moveToNext()) {
+                                if (PhoneNumberUtils.compare(contact.getPhoneNumber(), phones.getString(0))) {
+                                    // Number Type changed
+                                    if (contact.getNumberType() != phones.getInt(1)) {
+                                        hasChanged = true;
+                                        contact.setContactType(phones.getInt(1));
+                                    }
+                                    String numberLabel;
+                                    if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                                        numberLabel = phones.getString(2);
+                                    else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(context.getResources(), phones.getInt(1), "");
+                                    if (TextUtils.equals(contact.getNumberLabel(), numberLabel)) {
+                                        hasChanged = true;
+                                        contact.setNumberLabel(numberLabel);
+                                    }
+                                    break;
+                                }
+                            }
+                            if(phones != null && !phones.isClosed()) {
+                                phones.close();
+                            }
+                        }
                         if (hasChanged) {
                             count ++;
                             changedContacts.append("N:").append(contact.getPhoneNumber()).append(";");
@@ -180,10 +248,7 @@ public class ContactObserver extends ContentObserver {
             return;
         }
         FileUtils.saveObjectList(context, contacts, FileUtils.STORED_CONTACTS, ContactItem.class);
-        String qty = "0";
-        if (count == 1 && !contactNumber.isEmpty())
-            count = Integer.parseInt(contactNumber);
-        String formattedString = context.getResources().getQuantityString(R.plurals.deleted_registrations, count, count);
+        String formattedString = context.getResources().getQuantityString(R.plurals.contact_changed, count, count);
         showToast(formattedString);
 
         if (dataUpdateListener != null) {

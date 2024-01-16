@@ -1,4 +1,4 @@
-package it.dhd.bcrmanager.ui.fragments;
+package it.dhd.bcrmanager.ui.fragments.settings;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -6,14 +6,17 @@ import android.os.Bundle;
 
 import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.DropDownPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreferenceCompat;
 
 import java.util.Objects;
 
 import it.dhd.bcrmanager.BuildConfig;
 import it.dhd.bcrmanager.MainActivity;
 import it.dhd.bcrmanager.R;
+import it.dhd.bcrmanager.ui.fragments.ItemSettings;
 import it.dhd.bcrmanager.utils.FileUtils;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
 
@@ -43,6 +46,34 @@ public class Settings extends  PreferenceFragmentCompat {
                         .addToBackStack(ItemSettings.class.getSimpleName())
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
+                return true;
+            });
+        }
+
+        SwitchPreferenceCompat mDynamicColor = findPreference(PreferenceUtils.Keys.PREFS_KEY_DYNAMIC_COLOR);
+        DropDownPreference mThemeColor = findPreference(PreferenceUtils.Keys.PREFS_KEY_THEME_COLOR);
+        if (mDynamicColor != null) {
+            mDynamicColor.setOnPreferenceChangeListener((preference, newValue) -> {
+                if (mThemeColor != null) mThemeColor.setVisible(!((boolean) newValue));
+                requireActivity().recreate();
+
+                return true;
+            });
+        }
+
+
+        if (mThemeColor != null) {
+            mThemeColor.setVisible(!PreferenceUtils.getAppPreferences().getBoolean(PreferenceUtils.Keys.PREFS_KEY_DYNAMIC_COLOR, true));
+            mThemeColor.setOnPreferenceChangeListener((preference, newValue) -> {
+                requireActivity().recreate();
+                return true;
+            });
+        }
+
+        DropDownPreference mDarkMode =  findPreference(PreferenceUtils.Keys.PREFS_KEY_DARK_MODE);
+        if (mDarkMode != null) {
+            mDarkMode.setOnPreferenceChangeListener((preference, newValue) -> {
+                requireActivity().recreate();
                 return true;
             });
         }

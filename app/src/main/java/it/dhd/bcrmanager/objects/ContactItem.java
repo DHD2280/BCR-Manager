@@ -112,4 +112,12 @@ public class ContactItem {
     public int getNumberType() {
         return numberType;
     }
+
+    public void setNumberLabel(String numberLabel) {
+        this.numberLabel = numberLabel;
+    }
+
+    public void setNumberType(int numberType) {
+        this.numberType = numberType;
+    }
 }

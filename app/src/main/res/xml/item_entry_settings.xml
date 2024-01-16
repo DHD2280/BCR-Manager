@@ -27,11 +27,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/date_settings"
-        app:iconSpaceReserved="false">
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="@string/call_info"
         app:iconSpaceReserved="false">
         <DropDownPreference

@@ -1,6 +1,5 @@
 package it.dhd.bcrmanager.ui.fragments;
 
-import static it.dhd.bcrmanager.MainActivity.getAppContext;
 import static it.dhd.bcrmanager.utils.SimUtils.getNumberOfSimCards;
 
 import android.animation.Animator;
@@ -13,7 +12,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -29,6 +27,9 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -39,11 +40,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.core.util.Pair;
@@ -99,12 +101,11 @@ import it.dhd.bcrmanager.utils.DateUtils;
 import it.dhd.bcrmanager.utils.FileUtils;
 import it.dhd.bcrmanager.utils.PermissionsUtil;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
+import it.dhd.bcrmanager.utils.ThemeUtils;
 import it.dhd.bcrmanager.utils.VibratorUtils;
 import it.dhd.bcrmanager.utils.WrapContentLinearLayoutManager;
 import me.zhanghai.android.fastscroll.FastScrollerBuilder;
 import me.zhanghai.android.fastscroll.PopupTextProvider;
-import smartdevelop.ir.eram.showcaseviewlib.GuideView;
-import smartdevelop.ir.eram.showcaseviewlib.config.DismissType;
 
 public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<JsonFileLoader.TwoListsWrapper>,
                                                     ContactObserver.DataUpdateListener {
@@ -150,9 +151,6 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
     private String mDir;
 
-    @ColorInt
-    int colorPrimary, colorOnPrimary, backgroundColor, colorOnBackground, surfaceHighestColor;
-
     private String currentHeader, newHeader;
 
     private FragmentLogBinding binding;
@@ -160,6 +158,10 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
     private ContactObserver contentObserver;
     private LinearLayoutManager mLinearLayout;
     private GridLayoutManager mGridLayout;
+    private static SearchView searchView;
+    private static TextView textFilterItems;
+    private static MenuItem searchItem;
+    public static CharSequence searchQuery;
 
     public NewHome() {
         // Required empty public constructor
@@ -235,8 +237,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
     public void hideSoftKeyboard() {
         // Hide soft keyboard, if visible
         InputMethodManager inputMethodManager = (InputMethodManager)
-                getAppContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        inputMethodManager.hideSoftInputFromWindow(((MainActivity)requireActivity()).searchView.getWindowToken(), 0);
+                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(searchView.getWindowToken(), 0);
     }
 
     public static void animateSwipeUpView(ViewGroup v) {
@@ -348,26 +350,33 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
     }
 
+    /**
+     * Setup the badge
+     * @param items The number of items
+     */
+    public void setupBadge(int items) {
+
+        if (textFilterItems != null) {
+            if (items == -1) {
+                if (textFilterItems.getVisibility() != View.GONE) {
+                    textFilterItems.setVisibility(View.GONE);
+                }
+            } else {
+                textFilterItems.setText(String.valueOf(Math.min(items, 999)));
+                if (textFilterItems.getVisibility() != View.VISIBLE) {
+                    textFilterItems.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (PreferenceUtils.getAppContext() == null) PreferenceUtils.init(requireContext());
         showTiles = PreferenceUtils.showTiles();
         showHeaders = PreferenceUtils.showHeaders();
         vibrator = (Vibrator) requireContext().getSystemService(Context.VIBRATOR_SERVICE);
-        ((MainActivity)requireActivity()).setupBadge(-1);
-        TypedValue typedValue = new TypedValue();
-        Resources.Theme theme = requireContext().getTheme();
-        theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true);
-        colorPrimary = typedValue.data;
-        theme.resolveAttribute(com.google.android.material.R.attr.colorOnPrimary, typedValue, true);
-        colorOnPrimary = typedValue.data;
-        theme.resolveAttribute(com.google.android.material.R.attr.backgroundColor, typedValue, true);
-        backgroundColor = typedValue.data;
-        theme.resolveAttribute(com.google.android.material.R.attr.colorOnBackground, typedValue, true);
-        colorOnBackground = typedValue.data;
-        theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainerHighest, typedValue, true);
-        surfaceHighestColor = typedValue.data;
+        setupBadge(-1);
         if (mDir == null) mDir = PreferenceUtils.getStoredFolderFromPreference();
         Log.d("NewHome", "onCreate: mDir: " + mDir);
         Handler handler = new Handler();
@@ -379,10 +388,69 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         callStarredLogAdapter = new CallLogAdapter(yourListOfItemsStarred);
         concatAdapter = new ConcatAdapter(callStarredLogAdapter, callLogAdapter);
 
-
+        setHasOptionsMenu(true);
 
         Log.d("NewHome", "initLoader");
         LoaderManager.getInstance(this).initLoader(LOADER_ID, null, this);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.home_menu, menu);
+        final MenuItem filterItem = menu.findItem(R.id.menu_filter);
+        View actionView = filterItem.getActionView();
+        assert actionView != null;
+        textFilterItems = actionView.findViewById(R.id.cart_badge);
+        actionView.setOnClickListener(v -> onOptionsItemSelected(filterItem));
+        searchItem = menu.findItem(R.id.menu_search);
+        searchItem.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(@NonNull MenuItem menuItem) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(@NonNull MenuItem menuItem) {
+                TransitionManager.beginDelayedTransition(requireActivity().findViewById(R.id.toolbar), new Slide(Gravity.END));
+                return true;
+            }
+        });
+        searchView = (SearchView) searchItem.getActionView();
+
+
+        assert searchView != null;
+        searchView.setQueryHint(getString(R.string.search));
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (callLogAdapter != null) callLogAdapter.getFilter().filter(query);
+                if (callStarredLogAdapter != null) callStarredLogAdapter.getFilterStarred().filter(query);
+                searchQuery = query;
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (callLogAdapter != null) callLogAdapter.getFilter().filter(newText);
+                if (callStarredLogAdapter != null) callStarredLogAdapter.getFilterStarred().filter(newText);
+                searchQuery = newText;
+                return false;
+            }
+        });
+
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.menu_search) {
+            TransitionManager.beginDelayedTransition(requireActivity().findViewById(R.id.toolbar), new Slide(Gravity.START));
+            return true;
+        } else if(itemId == R.id.menu_filter) {
+            showFilterDialog();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -433,8 +501,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
             binding.filterCardLayout.durationLayout.setVisibility(isChecked ? View.VISIBLE : View.GONE);
             binding.filterCardLayout.durationSlider.setVisibility(isChecked ? View.VISIBLE : View.GONE);
             if (callLogAdapter != null && callStarredLogAdapter != null) {
-                callLogAdapter.getFilter().filter(MainActivity.searchQuery);
-                callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+                callLogAdapter.getFilter().filter(searchQuery);
+                callStarredLogAdapter.getFilterStarred().filter(searchQuery);
             }
         });
 
@@ -566,8 +634,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 mEndDuration = values.get(1);
                 binding.filterCardLayout.durationStartText.setText(DateUtils.formatDuration((long) mStartDuration));
                 binding.filterCardLayout.durationEndText.setText(DateUtils.formatDuration((long) mEndDuration));
-                callLogAdapter.getFilter().filter(MainActivity.searchQuery);
-                callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+                callLogAdapter.getFilter().filter(searchQuery);
+                callStarredLogAdapter.getFilterStarred().filter(searchQuery);
             }
         });
 
@@ -648,15 +716,15 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         yourListOfItemsStarredFiltered.remove(item);
         yourListOfItemsStarred.remove(item);
         callStarredLogAdapter.removeItem(ps);
-        callStarredLogAdapter.getFilter().filter(MainActivity.searchQuery);
+        callStarredLogAdapter.getFilter().filter(searchQuery);
     }
 
     public void playPauseButtonIcon(boolean isPlaying) {
         Drawable drawable;
         if (isPlaying) {
-            drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.play_to_pause);
+            drawable = ContextCompat.getDrawable(requireContext().getApplicationContext(), R.drawable.play_to_pause);
         } else {
-            drawable = ContextCompat.getDrawable(getAppContext(), R.drawable.pause_to_play);
+            drawable = ContextCompat.getDrawable(requireContext(), R.drawable.pause_to_play);
         }
         if (binding != null) binding.bottomPlayerLayout.playPauseButton.setIcon(drawable);
         if (drawable instanceof AnimatedVectorDrawable) {
@@ -671,9 +739,9 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         binding.filterCardLayout.pickDateButton.setEnabled(enabled);
         mDateEnabled = enabled;
         if (callLogAdapter != null && callLogAdapter.getItemCount()>0)
-            callLogAdapter.getFilter().filter(MainActivity.searchQuery);
+            callLogAdapter.getFilter().filter(searchQuery);
         if (callStarredLogAdapter != null && callStarredLogAdapter.getItemCount()>0)
-            callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+            callStarredLogAdapter.getFilterStarred().filter(searchQuery);
     }
 
     public void setupFilterLayout() {
@@ -707,8 +775,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                     mDatePicked = true;
                     mStartDate = dateFilter;
                     mFilterDateType = FILTER_DATE_TYPE_SINGLE;
-                    callLogAdapter.getFilter().filter(MainActivity.searchQuery);
-                    callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+                    callLogAdapter.getFilter().filter(searchQuery);
+                    callStarredLogAdapter.getFilterStarred().filter(searchQuery);
                     hideSoftKeyboard();
                     Log.d("NewHome", "date: " + dateText);
                 });
@@ -732,8 +800,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                     mStartDate = dateFilterStart;
                     mEndDate = dateFilterEnd;
                     mFilterDateType = FILTER_DATE_TYPE_RANGE;
-                    callLogAdapter.getFilter().filter(MainActivity.searchQuery);
-                    callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+                    callLogAdapter.getFilter().filter(searchQuery);
+                    callStarredLogAdapter.getFilterStarred().filter(searchQuery);
                     hideSoftKeyboard();
                     Log.d("NewHome", "date: " + dateText);
                 });
@@ -751,8 +819,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
             filterCall = !mDirection.isEmpty();
             filterCallQuery = mDirection;
             if (callLogAdapter != null && callStarredLogAdapter != null) {
-                callLogAdapter.getFilter().filter(MainActivity.searchQuery);
-                callStarredLogAdapter.getFilterStarred().filter(MainActivity.searchQuery);
+                callLogAdapter.getFilter().filter(searchQuery);
+                callStarredLogAdapter.getFilterStarred().filter(searchQuery);
             }
         });
     }
@@ -816,7 +884,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
             binding.chronometer.start();
         }
 
-        ((MainActivity)requireActivity()).setupBadge(-1);
+        setupBadge(-1);
 
         if (yourListOfItems.size()>0) yourListOfItems.clear();
         if (yourListOfItemsFiltered.size()>0) yourListOfItemsFiltered.clear();
@@ -836,7 +904,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
     public void onLoadFinished(@NonNull Loader<JsonFileLoader.TwoListsWrapper> loader, JsonFileLoader.TwoListsWrapper dataWrapper) {
         isRunning = false;
         Log.d("NewHome", "onLoadFinished");
-        if (dataWrapper.errorFiles().size() > 0) {
+        if (dataWrapper.errorFiles() != null && dataWrapper.errorFiles().size() > 0) {
             Log.d("NewHome", "onLoadFinished: errorFiles: " + dataWrapper.errorFiles().size());
             MaterialAlertDialogBuilder builderError = new MaterialAlertDialogBuilder(requireContext());
             builderError.setTitle(getString(R.string.error_files));
@@ -893,9 +961,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         binding.progress.setVisibility(View.GONE);
         binding.chronometer.stop();
 
-        ((MainActivity)requireActivity()).setupBadge(-1);
-
-        //if (yourListOfItems.size() > 0) runTutorial();
+        setupBadge(-1);
 
     }
 
@@ -1002,7 +1068,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
             case "conference" -> binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_conference);
         }
 
-        binding.bottomPlayerLayout.datePlayer.setText(item.getFormattedTimestamp(getAppContext().getString(R.string.today), getAppContext().getString(R.string.yesterday)));
+        binding.bottomPlayerLayout.datePlayer.setText(item.getFormattedTimestamp(requireContext().getString(R.string.today), requireContext().getString(R.string.yesterday)));
 
         if (item.getDuration() == 0) binding.bottomPlayerLayout.durationPlayer.setVisibility(View.GONE);
         else binding.bottomPlayerLayout.durationPlayer.setText(item.getFormattedDurationPlayer());
@@ -1047,12 +1113,16 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                                         callLogItem.setContactSaved(false);
                                         callLogItem.setLookupKey(null);
                                         callLogItem.setContactType(LetterTileDrawable.TYPE_GENERIC_AVATAR);
+                                        callLogItem.setNumberLabel(null);
+                                        callLogItem.setNumberType(0);
                                     } else {
                                         callLogItem.setContactName(contact.getContactName());
                                         callLogItem.setContactIcon(contact.getContactImage());
                                         callLogItem.setLookupKey(contact.getLookupKey());
                                         callLogItem.setContactSaved(contact.isContactSaved());
                                         callLogItem.setContactType(contact.getContactType());
+                                        callLogItem.setNumberType(contact.getNumberType());
+                                        callLogItem.setNumberLabel(contact.getNumberLabel());
                                     }
                                 }
                             }
@@ -1149,7 +1219,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
                 bindingItem.callLogEntryActions.createNewContactAction.setOnClickListener(v -> {
                     contentObserver.setContactNumber(((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber());
-                    //requireContext().getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+                    requireContext().getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
                     Intent intent1 = new Intent(Intent.ACTION_INSERT);
                     intent1.setType(ContactsContract.Contacts.CONTENT_TYPE);
                     intent1.putExtra(ContactsContract.Intents.Insert.PHONE, ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber());
@@ -1159,7 +1229,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 bindingItem.callLogEntryActions.editContactAction.setOnClickListener(v -> {
                     CallLogItem clickedItem = ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition()));
                     contentObserver.setContactNumber(clickedItem.getNumber());
-                    //requireContext().getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+                    requireContext().getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
                     Intent intent = new Intent(Intent.ACTION_EDIT);
                     Uri contactUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, "/" + ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getLookupKey());
                     intent.setData(contactUri);
@@ -1177,8 +1247,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 bindingItem.actionPlay.setOnClickListener(v -> {
                     VibratorUtils.vibrate(requireContext(), 25);
 
-                    bindingItem.actionPlay.setIconTint(ColorStateList.valueOf(colorPrimary));
-                    Drawable drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.play_to_pause);
+                    bindingItem.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(requireContext())));
+                    Drawable drawable = ContextCompat.getDrawable(requireContext().getApplicationContext(), R.drawable.play_to_pause);
 
                     CallLogItem clickedItem;
                     CallLogItem currentPlayingHolder = null;
@@ -1192,14 +1262,14 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                         // If it's the same item that is currently playing, pause or resume playback
                         if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
                             pausePlayback();
-                            drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.pause_to_play);
+                            drawable = ContextCompat.getDrawable(requireContext().getApplicationContext(), R.drawable.pause_to_play);
                         } else {
                             resumePlayback();
-                            drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.play_to_pause);
+                            drawable = ContextCompat.getDrawable(requireContext().getApplicationContext(), R.drawable.play_to_pause);
                         }
                     } else {
 
-                        ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.pause_to_play);
+                        ContextCompat.getDrawable(requireContext().getApplicationContext(), R.drawable.pause_to_play);
                         if (currentlyPlayingItem != null) {
                             currentlyPlayingItem.setPlaying(false);
                             callLogAdapter.notifyItemChanged(yourListOfItemsFiltered.indexOf(currentlyPlayingItem));
@@ -1460,7 +1530,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                     yourListOfItemsFiltered.clear();
                     yourListOfItemsFiltered.addAll((List<?>) filterResults.values);
-                    ((MainActivity)requireActivity()).setupBadge(getFilteredCount());
+                    setupBadge(getFilteredCount());
                     callLogItemsFiltered.clear();
                     callLogItemsFiltered.addAll((List<?>) filterResults.values);
                     notifyDataSetChanged();
@@ -1550,7 +1620,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                     yourListOfItemsStarredFiltered.clear();
                     yourListOfItemsStarredFiltered.addAll((List<?>) filterResults.values);
-                    ((MainActivity)requireActivity()).setupBadge(getFilteredCount());
+                    setupBadge(getFilteredCount());
                     callLogItemsFiltered.clear();
                     callLogItemsFiltered.addAll((List<?>) filterResults.values);
                     notifyDataSetChanged();
@@ -1574,7 +1644,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
 
                 // Set card stuff
                 if (position == expandedPosition) {
-                    binding.rootLayout.setCardBackgroundColor(surfaceHighestColor);
+                    binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceHighest(requireContext()));
                 } else {
                     binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.trans));
                 }
@@ -1594,7 +1664,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 if (showHeaders)
                     binding.date.setText(item.getTimeStamp(requireContext()));
                 else
-                    binding.date.setText(item.getFormattedTimestamp(getAppContext().getString(R.string.today), getAppContext().getString(R.string.yesterday)));
+                    binding.date.setText(item.getFormattedTimestamp(requireContext().getString(R.string.today), requireContext().getString(R.string.yesterday)));
 
                 Log.d("NewHome", "bind: " + item.getContactName() + " | NUMBER " + item.getNumberType());
 
@@ -1612,15 +1682,15 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 binding.starredIcon.setVisibility(item.isStarred() ? View.VISIBLE : View.GONE);
 
                 if (item.isPlaying())
-                    binding.actionPlay.setIconTint(ColorStateList.valueOf(colorPrimary));
+                    binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(requireContext())));
                 else
-                    binding.actionPlay.setIconTint(ColorStateList.valueOf(colorOnBackground));
+                    binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getOnBackgroundColor(requireContext())));
 
                 Drawable drawable;
                 if (mediaPlayerService != null && mediaPlayerService.isPlaying() && item.isPlaying()) {
-                    drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.ic_pause);
+                    drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_pause);
                 } else {
-                    drawable = ContextCompat.getDrawable(getAppContext().getApplicationContext(), R.drawable.ic_play);
+                    drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_play);
                 }
 
                 binding.actionPlay.setIcon(drawable);
@@ -1638,8 +1708,8 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
                 binding.callLogEntryActions.editContactAction.setVisibility(PermissionsUtil.hasReadContactsPermissions() && item.isContactSaved() ? View.VISIBLE : View.GONE);
                 binding.contactIcon.setOnClickListener(v -> {
                     expandedPosition = -1;
-                    MainActivity.searchItem.expandActionView();
-                    ((MainActivity) requireActivity()).searchView.setQuery(item.getContactName(), true);
+                    searchItem.expandActionView();
+                    searchView.setQuery(item.getContactName(), true);
                 });
 
                 String prefName = item.getFileName();

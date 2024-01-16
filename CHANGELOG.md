@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.1.0 - 2024-01-16
+- Improved code quality
+- Improved ContactObserver when clicking edit/add contact
+- Improved UI
+- Added Themes
+- Added Night Mode Override (System, Light, Dark)
+
 ## 1.0.4 - 2024-01-14
 - Added item customization in Settings
 

@@ -133,11 +133,9 @@ public class RegLogAdapter extends RecyclerView.Adapter<RegLogAdapter.ViewHolder
         holder.binding.callLogEntryActions.createNewContactAction.setVisibility(item.isContactSaved() ? View.GONE : View.VISIBLE);
 
         if (item.isPlaying())
-            holder.binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor()));
+            holder.binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(mContext)));
         else
-            holder.binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getOnBackgroundColor()));
-
-        Log.d("RegLogAdapter", "colorPrimary: " + ThemeUtils.getPrimaryColor());
+            holder.binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getOnBackgroundColor(mContext)));
 
         Drawable drawable;
         if (mediaPlayerService != null && mediaPlayerService.isPlaying() && item.isPlaying()) {
