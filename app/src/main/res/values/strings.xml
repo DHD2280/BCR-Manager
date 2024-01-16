@@ -33,7 +33,7 @@
     <string name="settings">Settings</string>
 
     <!-- Filter Menu Strings -->
-    <string name="filter_none">Off</string>
+    <string name="filter">filter</string>
     <string name="date">Date</string>
     <string name="single_date">Single Date</string>
     <string name="pick_date">Pick Date</string>
@@ -106,13 +106,44 @@
     <string name="unsaved_contacts">Unsaved contacts</string>
 
     <!-- Settings Strings -->
+    <string name="theme_settings">Theme Settings</string>
+    <string name="dynamic_colors">Use dynamic colors</string>
+    <string name="dynamic_colors_summary">Use system colors in app</string>
+
+    <string name="theme_color">Theme Color</string>
+    <!-- Theme Strings -->
+    <string name="color_sakura">Sakura</string>
+    <string name="color_red">Red</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_deep_purple">Deep purple</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_light_blue">Light blue</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_green">Green</string>
+    <string name="color_light_green">Light green</string>
+    <string name="color_lime">Lime</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_amber">Amber</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_deep_orange">Deep orange</string>
+    <string name="color_brown">Brown</string>
+    <string name="color_blue_grey">Blue grey</string>
+
+    <string name="night_theme">Night Theme</string>
+    <!-- Night Theme Strings -->
+    <string name="night_theme_on">Always On</string>
+    <string name="night_theme_off">Always Off</string>
+    <string name="night_theme_follow_system">Follow System</string>
+
+    <!-- Style Category -->
     <string name="style_settings">Style Settings</string>
     <string name="show_headers">Show Headers</string>
     <string name="show_headers_summary">Show headers in the call log</string>
-    <string name="show_colored_tiles">Show Colored Tiles</string>
-    <string name="show_colored_tiles_summary">Show colored tiles in the call log</string>
-    <string name="show_dark_letters_title">Show Dark Letters</string>
-    <string name="show_dark_letters_summary">Show dark letters when System Theme is dark</string>
+
+    <!-- Miscellanous Category -->
     <string name="app_settings">App Settings</string>
     <string name="vibrate_title">Vibrate</string>
     <string name="vibrate_summary">Vibrate on UI changes</string>
@@ -123,14 +154,30 @@
     <string name="refresh">Refresh</string>
     <string name="contact_icon_category">Contact Icon</string>
     <string name="show_contact">Show Contact Icon</string>
-    <string name="date_settings">Date Settings</string>
-    <string name="date_format">Date Format</string>
+    <string name="show_colored_tiles">Show Colored Tiles</string>
+    <string name="show_colored_tiles_summary">Show colored tiles in the call log</string>
+    <string name="show_dark_letters_title">Show Dark Letters</string>
+    <string name="show_dark_letters_summary">Show dark letters when System Theme is dark</string>
+
+    <!-- Call Info Category -->
     <string name="call_info">Call Info\'s</string>
     <string name="show_sim_info">Show SIM number</string>
     <string name="never">Never</string>
     <string name="automatic">Automatic</string>
     <string name="always">Always</string>
     <string name="show_number_label">Show Number Label</string>
+    <!-- Call Info Colors -->
+    <string name="call_info_colors">Call Info\'s icons colors</string>
+    <string name="direction_color">Direction Color</string>
+    <string name="color_default">Default</string>
+    <string name="primary_color">Primary Color</string>
+    <string name="surface_color">Surface Color</string>
+    <string name="based_on_direction">Based on Direction (in/out/conference)</string>
+    <string name="color_incoming">Incoming color</string>
+    <string name="color_outgoing">Outgoing color</string>
+    <string name="color_conference">Conference color</string>
+    <string name="sim_color">Sim Color</string>
+    <string name="color_number_label">Number Label Color</string>
 
 
     <!-- Player Strings -->

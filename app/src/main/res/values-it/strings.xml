@@ -33,7 +33,7 @@
     <string name="settings">Impostazioni</string>
 
     <!-- Filter Menu Strings -->
-    <string name="filter_none">Off</string>
+    <string name="filter">Filtra</string>
     <string name="date">Data</string>
     <string name="single_date">Data Singola</string>
     <string name="pick_date">Scegli Data</string>
@@ -96,18 +96,66 @@
     <string name="unsaved_contacts">Contatti non salvati</string>
 
     <!-- Settings Strings -->
+    <string name="theme_settings">Impostazioni tema</string>
+    <string name="dynamic_colors">Usa colori dimanici</string>
+    <string name="dynamic_colors_summary">Usa i colori del sistema nell\'app</string>
+
+    <string name="theme_color">Colore tema</string>
+    <!-- Theme Strings -->
+    <string name="color_sakura">Sakura</string>
+    <string name="color_red">Rosso</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_deep_purple">Deep purple</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_blue">Blu</string>
+    <string name="color_light_blue">Blu chiaro</string>
+    <string name="color_cyan">Ciano</string>
+    <string name="color_teal">Verde Acqua</string>
+    <string name="color_green">Verde</string>
+    <string name="color_light_green">Verde chiaro</string>
+    <string name="color_lime">Lime</string>
+    <string name="color_yellow">Giallo</string>
+    <string name="color_amber">Ambra</string>
+    <string name="color_orange">Arancione</string>
+    <string name="color_deep_orange">Arancione scuro</string>
+    <string name="color_brown">Marrone</string>
+    <string name="color_blue_grey">Blu grigio</string>
+
+    <string name="night_theme">Tema scuro</string>
+    <!-- Night Theme Strings -->
+    <string name="night_theme_on">Sempre attivato</string>
+    <string name="night_theme_off">Sempre disattivato</string>
+    <string name="night_theme_follow_system">Segui il sistema</string>
+
+    <!-- Style Category -->
     <string name="style_settings">Stile app</string>
     <string name="show_headers">Mostra Intestazioni</string>
     <string name="show_headers_summary">Mostra intestazioni nel log delle registrazioni</string>
-    <string name="show_colored_tiles">Mostra icone colorate</string>
-    <string name="show_colored_tiles_summary">Mostra icone colorate quando i contatti salvati non hanno un\'immagine.</string>
-    <string name="show_dark_letters_title">Mostra lettere scure</string>
-    <string name="show_dark_letters_summary">Mostra lettere scure nelle icone dei contatti quando hai il tema scuro.</string>
+
+    <!-- Miscellanous Category -->
     <string name="app_settings">Impostazioni app</string>
     <string name="vibrate_title">Vibrazione</string>
     <string name="vibrate_summary">Vibra nei cambiamenti dell\'UI</string>
     <string name="miscellaneous">Varie</string>
     <string name="version">Versione</string>
+
+    <!-- Item Entry Settings -->
+    <string name="refresh">Aggiorna</string>
+    <string name="contact_icon_category">Icona Contatto</string>
+    <string name="show_contact">Mostra Icona Contatto</string>
+    <string name="show_colored_tiles">Mostra icone colorate</string>
+    <string name="show_colored_tiles_summary">Mostra icone colorate quando i contatti salvati non hanno un\'immagine.</string>
+    <string name="show_dark_letters_title">Mostra lettere scure</string>
+    <string name="show_dark_letters_summary">Mostra lettere scure nelle icone dei contatti quando hai il tema scuro.</string>
+
+    <!-- Call Info Category -->
+    <string name="call_info">Informazioni chiamata</string>
+    <string name="show_sim_info">Mostra SIM</string>
+    <string name="never">Mai</string>
+    <string name="automatic">Automatico</string>
+    <string name="always">Sempre</string>
+    <string name="show_number_label">Mostra Etichetta Numero</string>
 
     <!-- Player Strings -->
     <string name="speed">Velocità</string>

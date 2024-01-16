@@ -15,8 +15,7 @@ public class PreferenceUtils {
     public static String LATEST_DIR = "latest_bcr_dir";
 
     public static String mDir = "";
-
-    private static Context mAppContext;
+    private static SharedPreferences mPreferences, mAppPreferences, mStarredPrefs;
 
     // Prevent instantiation
     private PreferenceUtils() {
@@ -27,16 +26,14 @@ public class PreferenceUtils {
      * @param appContext The application context
      */
     public static void init(Context appContext) {
-        mAppContext = appContext;
+        mPreferences = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mAppPreferences = appContext.getSharedPreferences(PREFS_APP_NAME, Context.MODE_PRIVATE);
+        mStarredPrefs = appContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
         mDir = getStoredFolderFromPreference();
     }
 
-    public static Context getAppContext() {
-        return mAppContext;
-    }
-
     public static SharedPreferences getSharedPreferences() {
-        return mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return mPreferences;
     }
 
     /**
@@ -44,7 +41,7 @@ public class PreferenceUtils {
      * @return The SharedPreferences
      */
     public static SharedPreferences getAppPreferences() {
-        return mAppContext.getSharedPreferences(PREFS_APP_NAME, Context.MODE_PRIVATE);
+        return mAppPreferences;
     }
 
     /**
@@ -69,8 +66,7 @@ public class PreferenceUtils {
      * @return The stored folder (String, need to Uri.parse)
      */
     public static String getStoredFolderFromPreference() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return pref.getString(DIRECTORY, "");
+        return mPreferences.getString(DIRECTORY, "");
     }
 
     /**
@@ -78,8 +74,7 @@ public class PreferenceUtils {
      * @param folder The folder to save
      */
     public static void saveFolder(String folder) {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(DIRECTORY, folder);
         editor.apply();
     }
@@ -90,8 +85,7 @@ public class PreferenceUtils {
      * @return true if starred, false otherwise
      */
     public static boolean isStarred(String filename) {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
-        return pref.getBoolean(filename, false);
+        return mStarredPrefs.getBoolean(filename, false);
     }
 
     /**
@@ -100,8 +94,7 @@ public class PreferenceUtils {
      * @param starred true if starred, false otherwise
      */
     public static void setStarred(String filename, boolean starred) {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mStarredPrefs.edit();
         if (starred) {
             editor.putBoolean(filename, true);
             editor.apply();
@@ -116,8 +109,7 @@ public class PreferenceUtils {
      * @return The number of starred registrations
      */
     public static int getStarredCount() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
-        return pref.getAll().size();
+        return mStarredPrefs.getAll().size();
     }
 
 
@@ -142,62 +134,53 @@ public class PreferenceUtils {
     }
 
     public static void saveLastTime(long l) {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putLong("last_time", l);
         editor.apply();
     }
 
     public static long getLastTime() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences pref = mPreferences;
         return pref.getLong("last_time", 0);
     }
 
     public static void savePermissions() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putBoolean(PermissionsKeys.PERMISSION_READ_CONTACTS, PermissionsUtil.hasReadContactsPermissions());
         editor.putBoolean(PermissionsKeys.PERMISSION_READ_CALL_LOG, PermissionsUtil.hasReadCallLogPermissions());
         editor.apply();
     }
 
     public static boolean getPermissionReadCallLogLastTime() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return pref.getBoolean(PermissionsKeys.PERMISSION_READ_CALL_LOG, false);
+        return mPreferences.getBoolean(PermissionsKeys.PERMISSION_READ_CALL_LOG, false);
     }
 
     public static boolean getPermissionReadContactsLastTime() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return pref.getBoolean(PermissionsKeys.PERMISSION_READ_CALL_LOG, false);
+        return mPreferences.getBoolean(PermissionsKeys.PERMISSION_READ_CALL_LOG, false);
     }
 
     public static void saveLastFolder() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(LATEST_DIR, PreferenceUtils.getStoredFolderFromPreference());
         editor.apply();
     }
 
     public static String getLatestFolder() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return pref.getString(LATEST_DIR, "");
+        return mPreferences.getString(LATEST_DIR, "");
     }
 
     public static int getLastTimeFiles() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        return pref.getInt("last_time_files", 0);
+        return mPreferences.getInt("last_time_files", 0);
     }
 
     public static void saveLastFiles(int length) {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mPreferences.edit();
         editor.putInt("last_time_files", length);
         editor.apply();
     }
 
     public static void resetStarred() {
-        SharedPreferences pref = mAppContext.getSharedPreferences(PREFS_NAME_STARRED, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
+        SharedPreferences.Editor editor = mStarredPrefs.edit();
         editor.clear();
         editor.apply();
     }
@@ -250,10 +233,25 @@ public class PreferenceUtils {
         public static final String PREFS_KEY_SHOW_SIM_NUMBER = "show_sim_info";
         // Number Label
         public static final String PREFS_KEY_SHOW_NUMBER_LABEL = "show_number_label";
+        // Call Info Icons Colors
+        public static final String PREFS_KEY_DIRECTION_COLOR = "direction_color";
+        public static final String PREFS_KEY_DIRECTION_IN_COLOR = "direction_in_color";
+        public static final String PREFS_KEY_DIRECTION_OUT_COLOR = "direction_out_color";
+        public static final String PREFS_KEY_DIRECTION_CONFERENCE_COLOR = "direction_conference_color";
+        public static final String PREFS_KEY_SIM_COLOR = "sim_color";
+        public static final String PREFS_KEY_SIM_1_COLOR = "sim_1_color";
+        public static final String PREFS_KEY_SIM_2_COLOR = "sim_2_color";
+        public static final String PREFS_KEY_NUMBER_LABEL_COLOR = "number_label_color";
 
         // Style Prefs
         public static final String PREFS_KEY_SHOW_HEADERS = "show_headers";
         public static final String PREFS_KEY_DARK_LETTER = "dark_letter_on_dark_mode";
+
+        // App Prefs
+        // Theme
+        public static final String PREFS_KEY_DYNAMIC_COLOR = "dynamic_colors";
+        public static final String PREFS_KEY_THEME_COLOR = "theme_color";
+        public static final String PREFS_KEY_DARK_MODE = "dark_mode";
         public static final String PREFS_KEY_VIBRATE = "vibrate";
     }
 

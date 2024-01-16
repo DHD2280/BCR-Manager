@@ -1,7 +1,6 @@
 package it.dhd.bcrmanager.ui.fragments;
 
 import android.Manifest;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,7 +91,11 @@ public class PermissionsFragment extends Fragment {
                                 PreferenceUtils.setFirstTime();
                                 binding.setupPermissionsGrant.setIcon(ContextCompat.getDrawable(requireActivity(), R.drawable.ic_all_done));
                                 binding.setupPermissionsGrant.setText(R.string.setup_permissions_granted);
-                                binding.setupPermissionsGrant.setOnClickListener(v -> MainActivity.restartActivity());
+                                binding.setupPermissionsGrant.setOnClickListener(v ->
+                                        getParentFragmentManager().beginTransaction()
+                                                .replace(R.id.frame_layout, new NewHome(), NewHome.class.getSimpleName())
+                                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                                .commit());
                             }
                         }
                     });
@@ -114,10 +118,5 @@ public class PermissionsFragment extends Fragment {
             binding.setupPermissionsLoadingProgress.setVisibility(View.GONE);
         }
     }
-    private final ActivityResultLauncher<Intent> startActivityIntent = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                // We don't need to do anything here
-            });
 
 }

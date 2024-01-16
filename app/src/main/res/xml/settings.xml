@@ -2,7 +2,33 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
-    <!-- TODO implement Theme Settings -->
+    <!-- TODO implement Theme Settings -->ù
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        android:title="@string/theme_settings">
+        <SwitchPreferenceCompat
+            app:iconSpaceReserved="false"
+            android:key="dynamic_colors"
+            android:defaultValue="true"
+            android:title="@string/dynamic_colors"
+            android:summary="@string/dynamic_colors_summary" />
+        <DropDownPreference
+            app:iconSpaceReserved="false"
+            android:key="theme_color"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/theme_color"
+            android:entries="@array/theme_entries"
+            android:entryValues="@array/theme_values"
+            android:defaultValue="MATERIAL_TEAL" />
+        <DropDownPreference
+            app:iconSpaceReserved="false"
+            android:key="dark_mode"
+            app:useSimpleSummaryProvider="true"
+            android:title="@string/night_theme"
+            android:entries="@array/night_theme_entries"
+            android:entryValues="@array/night_theme_values"
+            android:defaultValue="system" />
+    </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/style_settings"
         app:iconSpaceReserved="false" >

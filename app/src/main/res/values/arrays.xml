@@ -1,19 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Strings for direction -->
     <array name="direction_array" translatable="false" >
         <item>@string/ingoing</item>
         <item>@string/outgoing</item>
         <item>@string/conference</item>
         <item>@string/all</item>
     </array>
-    <array name="sim_info_entries">
+
+    <!-- String for SIM info -->
+    <array name="sim_info_entries" translatable="false">
         <item>@string/never</item>
         <item>@string/automatic</item>
         <item>@string/always</item>
     </array>
-    <string-array name="sim_info_entries_values">
+    <string-array name="sim_info_entries_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
     </string-array>
+
+    <!-- Themes strings -->
+    <string-array name="theme_entries" translatable="false">
+        <item>@string/color_sakura</item>
+        <item>@string/color_red</item>
+        <item>@string/color_pink</item>
+        <item>@string/color_purple</item>
+        <item>@string/color_deep_purple</item>
+        <item>@string/color_indigo</item>
+        <item>@string/color_blue</item>
+        <item>@string/color_light_blue</item>
+        <item>@string/color_cyan</item>
+        <item>@string/color_teal</item>
+        <item>@string/color_green</item>
+        <item>@string/color_light_green</item>
+        <item>@string/color_lime</item>
+        <item>@string/color_yellow</item>
+        <item>@string/color_amber</item>
+        <item>@string/color_orange</item>
+        <item>@string/color_deep_orange</item>
+        <item>@string/color_brown</item>
+        <item>@string/color_blue_grey</item>
+    </string-array>
+    <string-array name="theme_values" translatable="false">
+        <item>SAKURA</item>
+        <item>MATERIAL_RED</item>
+        <item>MATERIAL_PINK</item>
+        <item>MATERIAL_PURPLE</item>
+        <item>MATERIAL_DEEP_PURPLE</item>
+        <item>MATERIAL_INDIGO</item>
+        <item>MATERIAL_BLUE</item>
+        <item>MATERIAL_LIGHT_BLUE</item>
+        <item>MATERIAL_CYAN</item>
+        <item>MATERIAL_TEAL</item>
+        <item>MATERIAL_GREEN</item>
+        <item>MATERIAL_LIGHT_GREEN</item>
+        <item>MATERIAL_LIME</item>
+        <item>MATERIAL_YELLOW</item>
+        <item>MATERIAL_AMBER</item>
+        <item>MATERIAL_ORANGE</item>
+        <item>MATERIAL_DEEP_ORANGE</item>
+        <item>MATERIAL_BROWN</item>
+        <item>MATERIAL_BLUE_GREY</item>
+    </string-array>
+
+    <!-- Night Theme strings -->
+    <string-array name="night_theme_entries" translatable="false">
+        <item>@string/night_theme_off</item>
+        <item>@string/night_theme_on</item>
+        <item>@string/night_theme_follow_system</item>
+    </string-array>
+    <string-array name="night_theme_values" translatable="false">
+        <item>off</item>
+        <item>on</item>
+        <item>system</item>
+    </string-array>
+
+    <!-- Icons Colors -->
+    <string-array name="direction_entries" translatable="false">
+        <item>@string/color_default</item>
+        <item>@string/primary_color</item>
+        <item>@string/color_red</item>
+        <item>@string/color_purple</item>
+        <item>@string/color_blue</item>
+        <item>@string/color_teal</item>
+        <item>@string/color_green</item>
+        <item>@string/color_lime</item>
+        <item>@string/color_yellow</item>
+        <item>@string/color_orange</item>
+        <item>@string/color_brown</item>
+        <item>@string/based_on_direction</item>
+    </string-array>
+    <string-array name="direction_values" translatable="false">
+        <item>default</item>
+        <item>primary</item>
+        <item>red</item>
+        <item>purple</item>
+        <item>blue</item>
+        <item>teal</item>
+        <item>green</item>
+        <item>lime</item>
+        <item>yellow</item>
+        <item>orange</item>
+        <item>brown</item>
+        <item>direction</item>
+    </string-array>
+    <string-array name="icons_color_entries" translatable="false">
+        <item>@string/color_default</item>
+        <item>@string/color_red</item>
+        <item>@string/color_pink</item>
+    </string-array>
+    <string-array name="icons_color_values" translatable="false">
+        <item>default</item>
+        <item>red</item>
+        <item>pink</item>
+    </string-array>
+
 </resources>

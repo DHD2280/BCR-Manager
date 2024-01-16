@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
@@ -25,6 +26,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -84,8 +86,17 @@ public class ContactActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DynamicColors.applyToActivityIfAvailable(this);
-        DynamicColors.applyToActivitiesIfAvailable(getApplication());
+        PreferenceUtils.init(getApplicationContext());
+        SharedPreferences prefs = PreferenceUtils.getAppPreferences();
+        AppCompatDelegate.setDefaultNightMode(ThemeUtils.getDarkTheme());
+        if (prefs.getBoolean(PreferenceUtils.Keys.PREFS_KEY_DYNAMIC_COLOR, true)) {
+            DynamicColors.applyToActivityIfAvailable(this);
+            DynamicColors.applyToActivitiesIfAvailable(getApplication());
+        } else {
+            getTheme().applyStyle(ThemeUtils.getColorThemeStyleRes(), true);
+        }
+
+        PermissionsUtil.init(this);
 
         binding = ContactActivityBinding.inflate(getLayoutInflater());
 
@@ -99,10 +110,6 @@ public class ContactActivity
             lookupKey = "starred_contacts";
             onlyStarred = true;
         }
-
-        PreferenceUtils.init(this);
-        PermissionsUtil.init(this);
-        ThemeUtils.init(this);
         nSim = SimUtils.getNumberOfSimCards(this);
 
         Intent serviceIntent = new Intent(this, MediaPlayerService.class);
@@ -285,7 +292,7 @@ public class ContactActivity
 
         adapter = new RegLogAdapter(this, contactCalls, mediaPlayerService, true, true,
                 (bind, p) -> {
-                    bind.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor()));
+                    bind.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(this)));
                     Drawable drawable = ContextCompat.getDrawable(this, R.drawable.play_to_pause);
 
                     CallLogItem clickedItem = adapter.callLogItemsFiltered.get(p);
