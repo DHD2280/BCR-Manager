@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -157,12 +158,19 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
             if (currentItem.getContactName()!=null) binding.contactNamePlayerDialog.setText(currentItem.getContactName());
             else binding.contactNamePlayerDialog.setText(currentItem.getNumberFormatted());
 
-            binding.callTypeIconPlayerDialog.setImageResource(currentItem.getDirection().equals("in") ? R.drawable.ic_in : R.drawable.ic_out);
+            switch (currentItem.getDirection()) {
+                case "in" -> binding.callTypeIconPlayerDialog.setImageResource(R.drawable.ic_in);
+                case "out" -> binding.callTypeIconPlayerDialog.setImageResource(R.drawable.ic_out);
+                case "conference" -> binding.callTypeIconPlayerDialog.setImageResource(R.drawable.ic_conference);
+            }
 
-            if (SimUtils.getNumberOfSimCards(requireContext())<=1) {
-                binding.dividerSimPlayerDialog.setVisibility(View.GONE);
+            if (SimUtils.getNumberOfSimCards(requireContext())>1) {
+                if (!TextUtils.isEmpty(String.valueOf(currentItem.getSimSlot())))
+                    binding.simSlotPlayerDialog.setText(String.valueOf(currentItem.getSimSlot()));
+            } else {
                 binding.simSlotPlayerDialog.setVisibility(View.GONE);
-            } else binding.simSlotPlayerDialog.setText(currentItem.getSimSlot());
+                binding.dividerSimPlayerDialog.setVisibility(View.GONE);
+            }
 
             binding.datePlayerDialog.setText(currentItem.getFormattedTimestampComplete(requireContext().getString(R.string.today),
                     requireContext().getString(R.string.yesterday)));

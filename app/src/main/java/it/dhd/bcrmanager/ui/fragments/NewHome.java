@@ -173,6 +173,7 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         if (binding.filterLayout.getVisibility() != View.VISIBLE) {
             binding.filterLayout.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
             binding.filterLayout.setVisibility(View.VISIBLE);
+
             ObjectAnimator slideUp = ObjectAnimator.ofFloat(binding.filterLayout, "translationY", -binding.filterLayout.getHeight(), 0);
             slideUp.setDuration(500);
             slideUp.addListener(new AnimatorListenerAdapter() {
@@ -1056,11 +1057,15 @@ public class NewHome extends Fragment implements LoaderManager.LoaderCallbacks<J
         item.setPlaying(true);
         if (item.getContactName()!=null) binding.bottomPlayerLayout.contactNamePlayer.setText(item.getContactName());
         else binding.bottomPlayerLayout.contactNamePlayer.setText(item.getNumberFormatted());
-        if (nSim<=1) {
+
+        if (nSim>1) {
+            if (!TextUtils.isEmpty(String.valueOf(item.getSimSlot())))
+                binding.bottomPlayerLayout.simSlotPlayer.setText(String.valueOf(item.getSimSlot()));
+        } else {
             binding.bottomPlayerLayout.dividerSimPlayer.setVisibility(View.GONE);
             binding.bottomPlayerLayout.simSlotPlayer.setVisibility(View.GONE);
             binding.bottomPlayerLayout.dividerDatePlayer.setVisibility(View.GONE);
-        } else binding.bottomPlayerLayout.simSlotPlayer.setText(item.getSimSlot());
+        }
 
         switch (item.getDirection()) {
             case "in" -> binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_in);

@@ -20,6 +20,11 @@
         <item>2</item>
     </string-array>
 
+    <string-array name="sim" translatable="false">
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+
     <!-- Themes strings -->
     <string-array name="theme_entries" translatable="false">
         <item>@string/color_sakura</item>

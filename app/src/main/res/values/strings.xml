@@ -45,6 +45,7 @@
     <string name="conference">Conference</string>
     <string name="all">All</string>
     <string name="duration">Duration</string>
+    <string name="sim">Sim</string>
 
     <!-- File Error string -->
     <string name="error_files">Those files aren\'t correctly parsed.\nMaybe you are using a different date/time format.</string>

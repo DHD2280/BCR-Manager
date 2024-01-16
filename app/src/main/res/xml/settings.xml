@@ -2,7 +2,6 @@
 <PreferenceScreen
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
-    <!-- TODO implement Theme Settings -->ù
     <PreferenceCategory
         app:iconSpaceReserved="false"
         android:title="@string/theme_settings">
@@ -43,19 +42,6 @@
             android:key="item_entry_appearance"
             android:title="Item Entry Appearance"
             android:summary="Customize Item Entry"/>
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
-            android:defaultValue="true"
-            android:key="show_colored_tiles"
-            android:title="@string/show_colored_tiles"
-            android:summary="@string/show_colored_tiles_summary" />
-        <SwitchPreferenceCompat
-            app:iconSpaceReserved="false"
-            android:defaultValue="true"
-            android:key="dark_letter_on_dark_mode"
-            android:dependency="show_colored_tiles"
-            android:title="@string/show_dark_letters_title"
-            android:summary="@string/show_dark_letters_summary" />
     </PreferenceCategory>
 
     <PreferenceCategory

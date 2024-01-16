@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 1.1.1 - 2024-01-17
+- Fixed bug in Sim Number [Issue #2](https://github.com/DHD2280/BCR-Manager/issues/2)
+- Added Sim Filter in Home
+
 ## 1.1.0 - 2024-01-16
 - Improved code quality
 - Improved ContactObserver when clicking edit/add contact
