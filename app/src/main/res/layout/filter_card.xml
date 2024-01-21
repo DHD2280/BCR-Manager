@@ -18,6 +18,7 @@
         android:layout_marginEnd="8dp"
         android:orientation="vertical">
 
+        <!-- Date Layout -->
         <LinearLayout
             android:id="@+id/dateFilterLayout"
             android:layout_width="match_parent"
@@ -58,8 +59,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
                 android:layout_marginBottom="6dp"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:visibility="gone"
+                android:orientation="horizontal">
 
                 <RadioGroup
                     android:layout_width="wrap_content"
@@ -71,14 +72,12 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        android:enabled="false"
                         android:text="@string/single_date" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radioRangeDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
                         android:text="@string/range_date" />
                 </RadioGroup>
 
@@ -93,7 +92,6 @@
                         android:id="@+id/pickDateButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:enabled="false"
                         android:text="@string/pick_date"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -106,34 +104,33 @@
 
         </LinearLayout>
 
+        <!-- Divider -->
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/dialer_divider_line_color" />
+            style="@style/HorizontalDivider"/>
 
+        <!-- Direction Layout -->
         <LinearLayout
             android:id="@+id/directionFilterLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <CheckBox
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/directionCheckBox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:text="@string/direction"
                 android:textSize="16sp" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/directionMenu"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="200dp"
+                android:visibility="gone"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="22dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"
@@ -151,11 +148,11 @@
 
         </LinearLayout>
 
+        <!-- Divider -->
         <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/dialer_divider_line_color" />
+            style="@style/HorizontalDivider" />
 
+        <!-- Duration Layout -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -165,14 +162,20 @@
                 android:id="@+id/durationCheckbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/duration" />
+                android:text="@string/duration"/>
 
             <LinearLayout
-                android:id="@+id/durationLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:visibility="gone">
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:id="@+id/durationLayout">
+
+            <LinearLayout
+                android:id="@+id/durationLayoutText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/durationStartText"
@@ -195,18 +198,19 @@
             <com.google.android.material.slider.RangeSlider
                 android:id="@+id/durationSlider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:layout_height="wrap_content"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
+        <!-- Divider -->
         <View
             android:id="@+id/simDiv"
             android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/dialer_divider_line_color" />
+            style="@style/HorizontalDivider"/>
 
+        <!-- Sim Layout -->
         <LinearLayout
             android:id="@+id/simFilter"
             android:visibility="gone"
@@ -220,16 +224,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/sim" />
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/simMenu"
                 style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                android:layout_width="200dp"
+                android:visibility="gone"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="22dp"
                 android:layout_marginTop="4dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginBottom="4dp"

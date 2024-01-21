@@ -18,8 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.Objects;
 
 import it.dhd.bcrmanager.R;
-import it.dhd.bcrmanager.ui.adapters.RegLogAdapter;
-import it.dhd.bcrmanager.ui.fragments.NewHome;
+import it.dhd.bcrmanager.ui.adapters.CallLogAdapter;
 
 abstract public class SwipeCallback extends ItemTouchHelper.Callback {
 
@@ -58,8 +57,7 @@ abstract public class SwipeCallback extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        if (viewHolder instanceof RegLogAdapter.ViewHolder ||
-                viewHolder instanceof NewHome.CallLogAdapter.CallLogViewHolder)
+        if (viewHolder instanceof CallLogAdapter.CallLogViewHolder)
             return makeMovementFlags(0, ItemTouchHelper.LEFT);
         return 0;
     }

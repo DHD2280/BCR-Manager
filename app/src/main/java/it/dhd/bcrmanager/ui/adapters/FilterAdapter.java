@@ -27,7 +27,6 @@ import it.dhd.bcrmanager.utils.PreferenceUtils;
 
 public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder> {
 
-
     private final Context mContext;
     private final onClickListeners onClickListeners;
     private final onCheckedChangeListener onCheckboxChanged;
@@ -66,22 +65,6 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
         this.runReCheck = runReCheck;
     }
 
-    public void setDateEnabled(boolean enabled) {
-        binding.batchDeleteDateCardView.setVisibility(enabled ? View.VISIBLE : View.GONE);
-    }
-
-    public void setContactEnabled(boolean enabled) {
-        binding.batchDeleteContactCardView.setVisibility(enabled ? View.VISIBLE : View.GONE);
-    }
-
-    public void setDirectionEnabled(boolean enabled) {
-        binding.batchDeleteDirectionCardView.setVisibility(enabled ? View.VISIBLE : View.GONE);
-    }
-
-    public void setDurationEnabled(boolean enabled) {
-        binding.batchDeleteDurationCardView.setVisibility(enabled ? View.VISIBLE : View.GONE);
-    }
-
     public boolean isChecked(int checkType) {
         return switch (checkType) {
             case CONTACT -> binding.batchDeleteContactCheckbox.isChecked();
@@ -110,6 +93,13 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
 
     public double getEndDuration() {
         return mEndDuration;
+    }
+
+    public void setContactItems(List<ContactItem> contactsList, ArrayList<String> contactNames) {
+        this.contactList.clear();
+        this.contactList.addAll(contactsList);
+        this.contactNames.clear();
+        this.contactNames.addAll(contactNames);
     }
 
     public interface onCheckedChangeListener {
@@ -179,7 +169,8 @@ public class FilterAdapter extends RecyclerView.Adapter<FilterAdapter.ViewHolder
             switch (pos) {
                 case 0 -> mDirection = "in";
                 case 1 -> mDirection = "out";
-                case 2 -> mDirection = "";
+                case 2 -> mDirection = "conference";
+                case 3 -> mDirection = "";
             }
             Log.d("BatchDelete", "poition: " + position + " onItemClick: " + mDirection);
             runReCheck.runrecheck();

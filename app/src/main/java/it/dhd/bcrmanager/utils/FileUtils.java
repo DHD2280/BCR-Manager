@@ -18,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.dhd.bcrmanager.json.UriJsonAdapter;
+import it.dhd.bcrmanager.objects.CallLogItem;
 
 public class FileUtils {
 
@@ -56,9 +58,6 @@ public class FileUtils {
         } else {
             Log.d("FileUtils", "File not found");
         }
-        /*if (documentFile != null && documentFile.exists()) {
-            documentFile.delete();
-        }*/
     }
 
     public static void deleteCachedFiles(Context context) {
@@ -80,8 +79,10 @@ public class FileUtils {
 
         try {
             DocumentsContract.deleteDocument(contentResolver, fileUri);
-        } catch (Exception e) {
+        } catch (FileNotFoundException f) {
             Log.d("FileUtils", "File not found");
+        } catch (Exception e) {
+            Log.d("FileUtils", "Exception: " + e.getMessage());
         }
     }
 
@@ -282,6 +283,24 @@ public class FileUtils {
         } catch (NullPointerException e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    /**
+     * Delete a registration
+     * @param context The application context
+     * @param callItem The registration to delete
+     */
+    public static void deleteRegistration(Context context, CallLogItem callItem) {
+        Uri fileUri, audioUri;
+        fileUri = Uri.parse(callItem.getFilePath());
+        audioUri = Uri.parse(callItem.getAudioFilePath());
+
+        if (UriUtils.areEqual(fileUri, audioUri)) {
+            deleteFileUri(context, audioUri);
+        } else {
+            deleteFileUri(context, fileUri);
+            deleteFileUri(context, audioUri);
         }
     }
 }

@@ -1,11 +1,10 @@
-package it.dhd.bcrmanager.ui.fragments;
+package it.dhd.bcrmanager.ui.fragments.player;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.VibrationEffect;
@@ -27,7 +26,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -40,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.databinding.LayoutBottomPlayerBinding;
@@ -52,9 +51,7 @@ import it.dhd.bcrmanager.utils.SimUtils;
 
 public class PlayerFragment extends BottomSheetDialogFragment implements View.OnClickListener {
 
-    // When requested, this adapter returns a DemoObjectFragment,
-    // representing an object in the collection.
-    DemoCollectionAdapter demoCollectionAdapter;
+    private PlayerCollectionAdapter demoCollectionAdapter;
 
     private LayoutBottomPlayerBinding binding;
     private Handler mUpdateProgress;
@@ -147,14 +144,18 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
                              Bundle savedInstanceState) {
 
         binding = LayoutBottomPlayerBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
 
+        return binding.getRoot();
+
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         isSeeking = false;
 
         if (currentItem != null) {
-            boolean isContactSaved = currentItem.isContactSaved();
             fileName = currentItem.getFileName();
-            Log.d("PlayerFragment", "number: " + currentItem.getNumber() + " saved: " +isContactSaved);
             if (currentItem.getContactName()!=null) binding.contactNamePlayerDialog.setText(currentItem.getContactName());
             else binding.contactNamePlayerDialog.setText(currentItem.getNumberFormatted());
 
@@ -176,7 +177,6 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
                     requireContext().getString(R.string.yesterday)));
 
         }
-        Slider seekBar = binding.seekBarPlayer;
         if (!mediaPlayerService.isPlaying()) {
             binding.seekBarSpeed.setValue(mediaPlayerService.getLastSpeed());
             binding.currentTimePlayer.setText(formatTime(mediaPlayerService.getLastPosition()));
@@ -190,25 +190,24 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
 
             @Override
             public void onStopTrackingTouch(@NonNull Slider slider) {
-                int progress = (int)seekBar.getValue();
-                int duration = mediaPlayerService.getDuration();
+                int progress = (int)slider.getValue();
+                long duration = mediaPlayerService.getDuration();
                 int newPosition = (int) (((float) progress / 100) * duration);
 
                 // Seek to the new position
                 mediaPlayerService.seekTo(newPosition);
-
                 // Hide the TextView
                 isSeeking = false;
             }
         });
-        seekBar.setLabelFormatter(value -> {
+        binding.seekBarPlayer.setLabelFormatter(value -> {
             int progress = (int)value;
-            int duration = mediaPlayerService.getDuration();
+            long duration = mediaPlayerService.getDuration();
             int newPosition = (int) (((float) progress / 100) * duration);
             return formatTime(newPosition);
         });
 
-        int durationMillis = mediaPlayerService.getDuration();
+        long durationMillis = mediaPlayerService.getDuration();
         binding.totalTimePlayer.setText(String.format(Locale.getDefault(), "%02d:%02d",
                 (durationMillis / 1000) / 60, durationMillis / 1000 % 60));
         if (mediaPlayerService.isPlaying()) {
@@ -256,17 +255,17 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
         });
 
         binding.btnPrevious10.setOnClickListener(v -> {
-            int currentPosition = mediaPlayerService.getCurrentPosition();
-            int newPosition = currentPosition - 10000;
+            long currentPosition = mediaPlayerService.getCurrentPosition();
+            long newPosition = currentPosition - 10000;
             if (newPosition<0) newPosition = 0;
-            mediaPlayerService.seekTo(newPosition);
+            mediaPlayerService.seekTo((int)newPosition);
         });
         binding.btnForward10.setOnClickListener(v -> {
-            int currentPosition = mediaPlayerService.getCurrentPosition();
-            int newPosition = currentPosition + 10000;
-            int duration = mediaPlayerService.getDuration();
+            long currentPosition = mediaPlayerService.getCurrentPosition();
+            long newPosition = currentPosition + 10000;
+            long duration = mediaPlayerService.getDuration();
             if (newPosition>duration) newPosition = duration;
-            mediaPlayerService.seekTo(newPosition);
+            mediaPlayerService.seekTo((int)newPosition);
         });
         binding.btnPrevious.setOnClickListener(this);
         binding.btnNext.setOnClickListener(this);
@@ -292,17 +291,21 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
             }
         });
 
-        demoCollectionAdapter = new DemoCollectionAdapter(this, fileName);
+        demoCollectionAdapter = new PlayerCollectionAdapter(this, fileName, mediaPlayerService);
         binding.viewPager.setAdapter(demoCollectionAdapter);
         new TabLayoutMediator(view.findViewById(R.id.into_tab_layout), binding.viewPager, (tab, pos) -> {}).attach();
-
-        return view;
-
     }
 
     private String formatTime(int milliseconds) {
         int seconds = milliseconds / 1000;
         int minutes = seconds / 60;
+        seconds = seconds % 60;
+        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+    }
+
+    private String formatTime(long milliseconds) {
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(milliseconds);
+        long minutes = seconds / 60;
         seconds = seconds % 60;
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
@@ -316,13 +319,13 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
         mUpdateProgressTask = new Runnable() {
             @Override
             public void run() {
-                if (mediaPlayerService!=null && mediaPlayerService.isPlaying()) {
-                    int currentMillis = mediaPlayerService.getCurrentPosition();
-                    int durationMillis = mediaPlayerService.getDuration();
-                    int progress = (int) ((long) currentMillis * 100 / durationMillis);
+                if (mediaPlayerService!=null) {
+                    long currentMillis = mediaPlayerService.getCurrentPosition();
+                    long durationMillis = mediaPlayerService.getDuration();
+                    int progress = (int) ((currentMillis * 100) / durationMillis);
                     if (!isSeeking) binding.seekBarPlayer.setValue(progress);
-                    mUpdateProgress.postDelayed(this, 50);
                     binding.currentTimePlayer.setText(formatTime(currentMillis));
+                    mUpdateProgress.postDelayed(this, 50);
                 } else {
                     stopUpdater(true);
                 }
@@ -404,11 +407,11 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
                 requireContext().getString(R.string.yesterday)));
 
         if (newPosition<0 || newPosition>allItems.size()-1) return;
-        mediaPlayerService.startPlayback(getContext(), Uri.parse(newPlaying.getAudioFilePath()));
-        mediaPlayerService.setOnCompletionListener(mp -> stopUpdater(true));
+        mediaPlayerService.startPlayback(newPlaying);
+        mediaPlayerService.setOnCompletionListener(() -> stopUpdater(true));
         startUpdater();
 
-        int durationMillis = mediaPlayerService.getDuration();
+        long durationMillis = mediaPlayerService.getDuration();
         binding.totalTimePlayer.setText(String.format(Locale.getDefault(), "%02d:%02d",
                 (durationMillis / 1000) / 60, durationMillis / 1000 % 60));
         if (newPlaying.getContactName()!=null) binding.contactNamePlayerDialog.setText(newPlaying.getContactName());
@@ -420,7 +423,7 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
             binding.favoritePlayerDialog.setImageResource(R.drawable.ic_unstar);
         }
 
-        demoCollectionAdapter = new DemoCollectionAdapter(this, fileName);
+        demoCollectionAdapter = new PlayerCollectionAdapter(this, fileName, mediaPlayerService);
         binding.viewPager.setAdapter(demoCollectionAdapter);
 
 
@@ -454,41 +457,6 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
         return next;
     }
 
-    public static class DemoCollectionAdapter extends FragmentStateAdapter {
-
-        private final int mPageNumbers = 2;
-        final String fileName;
-
-        public DemoCollectionAdapter(Fragment fragment, String fileName) {
-            super(fragment);
-            this.fileName = fileName;
-        }
-
-        @NonNull
-        @Override
-        public Fragment createFragment(int position) {
-            // Return a NEW fragment instance in createFragment(int).
-            Fragment fragment = null;
-            Bundle args = new Bundle();
-            // The object is just an integer.
-            String frag = "";
-            switch (position) {
-                case 0 -> fragment = new ContactIconFragment();
-                case 1 -> fragment = new BreakPointsFragment();
-            }
-            args.putString("frag", frag);
-            args.putString("filename", fileName);
-            assert fragment != null;
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public int getItemCount() {
-            return mPageNumbers;
-        }
-    }
-
 
     public static class ContactIconFragment extends Fragment {
 
@@ -510,7 +478,7 @@ public class PlayerFragment extends BottomSheetDialogFragment implements View.On
                         .placeholder(R.drawable.ic_default_contact)
                         .error(R.drawable.ic_default_contact)
                         .into(contactImageView);
-            else if (currentItem.getContactDrawable(requireContext())!=null)
+            else if (PreferenceUtils.showTiles())
                 contactImageView.setImageDrawable(currentItem.getContactDrawable(requireContext()));
             else
                 contactImageView.setImageResource(R.drawable.ic_default_contact);

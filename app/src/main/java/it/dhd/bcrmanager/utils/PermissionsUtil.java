@@ -10,8 +10,6 @@ public class PermissionsUtil {
 
     private static Context mAppContext;
 
-    private static final String PERMISSION_PREFERENCE = "bcr_manager_permissions";
-
     public static void init(Context appContext) {
         mAppContext = appContext;
     }

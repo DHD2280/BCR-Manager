@@ -1,4 +1,4 @@
-package it.dhd.bcrmanager.ui.fragments;
+package it.dhd.bcrmanager.ui.fragments.settingscontainers;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.squareup.picasso.Picasso;
 
@@ -25,14 +26,17 @@ import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.ui.fragments.settings.ItemPreferences;
 import it.dhd.bcrmanager.utils.CircleTransform;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
+import it.dhd.bcrmanager.utils.SimUtils;
 import it.dhd.bcrmanager.utils.ThemeUtils;
+import it.dhd.bcrmanager.viewmodel.FileViewModel;
 
 public class ItemSettings extends Fragment {
 
-    private static ItemSettingsBinding binding;
-    private static SharedPreferences prefs;
-    private static CallLogItem randomItem;
+    private ItemSettingsBinding binding;
+    private SharedPreferences prefs;
+    private CallLogItem randomItem;
     private List<CallLogItem> itemHolder;
+    private FileViewModel fileModel;
 
     public ItemSettings() {
         // Required empty public constructor
@@ -42,6 +46,7 @@ public class ItemSettings extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fileModel = new ViewModelProvider(requireActivity()).get(FileViewModel.class);
         setHasOptionsMenu(true);
     }
 
@@ -54,8 +59,8 @@ public class ItemSettings extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.refresh_item) {
-            randomItem = itemHolder.get(new Random().nextInt(itemHolder.size()));
-            binding.itemEntry.setCallLogItem(randomItem);
+            if (itemHolder != null && itemHolder.size() > 0) randomItem = itemHolder.get(new Random().nextInt(itemHolder.size()));
+            if (randomItem != null) binding.itemEntry.setCallLogItem(randomItem);
             setupItem();
         }
         super.onOptionsItemSelected(item);
@@ -66,18 +71,19 @@ public class ItemSettings extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = ItemSettingsBinding.inflate(inflater, container, false);
+        requireActivity().setTitle(R.string.item_entry_appearance);
         binding.itemEntry.rootLayout.setStrokeColor(ThemeUtils.getOnBackgroundColor(requireContext()));
         binding.itemEntry.expandingLayout.setVisibility(View.GONE);
         binding.itemEntry.setShowLabel(true);
-        if (NewHome.yourListOfItems.size() > 0) {
-            itemHolder = NewHome.yourListOfItems.stream()
+        if (fileModel.getSortedItems().size()> 0) {
+            itemHolder = fileModel.getSortedItems().stream()
                     .filter(CallLogItem.class::isInstance) // Filter only CallLogItem
                     .map(CallLogItem.class::cast) // Converts Object to CallLogItem
                     .collect(Collectors.toList()); // Collects in a new list of CallLogItem
             randomItem = itemHolder.get(new Random().nextInt(itemHolder.size()));
         }
 
-        binding.itemEntry.setCallLogItem(randomItem);
+        if (randomItem != null) binding.itemEntry.setCallLogItem(randomItem);
         prefs = PreferenceUtils.getAppPreferences();
         getChildFragmentManager().beginTransaction().add(R.id.settings_container,
                 new ItemPreferences(new ItemPreferences.onSettingsChangedListener() {
@@ -96,7 +102,7 @@ public class ItemSettings extends Fragment {
                         setupSim(simInfo);
                     }
                 })).commit();
-        setupItem();
+        if (randomItem != null) setupItem();
         return binding.getRoot();
     }
 
@@ -127,7 +133,7 @@ public class ItemSettings extends Fragment {
         Log.d("ItemSettings", "setupSim: " + pref);
         switch (pref) {
             case "0" -> binding.itemEntry.setShowSim(false);
-            case "1" -> binding.itemEntry.setShowSim(NewHome.nSim > 1);
+            case "1" -> binding.itemEntry.setShowSim(SimUtils.getNumberOfSimCards(requireContext()) > 1);
             case "2" -> binding.itemEntry.setShowSim(true);
         }
     }

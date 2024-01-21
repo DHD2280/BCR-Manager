@@ -8,27 +8,19 @@ import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.ContactsContract;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
 import com.squareup.picasso.Picasso;
 
-import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.databinding.ItemEntryBinding;
@@ -39,47 +31,121 @@ import it.dhd.bcrmanager.objects.DateHeader;
 import it.dhd.bcrmanager.services.MediaPlayerService;
 import it.dhd.bcrmanager.utils.BreakpointUtils;
 import it.dhd.bcrmanager.utils.CircleTransform;
-import it.dhd.bcrmanager.utils.DateUtils;
 import it.dhd.bcrmanager.utils.PermissionsUtil;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
 import it.dhd.bcrmanager.utils.SimUtils;
 import it.dhd.bcrmanager.utils.ThemeUtils;
 import it.dhd.bcrmanager.utils.VibratorUtils;
 
-public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
+public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final int VIEW_TYPE_HEADER = 0;
-    private static final int VIEW_TYPE_ITEM = 1;
+    // View Types
+    public static final int VIEW_TYPE_HEADER = 0;
+    public static final int VIEW_TYPE_ITEM = 1;
 
+    // List of items
     public final List<Object> callLogItems;
-    public final List<Object> callLogItemsFiltered;
-    public static List<Object> items;
+
+    // Expanded Position Holder
     private int expandedPosition = -1;
-    private final MediaPlayerService mediaPlayerService;
-    private CallLogItem currentlyPlayingItem;
+
+    // Media Player Service
+    private MediaPlayerService mediaPlayerService;
     private final Context mContext;
     private final int nSim;
 
-    public interface onActionPlayListener {
-        public void onActionPlay(CallLogItem item);
+    // Interfaces for click listeners
+    private final onActionPlayListener mPlayListener;
+    private final onDeleteListener mDeleteListener;
+    private final onContactListener mContactListener;
+    private final onContactIconClickListener mContactIconListener;
+    private final onTrimListener mTrimClipListener;
+
+    private boolean hasExpansion = true;
+    private boolean hasContactsActionsEnabled = true;
+
+    public void filter(List<Object> filteredList) {
+        callLogItems.clear();
+        callLogItems.addAll(filteredList);
+        notifyDataSetChanged();
     }
 
-    public CallLogAdapter(Context context, List<Object> callLogItems, MediaPlayerService mps) {
+    public interface onActionPlayListener {
+        void onActionPlay(MaterialButton playButton, CallLogItem item, RecyclerView.Adapter<? extends RecyclerView.ViewHolder> bindingAdapter);
+    }
+
+    public interface onDeleteListener {
+        void onDeleteClick(CallLogItem item, RecyclerView.Adapter<? extends RecyclerView.ViewHolder> bindingAdapter);
+    }
+
+    public interface onContactListener {
+        void onContactClick(CallLogItem item);
+    }
+
+    public interface onContactIconClickListener {
+        void onContactIconClick(CallLogItem item);
+    }
+
+    public interface onTrimListener {
+        void onTrimClick(CallLogItem item);
+    }
+
+    public CallLogAdapter(Context context, List<Object> callLogItems, boolean hasExpansion) {
+        this.mContext = context;
+        this.nSim = SimUtils.getNumberOfSimCards(context);
+        this.hasExpansion = hasExpansion;
+        this.callLogItems = callLogItems;
+        this.mediaPlayerService = null;
+        this.mPlayListener = null;
+        this.mDeleteListener = null;
+        this.mContactListener = null;
+        this.mContactIconListener = null;
+        this.mTrimClipListener = null;
+    }
+
+    public CallLogAdapter(Context context, List<Object> callLogItems, MediaPlayerService mps,
+                          onActionPlayListener listener, onDeleteListener deleteListener) {
         this.mContext = context;
         this.nSim = SimUtils.getNumberOfSimCards(context);
         this.callLogItems = callLogItems;
-        this.callLogItemsFiltered = new ArrayList<>(callLogItems);
         this.mediaPlayerService = mps;
-        items = new ArrayList<>(callLogItems);
+        this.mPlayListener = listener;
+        this.mDeleteListener = deleteListener;
+        this.mContactListener = null;
+        this.mContactIconListener = null;
+        this.mTrimClipListener = null;
     }
 
-    public static int getSize() {
-        return items.size();
+    public CallLogAdapter(Context context, List<Object> callLogItems, MediaPlayerService mps,
+                          onActionPlayListener listener, onDeleteListener deleteListener,
+                          onContactListener contactListener, onContactIconClickListener contactIconListener,
+                          onTrimListener trimListener) {
+        this.mContext = context;
+        this.nSim = SimUtils.getNumberOfSimCards(context);
+        this.callLogItems = callLogItems;
+        this.mediaPlayerService = mps;
+        this.mPlayListener = listener;
+        this.mDeleteListener = deleteListener;
+        this.mContactListener = contactListener;
+        this.mContactIconListener = contactIconListener;
+        this.mTrimClipListener = trimListener;
+    }
+
+    public void setMediaPlayerService(MediaPlayerService mps) {
+        this.mediaPlayerService = mps;
+    }
+
+    public void setContactActionsEnabled(boolean featuresEnabled) {
+        this.hasContactsActionsEnabled = featuresEnabled;
+    }
+
+    public void resetExpansion() {
+        expandedPosition = -1;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (callLogItemsFiltered.get(position) instanceof DateHeader) {
+        if (callLogItems.get(position) instanceof DateHeader) {
             return VIEW_TYPE_HEADER;
         } else {
             return VIEW_TYPE_ITEM;
@@ -97,30 +163,32 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             result = new HeaderViewHolder(bindingHeader);
         } else {
             result = new CallLogViewHolder(bindingItem);
-            bindingItem.rootLayout.setOnClickListener(v -> toggleExpansion(result.getBindingAdapterPosition()));
-
+            if (hasExpansion) bindingItem.rootLayout.setOnClickListener(v -> toggleExpansion(result.getBindingAdapterPosition()));
             bindingItem.callLogEntryActions.callAction.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
                 Intent intent = new Intent(Intent.ACTION_DIAL);
-                intent.setData(Uri.parse("tel:" + ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber()));
+                intent.setData(Uri.parse("tel:" + ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())).getNumber()));
                 mContext.startActivity(intent);
             });
 
             bindingItem.callLogEntryActions.createNewContactAction.setOnClickListener(v -> {
-                //contentObserver.setContactNumber(((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber());
-                //mContext.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+                CallLogItem clickedItem = ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition()));
+                if (mContactListener != null) {
+                    mContactListener.onContactClick(clickedItem);
+                }
                 Intent intent1 = new Intent(Intent.ACTION_INSERT);
                 intent1.setType(ContactsContract.Contacts.CONTENT_TYPE);
-                intent1.putExtra(ContactsContract.Intents.Insert.PHONE, ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber());
+                intent1.putExtra(ContactsContract.Intents.Insert.PHONE, ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())).getNumber());
                 mContext.startActivity(intent1);
             });
 
             bindingItem.callLogEntryActions.editContactAction.setOnClickListener(v -> {
-                CallLogItem clickedItem = ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition()));
-                //contentObserver.setContactNumber(clickedItem.getNumber());
-                //mContext.getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, contentObserver);
+                CallLogItem clickedItem = ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition()));
+                if (mContactListener != null) {
+                    mContactListener.onContactClick(clickedItem);
+                }
                 Intent intent = new Intent(Intent.ACTION_EDIT);
-                Uri contactUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, "/" + ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getLookupKey());
+                Uri contactUri = Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI, "/" + ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())).getLookupKey());
                 intent.setData(contactUri);
                 mContext.startActivity(intent);
 
@@ -129,30 +197,47 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             bindingItem.callLogEntryActions.sendMessageAction.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setData(Uri.parse("sms:" + ((CallLogItem)callLogItemsFiltered.get(result.getBindingAdapterPosition())).getNumber()));
+                intent.setData(Uri.parse("sms:" + ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())).getNumber()));
                 mContext.startActivity(intent);
             });
 
+            if (!hasContactsActionsEnabled) {
+                bindingItem.callLogEntryActions.callAction.setVisibility(View.GONE);
+                bindingItem.callLogEntryActions.createNewContactAction.setVisibility(View.GONE);
+                bindingItem.callLogEntryActions.editContactAction.setVisibility(View.GONE);
+                bindingItem.callLogEntryActions.sendMessageAction.setVisibility(View.GONE);
+            }
+
             bindingItem.actionPlay.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
-
-
+                if (mPlayListener != null) {
+                    mPlayListener.onActionPlay(bindingItem.actionPlay, ((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())), result.getBindingAdapter());
+                }
             });
+            if (mPlayListener==null) bindingItem.actionPlay.setVisibility(View.GONE);
 
             bindingItem.callLogEntryActions.openWithAction.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
                 int adapterPosition = result.getBindingAdapterPosition();
-                CallLogItem currentPlayingItem = ((CallLogItem)callLogItemsFiltered.get(adapterPosition));
+                CallLogItem currentPlayingItem = ((CallLogItem)callLogItems.get(adapterPosition));
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setDataAndType(Uri.parse(currentPlayingItem.getAudioFilePath()), "audio/*");
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 mContext.startActivity(intent);
             });
 
+            bindingItem.callLogEntryActions.trimAudioClip.setOnClickListener(v -> {
+                VibratorUtils.vibrate(mContext, 25);
+                if (mTrimClipListener != null) {
+                    mTrimClipListener.onTrimClick(((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())));
+                }
+            });
+            bindingItem.callLogEntryActions.trimAudioClip.setVisibility(View.GONE);
+
             bindingItem.callLogEntryActions.shareAction.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
                 int adapterPosition = result.getBindingAdapterPosition();
-                CallLogItem currentPlayingItem = ((CallLogItem)callLogItemsFiltered.get(adapterPosition));
+                CallLogItem currentPlayingItem = ((CallLogItem)callLogItems.get(adapterPosition));
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setType("audio/*");
                 intent.putExtra(Intent.EXTRA_STREAM, Uri.parse(currentPlayingItem.getAudioFilePath()));
@@ -162,7 +247,9 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             bindingItem.callLogEntryActions.deleteAction.setOnClickListener(v -> {
                 VibratorUtils.vibrate(mContext, 25);
-
+                if (mDeleteListener != null) {
+                    mDeleteListener.onDeleteClick(((CallLogItem)callLogItems.get(result.getBindingAdapterPosition())), result.getBindingAdapter());
+                }
             });
         }
         return result;
@@ -172,21 +259,22 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_ITEM) {
-            CallLogItem callLogItem = ((CallLogItem) callLogItemsFiltered.get(position));
+            CallLogItem callLogItem = ((CallLogItem) callLogItems.get(position));
             ((CallLogViewHolder) holder).bind(callLogItem, position);
             ((CallLogViewHolder) holder).binding.setCallLogItem(callLogItem);
             ((CallLogViewHolder) holder).binding.setShowIcon(PreferenceUtils.showIcon());
             ((CallLogViewHolder) holder).binding.setShowSim(PreferenceUtils.showSim(nSim));
             ((CallLogViewHolder) holder).binding.setShowLabel(PreferenceUtils.showLabel());
+            ((CallLogViewHolder) holder).binding.executePendingBindings();
         } else if (getItemViewType(position) == VIEW_TYPE_HEADER) {
-            DateHeader dateHeader = ((DateHeader)callLogItemsFiltered.get(position));
+            DateHeader dateHeader = ((DateHeader)callLogItems.get(position));
             ((HeaderViewHolder) holder).bind(dateHeader);
         }
     }
 
     @Override
     public int getItemCount() {
-        return callLogItemsFiltered.size();
+        return callLogItems.size();
     }
 
     private void toggleExpansion(int position) {
@@ -205,118 +293,33 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     }
 
-    public String removeDiacriticalMarks(String string) {
-        return Normalizer.normalize(string, Normalizer.Form.NFD)
-                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
-    }
-
-    @Override
-    public Filter getFilter() {
-        return new Filter() {
-            @Override
-            protected FilterResults performFiltering(CharSequence charSequence) {
-
-                List<Object> filteredList = new ArrayList<>();
-                List<CallLogItem> filteredCallLogItems = new ArrayList<>();
-                String query = charSequence != null ? charSequence.toString().toLowerCase() : "";
-
-                Date currentDate = Date.from(Calendar.getInstance().getTime().toInstant());
-                Date lastAddedHeaderDate = null;
-                boolean addedMonthHeader = false;
-                String monthHeader = "";
-
-                for (Object item : callLogItems) {
-                    if (item instanceof CallLogItem callLogItem) {
-                        if (!TextUtils.isEmpty(callLogItem.getContactName()) && removeDiacriticalMarks(callLogItem.getContactName().toLowerCase()).contains(removeDiacriticalMarks(query)))
-                            filteredCallLogItems.add(callLogItem);
-                    }
-                }
-
-                // Add headers to the filtered list
-                    for (CallLogItem callLogItem : filteredCallLogItems) {
-                        // Check if the date has changed for headers
-                        Date itemDate = new Date(callLogItem.getTimestampDate());
-
-                        if (!DateUtils.isSameDay(lastAddedHeaderDate, itemDate)) {
-                            // Add a new header if the date is different from the last added header
-                            if (DateUtils.isSameDay(currentDate, itemDate)) {
-                                // If the date is today, show 'Today'
-                                filteredList.add(new DateHeader(mContext.getString(R.string.today)));
-                            } else if (DateUtils.isYesterday(currentDate, itemDate)) {
-                                // If the date is yesterday, show 'Yesterday'
-                                filteredList.add(new DateHeader(mContext.getString(R.string.yesterday)));
-                            } else if (DateUtils.isLastWeek(currentDate, itemDate)) {
-                                // If the date is in last week, show the day (e.g., Wednesday)
-                                String dayOfWeek = DateUtils.getDayOfWeek(itemDate);
-                                filteredList.add(new DateHeader(dayOfWeek));
-                            } else if (!addedMonthHeader && DateUtils.isLastMonth(currentDate, itemDate)) {
-                                // If the date is in last month, show 'Last month'
-                                filteredList.add(new DateHeader(mContext.getString(R.string.last_month)));
-                                monthHeader = DateUtils.getMonth(itemDate);
-                                addedMonthHeader = true;
-                            } else {
-                                // For other items, group by month
-                                String month = DateUtils.getMonth(itemDate);
-                                if (!Objects.equals(month, monthHeader)) {
-                                    monthHeader = month;
-                                    filteredList.add(new DateHeader(month));
-                                }
-                            }
-
-                            // Update the last added header date
-                            lastAddedHeaderDate = itemDate;
-                        }
-
-                        // Add the regular item
-                        filteredList.add(callLogItem);
-                    }
-
-
-                FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredList;
-                return filterResults;
-
-            }
-
-            @Override
-            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-
-                callLogItemsFiltered.clear();
-                callLogItemsFiltered.addAll((List<?>) filterResults.values);
-                notifyDataSetChanged();
-            }
-        };
-    }
-
-
-
     public void setData(List<Object> newData) {
         callLogItems.clear();
         callLogItems.addAll(newData);
-        callLogItemsFiltered.clear();
-        callLogItemsFiltered.addAll(newData);
+        notifyDataSetChanged();
     }
 
     public void removeItem(int position) {
         expandedPosition = -1;
-        Object item = callLogItemsFiltered.get(position);
+        Object item = callLogItems.get(position);
         if (item instanceof CallLogItem) {
-            callLogItemsFiltered.remove(item);
             callLogItems.remove(item);
         } else {
-            callLogItemsFiltered.remove(position);
             callLogItems.remove(position);
         }
         notifyItemRemoved(position);
     }
 
+    public void restoreItem(Object item, int position) {
+        callLogItems.add(position, item);
+        notifyItemInserted(position);
+    }
+
     public void addItem(Object item) {
         if (getItemCount() == 0) {
             callLogItems.add(new DateHeader(mContext.getString(R.string.starred)));
-            callLogItemsFiltered.add(new DateHeader(mContext.getString(R.string.starred)));
         }
         callLogItems.add(item);
-        callLogItemsFiltered.add(item);
         notifyDataSetChanged();
     }
 
@@ -336,7 +339,7 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             // Set card stuff
             if (position == expandedPosition) {
-                binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceHighest(mContext));
+                binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceContainer(mContext));
             } else {
                 binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(mContext, R.color.trans));
             }
@@ -352,13 +355,10 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 case "conference" -> binding.callIcon.setImageResource(R.drawable.ic_conference);
             }
 
-
             if (PreferenceUtils.showHeaders())
                 binding.date.setText(item.getTimeStamp(mContext));
             else
                 binding.date.setText(item.getFormattedTimestamp(mContext.getString(R.string.today), mContext.getString(R.string.yesterday)));
-
-            Log.d("NewHome", "bind: " + item.getContactName() + " | NUMBER " + item.getNumberType());
 
             switch (item.getNumberType()) {
                 case ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM,
@@ -370,8 +370,6 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 case ContactsContract.CommonDataKinds.Phone.TYPE_WORK -> binding.numberIcon.setImageResource(R.drawable.ic_work);
                 case ContactsContract.CommonDataKinds.Phone.TYPE_COMPANY_MAIN -> binding.numberIcon.setImageResource(R.drawable.ic_business);
             }
-
-            binding.starredIcon.setVisibility(item.isStarred() ? View.VISIBLE : View.GONE);
 
             if (item.isPlaying())
                 binding.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(mContext)));
@@ -388,6 +386,14 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             binding.actionPlay.setIcon(drawable);
 
             binding.contactIcon.setImageDrawable(null);
+            binding.contactIcon.setOnClickListener(v -> {
+                VibratorUtils.vibrate(mContext, 25);
+                expandedPosition = -1;
+                if (mContactIconListener != null) {
+                    mContactIconListener.onContactIconClick(item);
+                }
+            });
+
             Picasso.get().cancelRequest(binding.contactIcon);
             if (item.getContactIcon()!=null)
                 Picasso.get().load(item.getContactIcon()).transform(new CircleTransform()).placeholder(R.drawable.ic_default_contact).into(binding.contactIcon);
@@ -398,18 +404,13 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             binding.callLogEntryActions.createNewContactAction.setVisibility(PermissionsUtil.hasReadContactsPermissions() && !item.isContactSaved() ? View.VISIBLE : View.GONE);
             binding.callLogEntryActions.editContactAction.setVisibility(PermissionsUtil.hasReadContactsPermissions() && item.isContactSaved() ? View.VISIBLE : View.GONE);
-            binding.contactIcon.setOnClickListener(v -> {
-                expandedPosition = -1;
-                //searchItem.expandActionView();
-                //searchView.setQuery(item.getContactName(), true);
-            });
 
             String prefName = item.getFileName();
             String PREF_KEY_BREAKPOINTS = prefName + "_breakpoints";
             // Get a list of all breakpoints
-            List<Breakpoints> breakpointsList = BreakpointUtils.loadListBreakpoints(PREF_KEY_BREAKPOINTS);
+            List<Breakpoints> breakpointsList = BreakpointUtils.loadListBreakpoints(mContext, PREF_KEY_BREAKPOINTS);
             // Iterate through the breakpoints and do something with them
-            if (breakpointsList.size() > 0 && mediaPlayerService.isPlaying() && currentlyPlayingItem == item) {
+            if (breakpointsList.size() > 0 && mediaPlayerService != null && mediaPlayerService.isPlaying() && item.isPlaying()) {
                 binding.breakpointsDiv.setVisibility(View.VISIBLE);
                 binding.breakpointsRecycler.setVisibility(View.VISIBLE);
                 BreakpointAdapter breakpointAdapter = new BreakpointAdapter(breakpointsList,
@@ -421,6 +422,7 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 binding.breakpointsDiv.setVisibility(View.GONE);
                 binding.breakpointsRecycler.setVisibility(View.GONE);
             }
+
         }
     }
 
@@ -431,7 +433,6 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         HeaderViewHolder(@NonNull ItemHeaderBinding binding) {
             super(binding.getRoot());
             this.binding = binding;
-            //binding.rootLayout.setOnClickListener(v -> toggleExpansion(getBindingAdapterPosition()));
         }
 
         public void bind(DateHeader dateHeader) {

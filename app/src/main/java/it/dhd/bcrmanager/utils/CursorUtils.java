@@ -200,8 +200,7 @@ public class CursorUtils {
     public static String getContactNameFromCallLogs(Context context, String phoneNumber) {
         String callLogName = "";
         Cursor cursor = context.getContentResolver().query(
-                CallLog.Calls.CONTENT_URI.buildUpon().appendQueryParameter(CallLog.Calls.LIMIT_PARAM_KEY, "1")
-                        .build(),
+                CallLog.Calls.CONTENT_URI,
                 new String[]{
                         CallLog.Calls.NUMBER,
                         CallLog.Calls.DATE,
@@ -214,7 +213,15 @@ public class CursorUtils {
                 null
         );
         if (cursor != null && cursor.moveToFirst()) {
-            callLogName = cursor.getString(2);
+            do {
+                if (PhoneNumberUtils.compare(phoneNumber, cursor.getString(0)) &&
+                        !TextUtils.isEmpty(cursor.getString(2))) {
+                    // Retrieve file information from the cursor
+                    callLogName = cursor.getString(2);
+                    break;
+                }
+            } while (cursor.moveToNext());
+
         }
         if(cursor != null && !cursor.isClosed()) {
             cursor.close();

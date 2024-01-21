@@ -6,8 +6,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,11 +26,10 @@ import java.util.Objects;
 import it.dhd.bcrmanager.databinding.ActivityMainBinding;
 import it.dhd.bcrmanager.handler.UncaughtExceptionHandler;
 import it.dhd.bcrmanager.ui.fragments.BatchDelete;
-import it.dhd.bcrmanager.ui.fragments.NewHome;
+import it.dhd.bcrmanager.ui.fragments.Home;
 import it.dhd.bcrmanager.ui.fragments.PermissionsFragment;
 import it.dhd.bcrmanager.ui.fragments.settings.Settings;
 import it.dhd.bcrmanager.utils.BetterActivityResult;
-import it.dhd.bcrmanager.utils.BreakpointUtils;
 import it.dhd.bcrmanager.utils.LogUtil;
 import it.dhd.bcrmanager.utils.PermissionsUtil;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
@@ -57,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getTheme().applyStyle(ThemeUtils.getColorThemeStyleRes(), true);
         }
+        active = true;
 
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(getApplicationContext()));
 
@@ -65,7 +65,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         PermissionsUtil.init(getApplicationContext());
-        BreakpointUtils.init(getApplicationContext());
 
         checkBcr();
         checkBcrDirectory();
@@ -88,10 +87,10 @@ public class MainActivity extends AppCompatActivity {
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
         } else {
-            if (savedInstanceState == null && !mDir.equals("")) {
+            if (savedInstanceState == null && !TextUtils.isEmpty(mDir)) {
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.frame_layout, new NewHome(), NewHome.class.getSimpleName())
+                        .replace(R.id.frame_layout, new Home(), Home.class.getSimpleName())
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
 
@@ -101,11 +100,6 @@ public class MainActivity extends AppCompatActivity {
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                mHideMenu = true;
-                Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
-                MainActivity.super.supportInvalidateOptionsMenu();
-                MainActivity.super.invalidateOptionsMenu();
-                MainActivity.super.invalidateMenu();
                 if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                     getSupportFragmentManager().popBackStackImmediate();
                 } else {
@@ -152,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         }  else if (itemId == R.id.batch_delete) {
             BatchDelete batchDelete = (BatchDelete) getSupportFragmentManager().findFragmentByTag(BatchDelete.class.getSimpleName());
-            if (batchDelete == null && !NewHome.isRunning) {
+            if (batchDelete == null) {
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.frame_layout, new BatchDelete())
@@ -165,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } else if (itemId == R.id.menu_settings) {
             Settings settings = (Settings) getSupportFragmentManager().findFragmentByTag(Settings.class.getSimpleName());
-            if (settings == null && !NewHome.isRunning) {
+            if (settings == null) {
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.frame_layout, new Settings())
@@ -186,8 +180,7 @@ public class MainActivity extends AppCompatActivity {
     private void checkBcrDirectory() {
         mDir = PreferenceUtils.getStoredFolderFromPreference();
         Log.d("BCR", "Directory: " + mDir);
-        Log.d("BCR", "Directory: " + Environment.getExternalStorageDirectory().getAbsolutePath());
-        if (mDir.equals("")) {
+        if (TextUtils.isEmpty(mDir)) {
             LogUtil.i("MainActivity.checkBcrDirectory", "No directory set");
             // set bcr directory
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);

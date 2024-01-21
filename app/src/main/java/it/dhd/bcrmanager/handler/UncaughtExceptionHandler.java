@@ -33,7 +33,7 @@ public class UncaughtExceptionHandler implements Thread.UncaughtExceptionHandler
 
             // Start the new activity directly without using startActivity()
             if (context instanceof AppCompatActivity) {
-                ((AppCompatActivity) context).startActivity(intent);
+                context.startActivity(intent);
             } else {
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);

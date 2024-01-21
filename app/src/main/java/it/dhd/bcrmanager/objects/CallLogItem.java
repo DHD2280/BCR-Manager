@@ -164,19 +164,6 @@ public class CallLogItem {
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
     }
 
-    public String getFormattedDuration(String formatSec, String formatMin) {
-        long durationSeconds = (long) Math.ceil(duration);
-
-        long minutes = durationSeconds / 60;
-        long seconds = durationSeconds % 60;
-
-        if (minutes == 0) {
-            return String.format(Locale.getDefault(), formatSec, seconds);
-        } else {
-            return String.format(Locale.getDefault(), formatMin, minutes, seconds);
-        }
-    }
-
     public String getStandardDuration() {
         long durationSeconds = (long) Math.ceil(duration);
 
@@ -226,11 +213,6 @@ public class CallLogItem {
         this.starred = starred;
     }
 
-    public String formatDate() {
-        SimpleDateFormat sdfOtherDays = new SimpleDateFormat("dd MMM HH:mm", Locale.getDefault());
-        return sdfOtherDays.format(timestampDate);
-    }
-
     public String getLookupKey() {
         return lookupKey;
     }
@@ -275,5 +257,6 @@ public class CallLogItem {
     public void setNumberType(int numberType) {
         this.numberType = numberType;
     }
+
 
 }

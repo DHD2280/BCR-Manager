@@ -60,7 +60,7 @@ public class IconFactory {
             letterTileDrawable.setCanonicalDialerLetterTileDetails(
                     displayName,
                     lookupKey,
-                    LetterTileDrawable.SHAPE_RECTANGLE,
+                    LetterTileDrawable.SHAPE_CIRCLE,
                     LetterTileDrawable.TYPE_DEFAULT);
 
             int iconSize =

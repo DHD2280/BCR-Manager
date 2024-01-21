@@ -20,7 +20,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
@@ -30,10 +29,12 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.ContextCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.transition.Slide;
 import androidx.transition.TransitionManager;
 
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.color.DynamicColors;
 import com.squareup.picasso.Picasso;
 
@@ -48,9 +49,10 @@ import it.dhd.bcrmanager.loaders.JsonFileLoader;
 import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.objects.ContactItem;
 import it.dhd.bcrmanager.services.MediaPlayerService;
-import it.dhd.bcrmanager.ui.adapters.RegLogAdapter;
-import it.dhd.bcrmanager.ui.fragments.PlayerFragment;
+import it.dhd.bcrmanager.ui.adapters.CallLogAdapter;
+import it.dhd.bcrmanager.ui.fragments.player.PlayerFragment;
 import it.dhd.bcrmanager.utils.CircleTransform;
+import it.dhd.bcrmanager.utils.FileUtils;
 import it.dhd.bcrmanager.utils.PermissionsUtil;
 import it.dhd.bcrmanager.utils.PreferenceUtils;
 import it.dhd.bcrmanager.utils.SimUtils;
@@ -61,25 +63,27 @@ public class ContactActivity
         extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<JsonFileLoader.TwoListsWrapper> {
 
-    List<ContactItem> contactList;
-    List<Object> callLogList;
+    private List<ContactItem> contactList;
+    private List<Object> callLogList;
     private int FILTER_TYPE = 0;
 
-    private RegLogAdapter adapter;
+    private CallLogAdapter mAdapter;
 
     private ContactActivityBinding binding;
 
-    String contactName;
+    private String contactName;
 
     private MediaPlayerService mediaPlayerService;
     private CallLogItem currentlyPlaying;
-    private int nSim = 1;
 
-    private static Handler mUpdateProgress;
-    private static Runnable mUpdateProgressTask;
+    private Handler mUpdateProgress;
+    private Runnable mUpdateProgressTask;
     private boolean isBound = false;
     private boolean onlyStarred = false;
     private String lookupKey;
+
+    private final List<Object> contactCalls = new ArrayList<>();
+    private final List<Object> contactCallsFiltered = new ArrayList<>();
 
 
     @Override
@@ -110,11 +114,10 @@ public class ContactActivity
             lookupKey = "starred_contacts";
             onlyStarred = true;
         }
-        nSim = SimUtils.getNumberOfSimCards(this);
 
         Intent serviceIntent = new Intent(this, MediaPlayerService.class);
-        this.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
+        this.bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE);   
+        
         LoaderManager.getInstance(this).initLoader(1, null, this);
 
     }
@@ -156,7 +159,6 @@ public class ContactActivity
         if (item.getItemId() == android.R.id.home) {
             if (MainActivity.active) {
                 Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
                 startActivity(intent);
             } else {
                 this.finish();
@@ -167,17 +169,17 @@ public class ContactActivity
                 case 0 -> {
                     FILTER_TYPE = 1;
                     item.setIcon(R.drawable.ic_in);
-                    adapter.getFilter().filter("in");
+                    filter("in");
                 }
                 case 1 -> {
                     FILTER_TYPE = 2;
                     item.setIcon(R.drawable.ic_out);
-                    adapter.getFilter().filter("out");
+                    filter("out");
                 }
                 case 2 -> {
                     FILTER_TYPE = 0;
                     item.setIcon(R.drawable.ic_filter);
-                    adapter.getFilter().filter("");
+                    filter("");
                 }
             }
             return true;
@@ -221,8 +223,6 @@ public class ContactActivity
         boolean contactSaved = false;
         int pos = 0;
 
-        Log.d("ContactActivity", " -*-ContactActivity-*- " + " contactList.size() " + contactList.size() + ", callLogList.size() " + callLogList.size());
-
         for (ContactItem contact : contactList) {
             if (contact.getLookupKey()!=null && contact.getLookupKey().equals(lookupKey)) {
                 contactIconUri = contact.getContactImage();
@@ -235,24 +235,23 @@ public class ContactActivity
             }
         }
 
-
-        List<CallLogItem> contactCalls = new ArrayList<>();
         if (onlyStarred) {
             for (Object item : callLogList) {
                 if (item instanceof CallLogItem)
                     if (((CallLogItem)item).isStarred())
-                        contactCalls.add(((CallLogItem)item));
+                        contactCalls.add(item);
             }
         } else {
             for (Object item : callLogList) {
                 if (item instanceof CallLogItem)
                     if (((CallLogItem)item).getContactName()!=null && ((CallLogItem)item).getContactName().equals(contactName))
-                        contactCalls.add(((CallLogItem)item));
+                        contactCalls.add(item);
                     else if (contactName == null || contactName.isEmpty() || ((CallLogItem)item).getNumberFormatted().equals(phoneNumberFormatted))
-                        contactCalls.add(((CallLogItem)item));
+                        contactCalls.add(item);
 
             }
         }
+        contactCallsFiltered.addAll(contactCalls);
 
 
         if (onlyStarred) binding.contactIcon.setImageResource(R.drawable.ic_star);
@@ -290,69 +289,11 @@ public class ContactActivity
             }
         });
 
-        adapter = new RegLogAdapter(this, contactCalls, mediaPlayerService, true, true,
-                (bind, p) -> {
-                    bind.actionPlay.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(this)));
-                    Drawable drawable = ContextCompat.getDrawable(this, R.drawable.play_to_pause);
-
-                    CallLogItem clickedItem = adapter.callLogItemsFiltered.get(p);
-
-                    if (currentlyPlaying == clickedItem) {
-                        // If it's the same item that is currently playing, pause or resume playback
-                        if (mediaPlayerService != null && mediaPlayerService.isPlaying()) {
-                            if (mediaPlayerService.isPlaying()) {
-                                mediaPlayerService.pausePlayback();
-                                stopUpdater();
-                            }
-                            drawable = ContextCompat.getDrawable(this, R.drawable.pause_to_play);
-                        } else {
-                            if (mediaPlayerService != null) {
-                                mediaPlayerService.resumePlayback();
-                                startUpdater();
-                            }
-                            drawable = ContextCompat.getDrawable(this, R.drawable.play_to_pause);
-                        }
-                    } else {
-
-                        ContextCompat.getDrawable(this, R.drawable.pause_to_play);
-                        if (currentlyPlaying != null) {
-                            currentlyPlaying.setPlaying(false);
-                            adapter.notifyItemChanged(contactCalls.indexOf(currentlyPlaying));
-                        }
-
-                        currentlyPlaying = clickedItem;
-                        currentlyPlaying.setPlaying(true);
-
-
-                        if (mediaPlayerService.isPlaying()) {
-                            mediaPlayerService.pausePlayback();
-                            stopUpdater();
-                        }
-
-                        mediaPlayerService.startPlayback(this, Uri.parse(clickedItem.getAudioFilePath()));
-                        mediaPlayerService.setOnCompletionListener(mp -> {
-                            //finish(); // finish current activity
-
-                            binding.bottomPlayerLayout.playerProgressBar.setProgressCompat(100, true);
-                            stopUpdater();
-                        });
-                        animateSwipeUpView(binding.playerInfoBarContainer);
-
-                        startUpdater();
-                        setPlayerInfo(clickedItem);
-                        //updatePlayerStatus();
-                    }
-                    bind.actionPlay.setIcon(drawable);
-                    if (drawable instanceof AnimatedVectorDrawable) {
-                        ((AnimatedVectorDrawable) drawable).start();
-                    }
-
-                });
-        adapter.setCallEnabled(false);
-        adapter.setMessageEnabled(false);
+        mAdapter = new CallLogAdapter(this, contactCallsFiltered, mediaPlayerService, this::onPlay, this::onDelete);
+        mAdapter.setContactActionsEnabled(false);
 
         binding.recyclerView.setLayoutManager(new WrapContentLinearLayoutManager(this));
-        binding.recyclerView.setAdapter(adapter);
+        binding.recyclerView.setAdapter(mAdapter);
 
         String finalPhoneNumber = phoneNumber;
         if (!onlyStarred) {
@@ -389,19 +330,19 @@ public class ContactActivity
                     new PlayerFragment.StarredInterface() {
                         @Override
                         public void setStarred(CallLogItem item) {
-                            adapter.notifyItemChanged(callLogList.indexOf(item));
+                            mAdapter.notifyItemChanged(callLogList.indexOf(item));
                         }
 
                         @Override
                         public void setUnstarred(CallLogItem item) {
-                            adapter.notifyItemChanged(callLogList.indexOf(item));
+                            mAdapter.notifyItemChanged(callLogList.indexOf(item));
                         }
                     },
                     (oldItem, newItem) -> {
-                        adapter.notifyItemChanged(callLogList.indexOf(oldItem));
-                        adapter.notifyItemChanged(callLogList.indexOf(newItem));
+                        mAdapter.notifyItemChanged(callLogList.indexOf(oldItem));
+                        mAdapter.notifyItemChanged(callLogList.indexOf(newItem));
                     },
-                    (item) -> adapter.notifyItemChanged(callLogList.indexOf(item)) );
+                    (item) -> mAdapter.notifyItemChanged(callLogList.indexOf(item)) );
             playerFragment.show(
                     getSupportFragmentManager(), PlayerFragment.class.getSimpleName()
             );
@@ -409,21 +350,83 @@ public class ContactActivity
         });
     }
 
-    public static void animateSwipeUpView(ViewGroup v) {
+    private void onDelete(CallLogItem callLogItem, RecyclerView.Adapter<? extends RecyclerView.ViewHolder> adapter) {
+        int index = contactCallsFiltered.indexOf(callLogItem);
+        contactCallsFiltered.remove(callLogItem);
+        contactCalls.remove(callLogItem);
+        mAdapter.notifyItemRemoved(index);
+        FileUtils.deleteRegistration(this, callLogItem);
+    }
+
+    private void filter(String direction) {
+        contactCallsFiltered.clear();
+        if (direction.isEmpty()) {
+            contactCallsFiltered.addAll(contactCalls);
+        } else {
+            for (Object item : contactCalls) {
+                if (item instanceof CallLogItem)
+                    if (((CallLogItem)item).getDirection().equals(direction))
+                        contactCallsFiltered.add(item);
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void onPlay(MaterialButton playButton, CallLogItem item, RecyclerView.Adapter<? extends RecyclerView.ViewHolder> adapter) {
+        setPlayerInfo(item);
+        playButton.setIconTint(ColorStateList.valueOf(ThemeUtils.getPrimaryColor(this)));
+        Drawable drawable = ContextCompat.getDrawable(this.getApplicationContext(), R.drawable.play_to_pause);
+
+        if (currentlyPlaying == item) {
+            // If it's the same item that is currently playing, pause or resume playback
+            if (mediaPlayerService != null) {
+                if (mediaPlayerService.isPlaying()) {
+                    mediaPlayerService.pausePlayback();
+                    drawable = ContextCompat.getDrawable(this.getApplicationContext(), R.drawable.pause_to_play);
+                } else {
+                    mediaPlayerService.resumePlayback();
+                    drawable = ContextCompat.getDrawable(this.getApplicationContext(), R.drawable.play_to_pause);
+                }
+            }
+        } else {
+
+            ContextCompat.getDrawable(this.getApplicationContext(), R.drawable.pause_to_play);
+            if (currentlyPlaying != null) {
+                currentlyPlaying.setPlaying(false);
+                mAdapter.notifyItemChanged(contactCallsFiltered.indexOf(currentlyPlaying));
+            }
+            currentlyPlaying = item;
+            currentlyPlaying.setPlaying(true);
+
+            if (mediaPlayerService.isPlaying()) {
+                mediaPlayerService.pausePlayback();
+                stopUpdater();
+            }
+
+            mediaPlayerService.startPlayback(item);
+            mediaPlayerService.setOnCompletionListener(() -> {
+                //finish(); // finish current activity
+                binding.bottomPlayerLayout.playerProgressBar.setProgressCompat(100, true);
+                stopUpdater();
+                mAdapter.notifyItemChanged(contactCallsFiltered.indexOf(currentlyPlaying));
+            });
+        }
+        playButton.setIcon(drawable);
+        if (drawable instanceof AnimatedVectorDrawable) {
+            ((AnimatedVectorDrawable) drawable).start();
+        }
+    }
+
+    public void animateSwipeUpView(ViewGroup v) {
         if (v.getVisibility() != View.VISIBLE) {
             v.setVisibility(View.VISIBLE);
-            // Get the height of the view
-            int viewHeight = v.getHeight();
-
-            // Create a translate animation (swipe up)
-            TranslateAnimation swipe = new TranslateAnimation(0, 0, viewHeight, 0);
-            swipe.setDuration(250); // Set the duration of the animation in milliseconds
-
-            // Apply an interpolator for a smoother effect (optional)
-            swipe.setInterpolator(new AccelerateInterpolator());
-            // Start the animation
-            v.startAnimation(swipe);
-            TransitionManager.beginDelayedTransition(v, new Slide(Gravity.TOP));
+            v.setTranslationY(v.getHeight());
+            v.animate()
+                    .translationY(0)
+                    .setDuration(250)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .start();
+            TransitionManager.beginDelayedTransition((ViewGroup) v.getParent(), new Slide(Gravity.TOP));
         }
     }
 
@@ -436,9 +439,9 @@ public class ContactActivity
             @Override
             public void run() {
                 if (mediaPlayerService!=null && mediaPlayerService.isPlaying() && binding != null) {
-                    int currentMillis = mediaPlayerService.getCurrentPosition();
-                    int durationMillis = mediaPlayerService.getDuration();
-                    int progress = (int) ((long) currentMillis * binding.bottomPlayerLayout.playerProgressBar.getMax() / durationMillis);
+                    long currentMillis = mediaPlayerService.getCurrentPosition();
+                    long durationMillis = mediaPlayerService.getDuration();
+                    int progress = (int) (currentMillis * binding.bottomPlayerLayout.playerProgressBar.getMax() / durationMillis);
                     binding.bottomPlayerLayout.playerProgressBar.setIndeterminate(false);
                     binding.bottomPlayerLayout.playerProgressBar.setProgressCompat(progress, true);
                     mUpdateProgress.postDelayed(this, 50);
@@ -478,16 +481,18 @@ public class ContactActivity
     }
 
     public void setPlayerInfo(CallLogItem currentPlayingItem) {
-        if (currentPlayingItem.getContactName()!=null) binding.bottomPlayerLayout.contactNamePlayer.setText(currentPlayingItem.getContactName());
-        else binding.bottomPlayerLayout.contactNamePlayer.setText(currentPlayingItem.getNumberFormatted());
-        if (nSim<=1) {
-            binding.bottomPlayerLayout.dividerSimPlayer.setVisibility(View.GONE);
-            binding.bottomPlayerLayout.simSlotPlayer.setVisibility(View.GONE);
-            binding.bottomPlayerLayout.dividerDatePlayer.setVisibility(View.GONE);
-        } else binding.bottomPlayerLayout.simSlotPlayer.setText(currentPlayingItem.getSimSlot());
 
-        if(currentPlayingItem.getDirection().contains("in")) binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_in);
-        else binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_out);
+        if (binding.playerInfoBarContainer.getVisibility() != View.VISIBLE) animateSwipeUpView(binding.playerInfoBarContainer);
+        binding.bottomPlayerLayout.setShowSim(PreferenceUtils.showSimPlayer(SimUtils.getNumberOfSimCards(this)));
+        binding.bottomPlayerLayout.setShowLabel(PreferenceUtils.showLabelPlayer());
+        binding.bottomPlayerLayout.setCallLogItem(currentPlayingItem);
+        startUpdater();
+
+        switch (currentPlayingItem.getDirection()) {
+            case "in" -> binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_in);
+            case "out" -> binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_out);
+            case "conference" -> binding.bottomPlayerLayout.callIconPlayer.setImageResource(R.drawable.ic_conference);
+        }
 
         binding.bottomPlayerLayout.datePlayer.setText(currentPlayingItem.getFormattedTimestamp(getString(R.string.today), getString(R.string.yesterday)));
 
@@ -499,12 +504,6 @@ public class ContactActivity
             binding.bottomPlayerLayout.contactIconPlayer.setImageDrawable(currentPlayingItem.getContactDrawable(this));
         else
             binding.bottomPlayerLayout.contactIconPlayer.setImageResource(R.drawable.ic_default_contact);
-
-        if (currentPlayingItem.isStarred()) {
-            binding.bottomPlayerLayout.starredIcon.setVisibility(View.VISIBLE);
-        } else {
-            binding.bottomPlayerLayout.starredIcon.setVisibility(View.GONE);
-        }
 
     }
 }

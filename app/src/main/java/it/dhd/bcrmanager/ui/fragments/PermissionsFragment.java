@@ -93,7 +93,7 @@ public class PermissionsFragment extends Fragment {
                                 binding.setupPermissionsGrant.setText(R.string.setup_permissions_granted);
                                 binding.setupPermissionsGrant.setOnClickListener(v ->
                                         getParentFragmentManager().beginTransaction()
-                                                .replace(R.id.frame_layout, new NewHome(), NewHome.class.getSimpleName())
+                                                .replace(R.id.frame_layout, new Home(), Home.class.getSimpleName())
                                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                                                 .commit());
                             }

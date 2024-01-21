@@ -1,4 +1,4 @@
-package it.dhd.bcrmanager.loaders;
+package it.dhd.bcrmanager.viewmodel;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +11,6 @@ import android.util.Log;
 
 import androidx.core.content.pm.ShortcutManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
-import androidx.loader.content.AsyncTaskLoader;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -33,6 +32,9 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Observable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.drawable.LetterTileDrawable;
 import it.dhd.bcrmanager.json.Call;
@@ -48,58 +50,132 @@ import it.dhd.bcrmanager.utils.PreferenceUtils;
 import it.dhd.bcrmanager.utils.ShortcutUtils;
 import it.dhd.bcrmanager.utils.UriUtils;
 
+public class DataRepository {
 
-public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapper> {
-    private final String storedUriString;
+    private static final DataRepository ourInstance = new DataRepository();
+
+    private List<ContactItem> contactList;
 
     boolean hasReadContactsPermission, hasWriteContactsPermission, hasReadCallLogPermission, hasReadPhoneStatePermission;
 
-    public List<ContactItem> contactList = new ArrayList<>();
-    private boolean onlyStarred;
-    private boolean onlySelectedContact;
-    private String selectedContact;
-    private final List<String> contactNumbers = new ArrayList<>();
-    private List<CallLogItem> yourListOfItems = new ArrayList<>();
+    private DataWrapper data;
 
-    private final List<String> fileError = new ArrayList<>();
+    public static DataRepository getInstance() {
+        return ourInstance;
+    }
 
-    /**
-     * Constructor for JsonFileLoader class
-     * @param context The application context
-     * @param lookupKey The lookup key of the selected contact
-     * This will load the JSON files from the selected directory.
-     * The lookup key is used to filter the JSON files for the selected contact.
-     * Lookup key can be empty if we haven't any particular contact.
-     * "starred_contacts" if we want to load only starred contacts.
-     **/
-    public JsonFileLoader(Context context, String lookupKey) {
-        super(context);
-        this.storedUriString = PreferenceUtils.getStoredFolderFromPreference();
-        if (lookupKey.equals("starred_contacts")) onlyStarred = true;
-        else if (!lookupKey.isEmpty()) {
-            selectedContact = lookupKey;
-            onlySelectedContact = true;
-        } else {
-            onlyStarred = false;
-            onlySelectedContact = false;
+    public Observable<DataWrapper> fetchData(Context context, String lookupKey) {
+        return Observable.fromCallable(() -> parseJson(context, lookupKey))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace);
+    }
+
+    public Observable<DataWrapper> removeItems(Context context, List<CallLogItem> itemsToDelete) {
+        return Observable.fromCallable(() -> deleteItems(context, itemsToDelete))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnError(Throwable::printStackTrace);
+    }
+
+    private DataWrapper deleteItems(Context context, List<CallLogItem> itemsToDelete) {
+        List<CallLogItem> rec = FileUtils.loadObjectList(context, FileUtils.STORED_REG, CallLogItem.class);
+        List<ContactItem> contactList = FileUtils.loadObjectList(context, FileUtils.STORED_CONTACTS, ContactItem.class);
+        List<Object> starredList = new ArrayList<>();
+        for (CallLogItem item : itemsToDelete) {
+            Log.d("DataRepository.loadInBackground", "Deleting: " + item.getFileName());
+            if (item.isStarred()) PreferenceUtils.removeStarred(item.getFileName());
+            FileUtils.deleteRegistration(context, item);
+            subtractCount(contactList, item);
+        }
+        Log.d("DataRepository.loadInBackground", "Deleted");
+        Log.d("DataRepository.loadInBackground", "rec size: " + rec.size());
+        rec.removeIf(callLogItem -> itemsToDelete.stream().anyMatch(item -> item.getFileName().equals(callLogItem.getFileName())));
+        Log.d("DataRepository.loadInBackground", "rec size: " + rec.size());
+        for (CallLogItem item : rec) {
+            if (item.isStarred()) starredList.add(item);
+        }
+        List<Object> starredWithHeaders = new ArrayList<>(starredList);
+        if (starredWithHeaders.size() > 0) starredWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
+        double mMaxDuration = 0;
+        Date currentDate = Date.from(Calendar.getInstance().getTime().toInstant());
+        String currentHeader = null;
+        List<Object> sortedListWithHeaders = new ArrayList<>();
+        List<Object> starredListWithHeaders = new ArrayList<>();
+        for (CallLogItem item : rec) {
+
+            item.setPlaying(false);
+            // Regular item, check if the date has changed
+            Date itemDate = new Date(item.getTimestampDate());
+
+            String header;
+
+            if (DateUtils.isToday(itemDate)) {
+                // If the date is today, show 'Today'
+                header = context.getString(R.string.today);
+            } else if (DateUtils.isYesterday(currentDate, itemDate)) {
+                // If the date is yesterday, show 'Yesterday'
+                header = context.getString(R.string.yesterday);
+            } else if (DateUtils.isLastWeek(currentDate, itemDate)) {
+                // If the date is in last week, show the day (e.g., Wednesday)
+                header = DateUtils.getDayOfWeek(itemDate);
+            } else if (DateUtils.isLastMonth(currentDate, itemDate)) {
+                // If the date is in last month, show 'Last Month'
+                header = context.getString(R.string.last_month);
+            } else {
+                // For other items, group by month
+                header = DateUtils.getMonth(itemDate);
+            }
+
+            // Check if the header has changed
+            if (!Objects.equals(currentHeader, header)) {
+                currentHeader = header;
+                sortedListWithHeaders.add(new DateHeader(header));
+            }
+            if (item.getDuration() > mMaxDuration) mMaxDuration = item.getDuration();
+
+            // Add the regular item
+            sortedListWithHeaders.add(item);
+            if (item.isStarred()) {
+                starredListWithHeaders.add(item);
+            }
+        }
+        if (starredListWithHeaders.size() > 0) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
+        FileUtils.saveObjectList(context, rec, FileUtils.STORED_REG, CallLogItem.class);
+        FileUtils.saveObjectList(context, contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
+        setupContactShortcuts(context, starredListWithHeaders.size() > 0);
+        data = new DataWrapper(sortedListWithHeaders, starredListWithHeaders, contactList, new ArrayList<>(), mMaxDuration);
+        return data;
+    }
+
+    private void subtractCount(List<ContactItem> contactList, CallLogItem item) {
+        for (ContactItem contact : contactList) {
+            if (contact.getPhoneNumber().equals(item.getNumber()) || contact.getPhoneNumberFormatted().equals(item.getNumber())) {
+                contact.setCount(contact.getCount() - 1);
+                break;
+            }
         }
     }
 
-    @Override
-    protected void onStartLoading() {
-        if (isStarted()) forceLoad();
-    }
 
-    /**
-     * Load the JSON files from the selected directory
-     * This will do the parsing.
-     * It will parse all JSON files based on constructor.
-     * Will check if some permissions are set, otherwise will not use Cursor, so will not parse contacts.
-     * @return A TwoListsWrapper object containing the list of starred items and the list of all items
-     */
-    @Override
-    public TwoListsWrapper loadInBackground() {
+    private DataWrapper parseJson(Context context, String lookupKey) {
+        Log.d("DataRepository.loadInBackground", "lookupKey: " + lookupKey);
+        contactList = new ArrayList<>();
+        List<String> contactNumbers = new ArrayList<>();
+        List<String> fileError = new ArrayList<>();
+        List<CallLogItem> recordingsList = new ArrayList<>();
 
+        boolean onlyStarred = false, onlySelectedContact = false;
+
+        String storedUriString = PreferenceUtils.getStoredFolderFromPreference();
+        String selectedContact = null;
+        if (!TextUtils.isEmpty(lookupKey)) {
+            if (lookupKey.equals("starred_contacts")) onlyStarred = true;
+            else if (!lookupKey.isEmpty()) {
+                selectedContact = lookupKey;
+                onlySelectedContact = true;
+            }
+        }
         boolean needToParse = true, contactsChanged = false;
 
         hasReadContactsPermission = PermissionsUtil.hasReadContactsPermissions();
@@ -109,43 +185,42 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
         // Here will check if we have selectedContact to filter JSON files
         if (onlySelectedContact && hasReadContactsPermission)
-            contactNumbers.addAll(CursorUtils.getPhoneNumbersForContact(getContext(), selectedContact));
+            contactNumbers.addAll(CursorUtils.getPhoneNumbersForContact(context, selectedContact));
 
-        if (storedUriString != null && !storedUriString.isEmpty()) {
+        if (!storedUriString.isEmpty()) {
 
             Uri treeUri = Uri.parse(storedUriString);
-            DocumentFile pickedDir = DocumentFile.fromTreeUri(getContext(), treeUri);
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUri);
 
 
-            Log.d("JsonFileLoader.loadInBackground", "treeUri: " + treeUri + ", pickedDir: " + pickedDir);
+            Log.d("DataRepository.loadInBackground", "treeUri: " + treeUri + ", pickedDir: " + pickedDir);
             if (pickedDir != null && pickedDir.isDirectory()) {
                 long lastModified = pickedDir.lastModified();
                 long lastTimeParsed = PreferenceUtils.getLastTime();
-                Log.d("JsonFileLoader.loadInBackground", "lastModified: " + lastModified + ", lastTimeParsed: " + lastTimeParsed);
+                Log.d("DataRepository.loadInBackground", "lastModified: " + lastModified + ", lastTimeParsed: " + lastTimeParsed);
                 if (PreferenceUtils.getPermissionReadContactsLastTime() != hasReadContactsPermission ||
                         PreferenceUtils.getPermissionReadCallLogLastTime() != hasReadCallLogPermission) {
-                    ShortcutManagerCompat.removeAllDynamicShortcuts(getContext());
-                    Log.d("JsonFileLoader.loadInBackground", "Permissions changed");
-                    removeFiles();
+                    ShortcutManagerCompat.removeAllDynamicShortcuts(context);
+                    Log.d("DataRepository.loadInBackground", "Permissions changed");
+                    FileUtils.deleteCachedFiles(context);
                 }
                 if (!storedUriString.equals(PreferenceUtils.getLatestFolder())) {
-                    Log.d("JsonFileLoader.loadInBackground", "Folder changed");
-                    yourListOfItems.clear();
+                    Log.d("DataRepository.loadInBackground", "Folder changed");
                     contactList.clear();
                     PreferenceUtils.resetStarred();
-                    removeFiles();
+                    FileUtils.deleteCachedFiles(context);
                 }
-                if (new File(getContext().getFilesDir(), FileUtils.STORED_REG).exists() &&
-                        new File(getContext().getFilesDir(), FileUtils.STORED_CONTACTS).exists()) {
-                    Log.d("JsonFileLoader.loadInBackground", "Files exists, imports them");
-                    yourListOfItems = FileUtils.loadObjectList(getContext(), FileUtils.STORED_REG, CallLogItem.class);
-                    contactList = FileUtils.loadObjectList(getContext(), FileUtils.STORED_CONTACTS, ContactItem.class);
+                if (new File(context.getFilesDir(), FileUtils.STORED_REG).exists() &&
+                        new File(context.getFilesDir(), FileUtils.STORED_CONTACTS).exists()) {
+                    Log.d("DataRepository.loadInBackground", "Files exists, imports them");
+                    recordingsList = FileUtils.loadObjectList(context, FileUtils.STORED_REG, CallLogItem.class);
+                    contactList = FileUtils.loadObjectList(context, FileUtils.STORED_CONTACTS, ContactItem.class);
                     StringBuilder contactNumbersBuilder = new StringBuilder();
-                    if (contactList != null && contactList.size() != 0 && yourListOfItems != null  && yourListOfItems.size() > 0 && hasReadContactsPermission && hasReadCallLogPermission) {
+                    if (contactList != null && contactList.size() != 0 && recordingsList != null  && recordingsList.size() > 0 && hasReadContactsPermission && hasReadCallLogPermission) {
                         for (ContactItem contact : contactList) {
                             boolean hasChanged = false;
 
-                            Cursor cursor = getContext().getContentResolver().query(
+                            Cursor cursor = context.getContentResolver().query(
                                     Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(contact.getPhoneNumber())),
                                     new String[]{
                                             ContactsContract.PhoneLookup._ID,
@@ -158,72 +233,72 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     null
                             );
                             if (cursor != null && cursor.moveToFirst()) {
-                                    if (cursor.getString(1).isEmpty()) {
-                                        // Probably contact was deleted
+                                if (cursor.getString(1).isEmpty()) {
+                                    // Probably contact was deleted
+                                    hasChanged = true;
+                                    contact.resetContact();
+                                } else {
+                                    // Name changed
+                                    if (!TextUtils.equals(contact.getContactName(), cursor.getString(1))) {
                                         hasChanged = true;
-                                        contact.resetContact();
-                                    } else {
-                                        // Name changed
-                                        if (!TextUtils.equals(contact.getContactName(), cursor.getString(1))) {
-                                            hasChanged = true;
-                                            contact.setContactName(cursor.getString(1));
-                                            if (!contact.isContactSaved()) {
-                                                contact.setContactSaved(true);
-                                                contact.setContactType(LetterTileDrawable.TYPE_PERSON);
+                                        contact.setContactName(cursor.getString(1));
+                                        if (!contact.isContactSaved()) {
+                                            contact.setContactSaved(true);
+                                            contact.setContactType(LetterTileDrawable.TYPE_PERSON);
+                                        }
+                                    }
+                                }
+                                // Check contact Image
+                                if (!UriUtils.areEqual(contact.getContactImage(), UriUtils.parseUriOrNull(cursor.getString(2)))) {
+                                    hasChanged = true;
+                                    contact.setContactImage(UriUtils.parseUriOrNull(cursor.getString(2)));
+                                }
+                                // Check contact LookupKey
+                                if (!TextUtils.equals(contact.getLookupKey(), cursor.getString(3))) {
+                                    hasChanged = true;
+                                    contact.setLookupKey(cursor.getString(3));
+                                }
+                                // Check contact ID
+                                if (contact.getContactId() != cursor.getLong(0)) {
+                                    hasChanged = true;
+                                    contact.setContactId(cursor.getLong(0));
+                                }
+                                // Check number label
+                                if (!TextUtils.isEmpty(cursor.getString(3))) {
+                                    Cursor phones = context.getContentResolver().query(
+                                            ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                            new String[] {
+                                                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+                                                    ContactsContract.CommonDataKinds.Phone.TYPE,
+                                                    ContactsContract.CommonDataKinds.Phone.LABEL } ,
+                                            ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + cursor.getLong(0),
+                                            null,
+                                            null);
+                                    while (phones != null && phones.moveToNext()) {
+                                        if (PhoneNumberUtils.compare(contact.getPhoneNumber(), phones.getString(0))) {
+                                            // Number Type changed
+                                            if (contact.getNumberType() != phones.getInt(1)) {
+                                                hasChanged = true;
+                                                contact.setContactType(phones.getInt(1));
                                             }
-                                        }
-                                    }
-                                    // Check contact Image
-                                    if (!UriUtils.areEqual(contact.getContactImage(), UriUtils.parseUriOrNull(cursor.getString(2)))) {
-                                        hasChanged = true;
-                                        contact.setContactImage(UriUtils.parseUriOrNull(cursor.getString(2)));
-                                    }
-                                    // Check contact LookupKey
-                                    if (!TextUtils.equals(contact.getLookupKey(), cursor.getString(3))) {
-                                        hasChanged = true;
-                                        contact.setLookupKey(cursor.getString(3));
-                                    }
-                                    // Check contact ID
-                                    if (contact.getContactId() != cursor.getLong(0)) {
-                                        hasChanged = true;
-                                        contact.setContactId(cursor.getLong(0));
-                                    }
-                                    // Check number label
-                                    if (!TextUtils.isEmpty(cursor.getString(3))) {
-                                        Cursor phones = getContext().getContentResolver().query(
-                                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                                                new String[] {
-                                                        ContactsContract.CommonDataKinds.Phone.NUMBER,
-                                                        ContactsContract.CommonDataKinds.Phone.TYPE,
-                                                        ContactsContract.CommonDataKinds.Phone.LABEL } ,
-                                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + cursor.getLong(0),
-                                                null,
-                                                null);
-                                        while (phones != null && phones.moveToNext()) {
-                                            if (PhoneNumberUtils.compare(contact.getPhoneNumber(), phones.getString(0))) {
-                                                // Number Type changed
-                                                if (contact.getNumberType() != phones.getInt(1)) {
-                                                    hasChanged = true;
-                                                    contact.setContactType(phones.getInt(1));
-                                                }
-                                                String numberLabel;
-                                                                                                if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
-                                                    numberLabel = phones.getString(2);
-                                                else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(getContext().getResources(), phones.getInt(1), "");
-                                                if (TextUtils.equals(contact.getNumberLabel(), numberLabel)) {
-                                                    hasChanged = true;
-                                                    contact.setNumberLabel(numberLabel);
-                                                }
-                                                break;
+                                            String numberLabel;
+                                            if (phones.getInt(1) == ContactsContract.CommonDataKinds.Phone.TYPE_CUSTOM)
+                                                numberLabel = phones.getString(2);
+                                            else numberLabel = (String) ContactsContract.CommonDataKinds.Phone.getTypeLabel(context.getResources(), phones.getInt(1), "");
+                                            if (TextUtils.equals(contact.getNumberLabel(), numberLabel)) {
+                                                hasChanged = true;
+                                                contact.setNumberLabel(numberLabel);
                                             }
-                                        }
-                                        if(phones != null && !phones.isClosed()) {
-                                            phones.close();
+                                            break;
                                         }
                                     }
-                                    if (hasChanged) {
-                                        contactNumbersBuilder.append("N:").append(contact.getPhoneNumber()).append(";");
+                                    if(phones != null && !phones.isClosed()) {
+                                        phones.close();
                                     }
+                                }
+                                if (hasChanged) {
+                                    contactNumbersBuilder.append("N:").append(contact.getPhoneNumber()).append(";");
+                                }
                             } else {
                                 if ((contact.getContactType() != LetterTileDrawable.TYPE_BUSINESS) &&
                                         (contact.getContactType() != LetterTileDrawable.TYPE_VOICEMAIL)) {
@@ -244,7 +319,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                         for (String changedContact : changedContacts) {
                             String[] contactInfo = changedContact.split(":");
                             if (contactInfo[0].equals("N")) {
-                                for (CallLogItem item : yourListOfItems) {
+                                for (CallLogItem item : recordingsList) {
                                     if (!PhoneNumberUtils.compare(item.getNumber(), contactInfo[1])) continue;
                                     ContactItem contact = getContactItemFromList(contactInfo[1]);
                                     if (contact == null) continue;
@@ -261,10 +336,10 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                     }
                 }
                 if (lastModified > lastTimeParsed) {
-                    Log.d("JsonFileLoader.loadInBackground", "lastModified > lastTimeParsed");
+                    Log.d("DataRepository.loadInBackground", "lastModified > lastTimeParsed");
                     PreferenceUtils.saveLastTime(pickedDir.lastModified());
                 } else {
-                    if (yourListOfItems != null && yourListOfItems.size() != 0) {
+                    if (recordingsList != null && recordingsList.size() != 0) {
                         needToParse = false;
                     }
                 }
@@ -275,7 +350,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                 Uri dirUri = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId);
 
                 // Use ContentResolver to query for files in the directory
-                Cursor fileCursor = getContext().getContentResolver().query(
+                Cursor fileCursor = context.getContentResolver().query(
                         dirUri,
                         new String[]{
                                 DocumentsContract.Document.COLUMN_DISPLAY_NAME,
@@ -287,33 +362,33 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                         null
                 );
                 List<String> fileNames = new ArrayList<>();
-                if (yourListOfItems != null && yourListOfItems.size() != 0) {
+                if (recordingsList != null && recordingsList.size() != 0) {
                     // Store a List of file parsed
-                    for (CallLogItem callLogItem : yourListOfItems) {
+                    for (CallLogItem callLogItem : recordingsList) {
                         fileNames.add(callLogItem.getFileName());
                     }
                 }
-                String path = FileUtils.getPathFromUri(getContext(), pickedDir.getUri());
+                String path = FileUtils.getPathFromUri(context, pickedDir.getUri());
                 if (path != null) {
                     File dir = new File(path);
                     List<String> filesInFolder = new ArrayList<>(Arrays.asList(dir.list()));
                     // Remove stored regs if file is not present
                     if (PreferenceUtils.getLastTimeFiles() != filesInFolder.size() &&
-                            PreferenceUtils.getLastTimeFiles() != 0 && yourListOfItems.size() != 0) {
-                        yourListOfItems.removeIf(callLogItem -> filesInFolder.contains(callLogItem.getFileName()));
+                            PreferenceUtils.getLastTimeFiles() != 0 && recordingsList.size() != 0) {
+                        recordingsList.removeIf(callLogItem -> filesInFolder.contains(callLogItem.getFileName()));
                     }
                 }
 
                 if (fileCursor != null && fileCursor.moveToFirst() && needToParse) {
-                    if (yourListOfItems == null) yourListOfItems = new ArrayList<>();
+                    if (recordingsList == null) recordingsList = new ArrayList<>();
                     do {
                         // Retrieve file information from the cursor
                         String fileName = fileCursor.getString(0);
                         String mimeType = fileCursor.getString(1);
-                        Log.d("JsonFileLoader.loadInBackground", "File: " + fileName + ", Type: " + mimeType);
+                        Log.d("DataRepository.loadInBackground", "File: " + fileName + ", Type: " + mimeType);
                         if (fileName.startsWith(".")) continue;
                         if (fileNames.contains(fileName)) {
-                            Log.d("JsonFileLoader.loadInBackground", "File already parsed: " + fileName + ", skipping");
+                            Log.d("DataRepository.loadInBackground", "File already parsed: " + fileName + ", skipping");
                             continue;
                         }
                         if (mimeType.equals("application/json")) {
@@ -321,10 +396,10 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                 continue;
                             }
                             // Here we parse the JSON file because we haven't parsed it yet
-                            Log.d("JsonFileLoader.loadInBackground", "File not parsed: " + fileName);
+                            Log.d("DataRepository.loadInBackground", "File not parsed: " + fileName);
                             StringBuilder content = new StringBuilder();
                             try {
-                                InputStream inputStream = getContext().getContentResolver().openInputStream(DocumentsContract.buildDocumentUriUsingTree(treeUri, fileCursor.getString(2)));
+                                InputStream inputStream = context.getContentResolver().openInputStream(DocumentsContract.buildDocumentUriUsingTree(treeUri, fileCursor.getString(2)));
                                 if (inputStream != null) {
 
                                     BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
@@ -386,12 +461,12 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                         treeUri,
                                         DocumentsContract.getTreeDocumentId(treeUri) + "/" + fileName.replace(".json", replacement)
                                 );
-                                ContactItem contactItemFound = searchContactItem(phoneNumber, phoneNumberFormatted, callLogResponse.getCallLogName());
+                                ContactItem contactItemFound = searchContactItem(context, phoneNumber, phoneNumberFormatted, callLogResponse.getCallLogName());
 
                                 if (!contactItemFound.isContactSaved() && contactItemFound.getContactType() == LetterTileDrawable.TYPE_GENERIC_AVATAR)
                                     callLogName = phoneNumberFormatted;
                                 else callLogName = contactItemFound.getContactName();
-                                yourListOfItems.add(new CallLogItem(contactItemFound.getContactImage(), contactItemFound.getLookupKey(), contactItemFound.isContactSaved(), contactItemFound.getContactType(),
+                                recordingsList.add(new CallLogItem(contactItemFound.getContactImage(), contactItemFound.getLookupKey(), contactItemFound.isContactSaved(), contactItemFound.getContactType(),
                                         callLogName, phoneNumber, phoneNumberFormatted, contactItemFound.getNumberLabel(), contactItemFound.getNumberType(), direction,
                                         timestamp != null ? Long.parseLong(timestamp) : 0, durationSecsTotal, simSlot,
                                         audioFileUri.toString(), fileUri.toString(), fileName, PreferenceUtils.isStarred(fileName)));
@@ -403,11 +478,11 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                             Log.d("File Info", "Name: " + fileName + ", Type: " + mimeType);
                         } else if (mimeType.contains("audio")) {
                             String jsonFileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".json";
-                            if (FileUtils.fileExists(getContext(), pickedDir.getUri(), jsonFileName)) {
-                                Log.d("JsonFileLoader.loadInBackground", "File exists: " + jsonFileName + ", skipping");
+                            if (FileUtils.fileExists(context, pickedDir.getUri(), jsonFileName)) {
+                                Log.d("DataRepository.loadInBackground", "File exists: " + jsonFileName + ", skipping");
                                 continue;
                             } else {
-                                Log.d("JsonFileLoader.loadInBackground", "File not exists: " + jsonFileName + ", try to parse");
+                                Log.d("DataRepository.loadInBackground", "File not exists: " + jsonFileName + ", try to parse");
                                 Uri audioFileUri = DocumentsContract.buildDocumentUriUsingTree(
                                         treeUri,
                                         DocumentsContract.getTreeDocumentId(treeUri) + "/" + fileName
@@ -430,12 +505,12 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     fileError.add(fileName);
                                 }
                                 String[] callLogSearch = null;
-                                Log.d("JsonFileLoader.loadInBackground", "filename: " + fileName + ", dateCheck: " + dateCheck.getTime());
+                                Log.d("DataRepository.loadInBackground", "filename: " + fileName + ", dateCheck: " + dateCheck.getTime());
                                 if (hasReadCallLogPermission)
-                                    callLogSearch = CursorUtils.searchThingsInCallLog(getContext(), dateCheck.getTime());
+                                    callLogSearch = CursorUtils.searchThingsInCallLog(context, dateCheck.getTime());
 
                                 String number, formatted, dur, dir, sim, name;
-                                Log.d("JsonFileLoader.loadInBackground", "filename: " + fileName + ", callLogSearch: " + Arrays.toString(callLogSearch));
+                                Log.d("DataRepository.loadInBackground", "filename: " + fileName + ", callLogSearch: " + Arrays.toString(callLogSearch));
                                 if (callLogSearch != null) {
                                     number = callLogSearch[0];
                                     if (!callLogSearch[1].isEmpty()) dur = callLogSearch[1]; else dur = "0";
@@ -447,12 +522,12 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     dur = "0";
                                     dir = TextUtils.isEmpty(direction) ? "" : direction;
                                     sim = "0";
-                                    name = getContext().getString(android.R.string.unknownName);
+                                    name = context.getString(android.R.string.unknownName);
                                 }
                                 if (!number.isEmpty()) formatted = PhoneNumberUtils.formatNumber(number, Locale.getDefault().getCountry());
                                 else formatted = "";
 
-                                ContactItem contactItemFound = searchContactItem(number, formatted, name);
+                                ContactItem contactItemFound = searchContactItem(context, number, formatted, name);
 
                                 if (onlySelectedContact && !number.isEmpty() &&
                                         !contactItemFound.getPhoneNumber().isEmpty() &&
@@ -461,7 +536,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                                     continue;
                                 }
 
-                                yourListOfItems.add(new CallLogItem(contactItemFound.getContactImage(), contactItemFound.getLookupKey(), contactItemFound.isContactSaved(), contactItemFound.getContactType(),
+                                recordingsList.add(new CallLogItem(contactItemFound.getContactImage(), contactItemFound.getLookupKey(), contactItemFound.isContactSaved(), contactItemFound.getContactType(),
                                         contactItemFound.getContactName(), number, formatted, contactItemFound.getNumberLabel(), contactItemFound.getNumberType(), dir, dateCheck.getTime(), Double.parseDouble(dur), Integer.parseInt(sim),
                                         audioFileUri.toString(), audioFileUri.toString(), fileName, PreferenceUtils.isStarred(fileName)));
 
@@ -484,15 +559,15 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                 Log.e("Error", "The selected item is not a directory");
                 return null;
             }
-        }  // Handle the case where the URI is not stored or is invalid
-        // Sort yourListOfItems by timestampDate in descending order (newest first)
-        yourListOfItems.sort(Comparator.comparingLong(CallLogItem::getTimestampDate).reversed());
-        for(CallLogItem item : yourListOfItems) {
+        }
+
+        recordingsList.sort(Comparator.comparingLong(CallLogItem::getTimestampDate).reversed());
+        for(CallLogItem item : recordingsList) {
             item.setStarred(PreferenceUtils.isStarred(item.getFileName()));
         }
         if (contactsChanged || needToParse) {
-            FileUtils.saveObjectList(getContext(), yourListOfItems, FileUtils.STORED_REG, CallLogItem.class);
-            FileUtils.saveObjectList(getContext(), contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
+            FileUtils.saveObjectList(context, recordingsList, FileUtils.STORED_REG, CallLogItem.class);
+            FileUtils.saveObjectList(context, contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
         }
         PreferenceUtils.saveLastFolder();
 
@@ -502,10 +577,8 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
         Date currentDate = Date.from(Calendar.getInstance().getTime().toInstant());
         String currentHeader = null;
 
-
-        if (PreferenceUtils.getStarredCount() > 0) starredListWithHeaders.add(new DateHeader(getContext().getString(R.string.starred)));
         double mMaxDuration = 0;
-        for (CallLogItem item : yourListOfItems) {
+        for (CallLogItem item : recordingsList) {
 
             item.setPlaying(false);
             // Regular item, check if the date has changed
@@ -515,16 +588,16 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
 
             if (DateUtils.isToday(itemDate)) {
                 // If the date is today, show 'Today'
-                header = getContext().getString(R.string.today);
+                header = context.getString(R.string.today);
             } else if (DateUtils.isYesterday(currentDate, itemDate)) {
                 // If the date is yesterday, show 'Yesterday'
-                header = getContext().getString(R.string.yesterday);
+                header = context.getString(R.string.yesterday);
             } else if (DateUtils.isLastWeek(currentDate, itemDate)) {
                 // If the date is in last week, show the day (e.g., Wednesday)
                 header = DateUtils.getDayOfWeek(itemDate);
             } else if (DateUtils.isLastMonth(currentDate, itemDate)) {
                 // If the date is in last month, show 'Last Month'
-                header = getContext().getString(R.string.last_month);
+                header = context.getString(R.string.last_month);
             } else {
                 // For other items, group by month
                 header = DateUtils.getMonth(itemDate);
@@ -542,48 +615,22 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             if (item.isStarred()) {
                 starredListWithHeaders.add(item);
             }
-        }
 
-        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(starredListWithHeaders.size() > 0);
+        }
+        if (starredListWithHeaders.size() > 0) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
+        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(context, starredListWithHeaders.size() > 0);
 
         // Now, sortedListWithHeaders contains both CallLogItem and DateHeader objects
         List<Object> sortedOrderedList = new ArrayList<>(sortedListWithHeaders);
-        Log.d("JsonFileLoader.loadInBackground", "contactList size: " + contactList.size());
+        Log.d("DataRepository.loadInBackground", "contactList size: " + contactList.size());
         PreferenceUtils.savePermissions();
-
-        return new TwoListsWrapper(starredListWithHeaders, sortedOrderedList, contactList, fileError, mMaxDuration);
+        data = new DataWrapper(sortedOrderedList, starredListWithHeaders, contactList, fileError, mMaxDuration);
+        return data;
     }
 
-    private Date forceDate(String fileName) {
-        String name = fileName.substring(0, fileName.lastIndexOf("."));
-        String cut = name.replaceAll("[^a-zA-Z0-9]", "");
-        Log.d("JsonFileLoader.forceDate", "cut: " + cut);
-        try {
-            return DateUtils.parse(cut);
-        } catch (ParseException e) {
-            return new Date(0);
-        }
-    }
-
-    private void removeFiles() {
-        if (new File(getContext().getFilesDir(), FileUtils.STORED_REG).exists())
-            new File(getContext().getFilesDir(), FileUtils.STORED_REG).delete();
-        if (new File(getContext().getFilesDir(), FileUtils.STORED_CONTACTS).exists())
-            new File(getContext().getFilesDir(), FileUtils.STORED_CONTACTS).delete();
-    }
-
-    private ContactItem getContactItemFromList(String phoneNumber) {
-        for (ContactItem contactItem : contactList) {
-            if (PhoneNumberUtils.compare(contactItem.getPhoneNumber(), phoneNumber)) {
-                return contactItem;
-            }
-        }
-        return null;
-    }
-
-    private ContactItem searchContactItem(String phoneNumber, String phoneNumberFormatted,
+    private ContactItem searchContactItem(Context context, String phoneNumber, String phoneNumberFormatted,
                                           String contactNameHolder) {
-        if (TextUtils.isEmpty(phoneNumber)) return new ContactItem(0, getContext().getString(android.R.string.unknownName), "", "", 0, "",false, null, null, null, LetterTileDrawable.TYPE_GENERIC_AVATAR);
+        if (TextUtils.isEmpty(phoneNumber)) return new ContactItem(0, context.getString(android.R.string.unknownName), "", "", 0, "",false, null, null, null, LetterTileDrawable.TYPE_GENERIC_AVATAR);
         boolean found = false;
         ContactItem contactItemFound = null;
         if (contactList.size() > 0) {
@@ -606,7 +653,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             int contactType = LetterTileDrawable.TYPE_GENERIC_AVATAR;
             int numberType = 0;
             if (hasReadContactsPermission) {
-                contactInfo = CursorUtils.getContactInfo(getContext(), phoneNumber);
+                contactInfo = CursorUtils.getContactInfo(context, phoneNumber);
                 contactId = Long.parseLong(contactInfo[0]);
                 contactName = contactInfo[1];
                 contactIconUri = contactInfo[2];
@@ -625,24 +672,19 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
             if (contactIconUri!=null) contactUri = Uri.parse(contactIconUri);
             if (TextUtils.isEmpty(contactName)) contactName = phoneNumberFormatted;
             if (isContactSaved) contactType = LetterTileDrawable.TYPE_PERSON;
-            boolean isVoiceMail = false;
-            PhoneNumberUtils.isVoiceMailNumber(phoneNumber);
-            if (hasReadPhoneStatePermission) isVoiceMail = PhoneNumberUtils.isVoiceMailNumber(phoneNumber);
+            boolean isVoiceMail = PhoneNumberUtils.isVoiceMailNumber(phoneNumber);
             if (isVoiceMail) {
                 if (!isContactSaved || TextUtils.isEmpty(contactName)) {
-                    contactName = getContext().getString(android.R.string.defaultVoiceMailAlphaTag);
+                    contactName = context.getString(android.R.string.defaultVoiceMailAlphaTag);
                 }
                 contactType = LetterTileDrawable.TYPE_VOICEMAIL;
             }
-            if (!isContactSaved && !isVoiceMail && hasReadCallLogPermission) {
-                String businessName = CursorUtils.getContactNameFromCallLogs(getContext(), phoneNumber);
+            if (!isContactSaved && !isVoiceMail) {
+                String businessName = CursorUtils.getContactNameFromCallLogs(context, phoneNumber);
                 if (!TextUtils.isEmpty(businessName)) {
                     contactName = businessName;
                     contactType = LetterTileDrawable.TYPE_BUSINESS;
                 }
-            }
-            if (!hasReadCallLogPermission && !hasReadContactsPermission) {
-                contactType = LetterTileDrawable.TYPE_GENERIC_AVATAR;
             }
             ContactItem item = new ContactItem(contactId, contactName, phoneNumber, numberLabel, numberType,
                     phoneNumberFormatted, isContactSaved, contactUri, lookupKey, lookupUri, contactType);
@@ -652,12 +694,42 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
         return contactItemFound;
     }
 
+    private ContactItem getContactItemFromList(String phoneNumber) {
+        for (ContactItem contactItem : contactList) {
+            if (PhoneNumberUtils.compare(contactItem.getPhoneNumber(), phoneNumber)) {
+                return contactItem;
+            }
+        }
+        return null;
+    }
+
+    private String getDirection(String fileName) {
+        String pat = "[^a-zA-Z0-9](in|out|conference)[^a-zA-Z0-9]";
+        Pattern pattern = Pattern.compile(pat);
+        Matcher matcher = pattern.matcher(fileName);
+        if (matcher.find()) {
+            return matcher.group().replaceAll("[^a-zA-Z0-9]", "");
+        }
+        return null;
+    }
+
+    private Date forceDate(String fileName) {
+        String name = fileName.substring(0, fileName.lastIndexOf("."));
+        String cut = name.replaceAll("[^a-zA-Z0-9]", "");
+        Log.d("DataRepository.forceDate", "cut: " + cut);
+        try {
+            return DateUtils.parse(cut);
+        } catch (ParseException e) {
+            return new Date(0);
+        }
+    }
+
     /**
      * Setup the contact shortcuts
      * @param addStarred If true, will add the starred shortcut, only if we have any starred item
      */
-    private void setupContactShortcuts(boolean addStarred) {
-        ShortcutManagerCompat.removeAllDynamicShortcuts(getContext());
+    private void setupContactShortcuts(Context context, boolean addStarred) {
+        ShortcutManagerCompat.removeAllDynamicShortcuts(context);
         int shortCount;
         if (contactList != null && contactList.size() > 0) {
             switch (contactList.size()) {
@@ -683,7 +755,7 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                 }
             }
             shortCutter.sort((item1, item2) -> Integer.compare(item2.getCount(), item1.getCount()));
-            ShortcutUtils shortcutUtils = new ShortcutUtils(getContext());
+            ShortcutUtils shortcutUtils = new ShortcutUtils(context);
             if (addStarred) shortcutUtils.addDynamicShortcutStarred();
             switch (shortCount) {
                 case 1 -> shortcutUtils.addDynamicShortcut(shortCutter.get(0));
@@ -698,22 +770,6 @@ public class JsonFileLoader extends AsyncTaskLoader<JsonFileLoader.TwoListsWrapp
                 }
             }
         }
-    }
-
-    private String getDirection(String fileName) {
-        String pat = "[^a-zA-Z0-9](in|out|conference)[^a-zA-Z0-9]";
-        Pattern pattern = Pattern.compile(pat);
-        Matcher matcher = pattern.matcher(fileName);
-        if (matcher.find()) {
-            return matcher.group().replaceAll("[^a-zA-Z0-9]", "");
-        }
-        return null;
-    }
-
-    public record TwoListsWrapper(List<Object> starredItemsList,
-                                  List<Object> sortedListWithHeaders,
-                                  List<ContactItem> contactList,
-                                  List<String> errorFiles, double maxDuration) {
     }
 
 }

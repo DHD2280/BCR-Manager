@@ -284,7 +284,7 @@ public class DateUtils {
     public static String formatDuration(double duration) {
         long minutes = (long) (duration / 60);
         long seconds = (long) (duration % 60);
-        return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds);
+        return String.format(Locale.getDefault(), "%01d:%02d", minutes, seconds);
     }
 
     /**
