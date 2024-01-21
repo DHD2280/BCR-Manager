@@ -13,7 +13,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/call_log_action_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -23,11 +25,7 @@
     android:visibility="visible">
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
-        android:background="@color/dialer_divider_line_color" />
+        style="@style/HorizontalDivider" />
 
     <LinearLayout
         android:id="@+id/call_action"
@@ -96,6 +94,20 @@
         <TextView
             style="@style/CallLogActionTextStyle"
             android:text="@string/open_with" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/trim_audio_clip"
+        style="@style/CallLogActionStyle">
+
+        <ImageView
+            style="@style/CallLogActionIconStyle"
+            android:src="@drawable/ic_trim_clip" />
+
+        <TextView
+            style="@style/CallLogActionTextStyle"
+            android:text="@string/trim_audio_clip" />
 
     </LinearLayout>
 

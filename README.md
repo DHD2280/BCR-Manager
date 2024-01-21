@@ -2,7 +2,7 @@
 
 A simple manager for BCR.
 
-[![Android](https://img.shields.io/badge/Platform-Android-green.svg?style=flat-square)](https://www.android.com) [![API](https://img.shields.io/badge/API-28%2B-orange.svg?logo=android&style=flat-square)](https://developer.android.com/studio/releases/platforms)
+[![Android](https://img.shields.io/badge/Platform-Android-green.svg?style=flat-square)](https://www.android.com) [![API](https://img.shields.io/badge/API-28%2B-orange.svg?logo=android&style=flat-square)](https://developer.android.com/studio/releases/platforms) [![Release](https://img.shields.io/github/v/release/DHD2280/BCR-Manager)](https://github.com/DHD2280/BCR-Manager/releases)
 
 <img src="app/images/icon.png" alt="app icon" width="144" />
 <img src="app/images/Screenshots.png" alt="app icon" width="2350" />
@@ -82,7 +82,7 @@ Feature requests are always welcome. If you want to make a feature request, open
 
 ## Issues
 
-If you want to report an issue with the app, just open a new issue following
+If you want to report an issue with the app, just open a new issue on GitHub.
 
 ## License
 
@@ -95,11 +95,10 @@ See [`CHANGELOG`](./CHANGELOG.md) for a complete list of changes.
 ## TODOs
 TODOs, but I don't know if I will do it, but if the app will be popular, I will do it.
 - Improve code quality
-- Add custom Themes (colors)
+- ~Add custom Themes (colors)~
 - Migrate to Kotlin (not necessary)
-- Migrate to ViewModel
+- ~Migrate to ViewModel~
 - Add desktop shortcut per-contact
-
 
 ## Acknowledgments
 

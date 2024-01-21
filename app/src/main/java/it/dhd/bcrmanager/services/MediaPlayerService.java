@@ -1,19 +1,23 @@
 package it.dhd.bcrmanager.services;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 
-public class MediaPlayerService extends Service implements MediaPlayer.OnCompletionListener {
+import androidx.media3.common.AudioAttributes;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
 
-    private MediaPlayer mediaPlayer;
+import it.dhd.bcrmanager.objects.CallLogItem;
 
-    private int lastPosition;
+public class MediaPlayerService extends Service implements Player.Listener {
+
+    private ExoPlayer player;
+
+    private long lastPosition;
     private float lastSpeed;
     private boolean isSpeedSet = false;
 
@@ -22,8 +26,8 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaPlayer = new MediaPlayer();
-        mediaPlayer.setOnCompletionListener(this);
+        player = new ExoPlayer.Builder(this).build();
+        player.addListener(this);
     }
 
     @Override
@@ -40,42 +44,50 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
 
     @Override
     public void onDestroy() {
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
+        if (player != null) {
+            player.release();
         }
         super.onDestroy();
     }
 
-    private MediaPlayer.OnCompletionListener completionListener;
+    private onCompleteListener completionListener;
+    public interface onCompleteListener {
+        void onCompletion();
+    }
 
-    public void setOnCompletionListener(MediaPlayer.OnCompletionListener listener) {
+    public void setOnCompletionListener(onCompleteListener listener) {
         this.completionListener = listener;
     }
 
     @Override
-    public void onCompletion(MediaPlayer mp) {
-        // Handle audio playback completion if needed
-        if (completionListener != null) {
-            completionListener.onCompletion(mp);
-        }
+    public void onPlaybackStateChanged(int state) {
+        // Handle playback state change here
+        if (state == Player.STATE_ENDED)
+            if (completionListener != null)
+                completionListener.onCompletion();
     }
 
     /**
      * Method to start playback of audio file
-     * @param c The application context
-     * @param audioFilePath The Uri of the audio file
+     * @param item The CallLogItem to play
      */
-    public void startPlayback(Context c, Uri audioFilePath) {
+    public void startPlayback(CallLogItem item) {
         try {
-            mediaPlayer.reset();
-            mediaPlayer.setAudioAttributes(
+            player.setAudioAttributes(
                     new AudioAttributes
                             .Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .build());
-            mediaPlayer.setDataSource(c, audioFilePath);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+                            .setContentType(AudioAttributes.DEFAULT.contentType)
+                            .build(), true);
+            player.setMediaItem(new MediaItem.Builder()
+                    .setUri(item.getAudioFilePath())
+                    .setMediaId(item.getFileName())
+                            .setMediaMetadata(new MediaMetadata.Builder()
+                                    .setTitle(item.getContactName())
+                                    .setSubtitle(item.getNumber())
+                                    .build())
+                    .build());
+            player.prepare();
+            player.play();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,13 +97,13 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * Method to pause playback
      */
     public void pausePlayback() {
-        if (mediaPlayer.isPlaying()) {
-            lastPosition = mediaPlayer.getCurrentPosition();
-            mediaPlayer.pause();
+        if (player.isPlaying()) {
+            lastPosition = player.getCurrentPosition();
+            player.pause();
         }
     }
 
-    public int getLastPosition() {
+    public long getLastPosition() {
         return lastPosition;
     }
 
@@ -99,8 +111,12 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * Method to resume playback
      */
     public void resumePlayback() {
-        if (!mediaPlayer.isPlaying()) {
-            mediaPlayer.start();
+        if (!player.isPlaying()) {
+            player.play();
+        }
+        if (player.getPlaybackState() == Player.STATE_ENDED) {
+            player.seekTo(0);
+            player.play();
         }
     }
 
@@ -108,45 +124,36 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * Method to stop playback
      */
     public void stopPlayback() {
-        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.stop();
-            mediaPlayer.reset();
+        if (player.isPlaying()) {
+            player.stop();
         }
     }
 
     // Method to get current playback position
-    public int getCurrentPosition() {
-        return mediaPlayer.getCurrentPosition();
+    public long getCurrentPosition() {
+        return player.getCurrentPosition();
     }
 
     // Method to get total duration of the audio file
-    public int getDuration() {
-        return mediaPlayer.getDuration();
+    public long getDuration() {
+        return player.getDuration();
     }
 
     // Method to check if playback is currently in progress
     public boolean isPlaying() {
-        try {
-            return mediaPlayer.isPlaying();
-        } catch(IllegalStateException e) {
-            // media player is not initialized
-            return false;
-        }
+        return player.isPlaying();
     }
 
-    public MediaPlayer getMediaPlayer() {
-        if (mediaPlayer != null) return mediaPlayer; else return null;
+    public ExoPlayer getPlayer() {
+        if (player != null) return player; else return null;
     }
 
-    public void seekTo(int newPosition) {
-        mediaPlayer.seekTo(newPosition);
+    public void seekTo(long newPosition) {
+        player.seekTo(newPosition);
     }
 
     public boolean isSpeedSet() { return isSpeedSet; }
 
-    public void reset() {
-        mediaPlayer.reset();
-    }
 
     // Binder class for communication with the activity
     public class LocalBinder extends Binder {
@@ -162,7 +169,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
     public void setSpeed(float speed) {
         lastSpeed = speed;
         isSpeedSet = true;
-        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(speed));
+        player.setPlaybackSpeed(speed);
     }
 
     /**
@@ -170,7 +177,7 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnComplet
      * @return The current playback speed (1.0f if not set)
      */
     public float getSpeed() {
-        float speed = mediaPlayer.getPlaybackParams().getSpeed();
+        float speed = player.getPlaybackParameters().speed;
         if (speed != 0.0) return speed; else return 1.0f;
     }
 

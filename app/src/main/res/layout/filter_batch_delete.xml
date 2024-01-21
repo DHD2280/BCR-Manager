@@ -135,6 +135,7 @@
                         android:id="@+id/radioSingleDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:checked="true"
                         android:text="@string/single_date" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton

@@ -29,8 +29,8 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 14
-        versionName = "1.1.1"
+        versionCode = 16
+        versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
     }
@@ -97,18 +97,14 @@ materialThemeBuilder {
 
 dependencies {
 
+    implementation("androidx.media3:media3-ui:1.2.1")
     val lifecycleVersion = "2.7.0"
-    val workVersion = "2.9.0"
 
     // AndroidX support
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.activity:activity:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.legacy:legacy-preference-v14:1.0.0")
     implementation("androidx.preference:preference:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
-    implementation("androidx.recyclerview:recyclerview-selection:1.1.0")
-    implementation("androidx.work:work-runtime:2.9.0")
 
     // Material Design
     implementation("com.google.android.material:material:1.11.0")
@@ -123,10 +119,6 @@ dependencies {
     // FastScroll
     implementation("me.zhanghai.android.fastscroll:library:1.3.0")
 
-    // ShowCase
-    implementation("com.github.mreram:showcaseview:1.4.1")
-    implementation("com.github.erkutaras:ShowcaseView:1.5.0")
-
     // Rx Java
     implementation("io.reactivex.rxjava3:rxjava:3.1.8")
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
@@ -137,11 +129,7 @@ dependencies {
     // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")
 
-    // Saved state module for ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion")
-
-    implementation("androidx.work:work-runtime:$workVersion")
-
-
-
+    // Media 3
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation ("androidx.media3:media3-common:1.2.1")
 }

@@ -101,7 +101,15 @@ public class PreferenceUtils {
         } else {
             editor.remove(filename).apply();
         }
+    }
 
+    /**
+     * Remove starred item from SharedPreferences
+     * @param fileName The filename of the registration
+     */
+    public static void removeStarred(String fileName) {
+        SharedPreferences.Editor editor = mStarredPrefs.edit();
+        editor.remove(fileName).apply();
     }
 
     /**
@@ -196,6 +204,10 @@ public class PreferenceUtils {
         return pref.getBoolean(Keys.PREFS_KEY_SHOW_NUMBER_LABEL, true);
     }
 
+    public static boolean showLabelPlayer() {
+        return getAppPreferences().getBoolean(Keys.PREFS_KEY_PLAYER_SHOW_LABEL, true);
+    }
+
     public static boolean showIcon() {
         SharedPreferences pref = getAppPreferences();
         return pref.getBoolean(Keys.PREFS_KEY_SHOW_CONTACT_ICON, true);
@@ -220,6 +232,26 @@ public class PreferenceUtils {
         }
         return true;
     }
+    public static boolean showSimPlayer(int nSim) {
+        SharedPreferences pref = getAppPreferences();
+        String sim = pref.getString(Keys.PREFS_KEY_PLAYER_SHOW_SIM, "1");
+        // 0 never
+        // 1 only if available (iy you have 1 sim it will not show)
+        // 2 always
+        switch (sim) {
+            case "0" -> {
+                return false;
+            }
+            case "1" -> {
+                return nSim > 1;
+            }
+            case "2" -> {
+                return true;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * Keys for the SharedPreferences
@@ -242,6 +274,10 @@ public class PreferenceUtils {
         public static final String PREFS_KEY_SIM_1_COLOR = "sim_1_color";
         public static final String PREFS_KEY_SIM_2_COLOR = "sim_2_color";
         public static final String PREFS_KEY_NUMBER_LABEL_COLOR = "number_label_color";
+
+        // Bottom Player Prefs
+        public static final String PREFS_KEY_PLAYER_SHOW_LABEL = "show_label_player";
+        public static final String PREFS_KEY_PLAYER_SHOW_SIM = "show_sim_player";
 
         // Style Prefs
         public static final String PREFS_KEY_SHOW_HEADERS = "show_headers";

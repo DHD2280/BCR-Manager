@@ -16,26 +16,20 @@ import it.dhd.bcrmanager.objects.Breakpoints;
 
 public class BreakpointUtils {
 
-    private static Context mContext;
-
-    public static void init(Context c) {
-        mContext = c;
-    }
-
-    private static SharedPreferences getSharedPreferences(String prefName) {
+    private static SharedPreferences getSharedPreferences(Context c, String prefName) {
         // Use your application context to get SharedPreferences
-        return mContext.getSharedPreferences(prefName, Context.MODE_PRIVATE);
+        return c.getSharedPreferences(prefName, Context.MODE_PRIVATE);
     }
 
-    public static Map<String, Map<String, String>> loadBreakpoints(String prefName) {
-        SharedPreferences preferences = getSharedPreferences(prefName);
+    public static Map<String, Map<String, String>> loadBreakpoints(Context c, String prefName) {
+        SharedPreferences preferences = getSharedPreferences(c, prefName);
         String breakpointsJson = preferences.getString(prefName, "{}");
         Type type = new TypeToken<Map<String, Map<String, String>>>() {}.getType();
         return new Gson().fromJson(breakpointsJson, type);
     }
 
-    public static List<Breakpoints> loadListBreakpoints(String prefName) {
-        Map<String, Map<String, String>> breakpoints = BreakpointUtils.loadBreakpoints(prefName);
+    public static List<Breakpoints> loadListBreakpoints(Context c, String prefName) {
+        Map<String, Map<String, String>> breakpoints = BreakpointUtils.loadBreakpoints(c, prefName);
         List<Breakpoints> breakpointsList = new ArrayList<>();
         // Iterate through the breakpoints and do something with them
         for (Map.Entry<String, Map<String, String>> entry : breakpoints.entrySet()) {
@@ -54,9 +48,9 @@ public class BreakpointUtils {
         return breakpointsList;
     }
 
-    public static void saveBreakpoints(String prefName, Map<String, Map<String, String>> breakpoints) {
+    public static void saveBreakpoints(Context c, String prefName, Map<String, Map<String, String>> breakpoints) {
         String breakpointsJson = new Gson().toJson(breakpoints);
-        SharedPreferences.Editor editor = getSharedPreferences(prefName).edit();
+        SharedPreferences.Editor editor = getSharedPreferences(c, prefName).edit();
         editor.putString(prefName, breakpointsJson);
         editor.apply();
     }

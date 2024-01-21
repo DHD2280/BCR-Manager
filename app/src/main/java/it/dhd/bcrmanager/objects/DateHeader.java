@@ -1,5 +1,3 @@
 package it.dhd.bcrmanager.objects;
 
-public record DateHeader(String date) {
-
-}
+public record DateHeader(String date) {}

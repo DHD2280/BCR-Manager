@@ -21,8 +21,6 @@ import it.dhd.bcrmanager.databinding.ErrorReportBinding;
 
 public class ErrorReportActivity extends AppCompatActivity {
 
-    private static final int CREATE_FILE_REQUEST_CODE = 999;
-
     private ErrorReportBinding binding;
     private String stackTrace;
 
@@ -41,7 +39,6 @@ public class ErrorReportActivity extends AppCompatActivity {
         handleUncaughtException();
     }
 
-    // Inizializza il launcher per l'Intent.ACTION_CREATE_DOCUMENT
     private final ActivityResultLauncher<Intent> createDocumentLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
             result -> handleCreateDocumentResult(result.getData())

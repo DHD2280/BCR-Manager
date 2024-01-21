@@ -40,8 +40,13 @@
         <Preference
             app:iconSpaceReserved="false"
             android:key="item_entry_appearance"
-            android:title="Item Entry Appearance"
-            android:summary="Customize Item Entry"/>
+            android:title="@string/item_entry_appearance"
+            android:summary="@string/item_entry_appearance_summary"/>
+        <Preference
+            app:iconSpaceReserved="false"
+            android:key="bottom_player"
+            android:title="@string/bottom_player"
+            android:summary="@string/bottom_player_summary"/>
     </PreferenceCategory>
 
     <PreferenceCategory

@@ -16,7 +16,6 @@ import it.dhd.bcrmanager.objects.Breakpoints;
 public class BreakpointAdapter extends RecyclerView.Adapter<BreakpointAdapter.ViewHolder> {
 
     private final List<Breakpoints> breakpoints;
-
     private final onItemLongClickListener onItemLongClickListener;
     private final onItemClickListener onItemClickListener;
 

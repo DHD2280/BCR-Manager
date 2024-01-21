@@ -1,6 +1,5 @@
 package it.dhd.bcrmanager.ui.fragments;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -9,10 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ConcatAdapter;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,25 +29,25 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
+import java.util.stream.Collectors;
 
 import it.dhd.bcrmanager.R;
 import it.dhd.bcrmanager.callbacks.SwipeCallback;
 import it.dhd.bcrmanager.databinding.BatchDeleteLayoutBinding;
 import it.dhd.bcrmanager.objects.CallLogItem;
 import it.dhd.bcrmanager.objects.ContactItem;
-import it.dhd.bcrmanager.runner.TaskRunner;
+import it.dhd.bcrmanager.ui.adapters.CallLogAdapter;
 import it.dhd.bcrmanager.ui.adapters.FilterAdapter;
-import it.dhd.bcrmanager.ui.adapters.RegLogAdapter;
 import it.dhd.bcrmanager.utils.DateUtils;
-import it.dhd.bcrmanager.utils.FileUtils;
-import it.dhd.bcrmanager.utils.UriUtils;
-import me.zhanghai.android.fastscroll.FastScrollerBuilder;
+import it.dhd.bcrmanager.utils.WrapContentLinearLayoutManager;
+import it.dhd.bcrmanager.viewmodel.FileViewModel;
 
 public class BatchDelete extends Fragment implements View.OnClickListener {
 
-    private List<CallLogItem> registrationsItems;
-    private RegLogAdapter regLogAdapter;
+    private List<Object> registrationsItems;
+    private List<CallLogItem> sortedList;
+    private List<ContactItem> contactsList;
+    private CallLogAdapter recordingsAdapter;
     ArrayList<String> contactNames;
 
     private Date mStartDate = null, mEndDate = null;
@@ -58,6 +58,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
     private FilterAdapter mFilterAdapter;
 
     private BatchDeleteLayoutBinding binding;
+    private FileViewModel fileModel;
 
     public BatchDelete() {
     }
@@ -65,8 +66,11 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-        //showTutorial();
+        registrationsItems = new ArrayList<>();
+        contactsList = new ArrayList<>();
+        contactNames = new ArrayList<>();
+        contactNames.add(getString(R.string.unsaved_contacts));
+        sortedList = new ArrayList<>();
     }
 
     @Override
@@ -74,50 +78,85 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                              Bundle savedInstanceState) {
 
         binding = BatchDeleteLayoutBinding.inflate(inflater, container, false);
+        requireActivity().setTitle(R.string.batch_delete);
+        fileModel = new ViewModelProvider(requireActivity()).get(FileViewModel.class);
+        return binding.getRoot();
+    }
 
-        View view = binding.getRoot();
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
+        fileModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                if (isLoading) {
+                    binding.progress.setVisibility(View.VISIBLE);
+                } else {
+                    binding.progress.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        fileModel.getDeletedItems().observe(getViewLifecycleOwner(), integer -> {
+            if (integer != null) {
+                if (integer > 0 && binding.batchDeleteFab.isShown()) {
+                    String message = requireContext().getResources().getQuantityString(R.plurals.deleted_registrations, integer, integer);
+                    Snackbar snackbar = Snackbar
+                            .make(binding.batchDeleteFab, message, Snackbar.LENGTH_LONG)
+                            .setAnchorView(binding.batchDeleteFab);
+                    snackbar.setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.black));
+                    snackbar.setTextColor(ContextCompat.getColor(requireContext(), R.color.white));
+                    snackbar.show();
+                    registrationsItems.clear();
+                    recordingsAdapter.notifyDataSetChanged();
+                    fileModel.getDeletedItems().setValue(0);
+                }
+            }
+        });
+
+        fileModel.getDataList().observe(getViewLifecycleOwner(), dataWrapper -> {
+            if (dataWrapper.sortedListWithHeaders() != null) {
+                sortedList = fileModel.getSortedItems().stream()
+                        .filter(CallLogItem.class::isInstance) // Filter only CallLogItem
+                        .map(CallLogItem.class::cast) // Converts Object to CallLogItem
+                        .collect(Collectors.toList());
+            }
+            if (dataWrapper.contactList() != null) {
+                List<ContactItem> contacts = dataWrapper.contactList();
+                Log.d("BatchDelete", "onViewCreated: " + contacts.size());
+                contactsList = new ArrayList<>(contacts);
+                Log.d("BatchDelete", "onViewCreated: " + contactsList.size());
+                contactsList.removeIf(contact -> TextUtils.isEmpty(contact.getContactName()));
+                contactsList.sort((o1, o2) -> o1.getContactName().compareToIgnoreCase(o2.getContactName()));
+                contactNames = new ArrayList<>();
+                contactNames.add(getString(R.string.unsaved_contacts));
+                List<ContactItem> uniqueContacts = new ArrayList<>();
+
+                for (ContactItem item : contactsList) {
+                    if (!contactNames.contains(item.getContactName()) && item.getCount() > 0) {
+                        contactNames.add(item.getContactName());
+                        uniqueContacts.add(item);
+                    }
+                }
+                mFilterAdapter.setContactItems(uniqueContacts, contactNames);
+            }
+        });
 
         setupViews();
-
-        //showTutorial();
-
-        return view;
     }
 
     private void setupViews() {
 
-        registrationsItems = new ArrayList<>();
-
-
-        Log.d("BatchDelete", "setupViews registrationsItems: " + registrationsItems.size());
-
-        List<ContactItem> contactItems = NewHome.contactList;
-        contactItems.removeIf(contact -> TextUtils.isEmpty(contact.getContactName()));
-        contactItems.sort((o1, o2) -> o1.getContactName().compareToIgnoreCase(o2.getContactName()));
-        contactNames = new ArrayList<>();
-        List<ContactItem> contactsList = new ArrayList<>();
-        contactNames.add(getString(R.string.unsaved_contacts));
-
-        for (ContactItem item : contactItems) {
-            if (!contactNames.contains(item.getContactName())) {
-                contactNames.add(item.getContactName());
-                contactsList.add(item);
-            }
-        }
-
-
         binding.noCriteriaTextView.setVisibility(View.VISIBLE);
 
-        regLogAdapter = new RegLogAdapter(requireContext(), registrationsItems, null, false, false, null);
+        recordingsAdapter = new CallLogAdapter(requireContext(), registrationsItems, false);
 
         binding.batchDeleteFab.hide();
         binding.batchDeleteFab.setOnClickListener(v -> showConfirmation());
 
         double mStartDuration = 0;
-        double mEndDuration = NewHome.mMaxDuration;
+        double mEndDuration = fileModel.getMaxDuration();
 
-
-        mFilterAdapter = new FilterAdapter(requireContext(), contactsList, contactNames, NewHome.mMaxDuration,
+        mFilterAdapter = new FilterAdapter(requireContext(), contactsList, contactNames, fileModel.getMaxDuration(),
                 mStartDuration, mEndDuration,
                 new FilterAdapter.onClickListeners() {
                     @Override
@@ -140,8 +179,8 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
 
         enableSwipeToDelete();
 
-        ConcatAdapter concatAdapter = new ConcatAdapter(mFilterAdapter, regLogAdapter);
-        binding.batchDeleteRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false));
+        ConcatAdapter concatAdapter = new ConcatAdapter(mFilterAdapter, recordingsAdapter);
+        binding.batchDeleteRecyclerView.setLayoutManager(new WrapContentLinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false));
         binding.batchDeleteRecyclerView.setAdapter(concatAdapter);
 
         binding.swipeUpFab.hide();
@@ -167,63 +206,22 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
     private void deleteItems() {
 
         binding.progress.setVisibility(View.VISIBLE);
-        int size = registrationsItems.size();
-        String formattedString = getResources().getQuantityString(R.plurals.deleted_registrations, size, size);
-        List<CallLogItem> itemsToRemove = new ArrayList<>(registrationsItems);
-        TaskRunner taskRunner = new TaskRunner();
-        taskRunner.executeAsync(() -> {
-            // Esegui il tuo metodo qui
-
-            for (CallLogItem item : registrationsItems) {
-
-                Uri fileUri, audioUri;
-                fileUri = Uri.parse(item.getFilePath());
-                audioUri = Uri.parse(item.getAudioFilePath());
-                if (UriUtils.areEqual(fileUri, audioUri)) {
-                    FileUtils.deleteFileUri(requireContext(), audioUri);
-                } else {
-                    FileUtils.deleteFileUri(requireContext(), fileUri);
-                    FileUtils.deleteFileUri(requireContext(), audioUri);
-                }
-            }
-            return null;
-        },
-                result -> {
-                    regLogAdapter.notifyItemRangeRemoved(0, size);
-                    registrationsItems.clear();
-                    for (CallLogItem item : itemsToRemove) {
-                        NewHome.deleteCallItem(item);
-                        if (item.isStarred()) {
-                            NewHome.deleteItemStarred(NewHome.yourListOfItemsStarred.indexOf(item));
-                        }
-                    }
-                    itemsToRemove.clear();
-                    List<CallLogItem> callLogItems = new ArrayList<>();
-                    for (Object item : NewHome.yourListOfItems) {
-                        if (item instanceof CallLogItem) {
-                            callLogItems.add((CallLogItem) item);
-                        }
-                    }
-                    FileUtils.saveObjectList(requireContext(), callLogItems, FileUtils.STORED_REG, CallLogItem.class);
-                    binding.progress.setVisibility(View.GONE);
-                    Snackbar.make(binding.batchDeleteFab.getRootView(), formattedString, Snackbar.LENGTH_SHORT)
-                            .setAnchorView(binding.batchDeleteFab)
-                            .setBackgroundTint(ContextCompat.getColor(requireContext(), R.color.black))
-                            .setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
-                            .show();
-                });
-
+        List<CallLogItem> itemsHolder = registrationsItems.stream()
+                .filter(CallLogItem.class::isInstance) // Filter only CallLogItem
+                .map(CallLogItem.class::cast) // Converts Object to CallLogItem
+                .collect(Collectors.toList());
+        fileModel.deleteItems(requireContext(), itemsHolder);
     }
 
 
     private void reCheckList() {
         registrationsItems.clear();
-        registrationsItems = new ArrayList<>();
         if ((mFilterAdapter.isChecked(mFilterAdapter.CONTACT) && mFilterAdapter.mContactPicked) ||
                 (mFilterAdapter.isChecked(mFilterAdapter.DATE) && mStartDate != null) ||
                 (mFilterAdapter.isChecked(mFilterAdapter.DIRECTION)) ||
                 mFilterAdapter.isChecked(mFilterAdapter.DURATION)) {
-            for (Object item : NewHome.yourListOfItems) {
+            if (sortedList == null) return;
+            for (Object item : sortedList) {
                 if (item instanceof CallLogItem currentItem) {
                     if (isDateInRange(new Date(currentItem.getTimestampDate())) &&
                             isContactInList(currentItem) &&
@@ -232,7 +230,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                         registrationsItems.add((CallLogItem) item);
                 }
             }
-            if (mFilterAdapter.mUnsaved) registrationsItems.sort((o1, o2) -> o1.getContactName().compareToIgnoreCase(o2.getContactName()));
+            //if (mFilterAdapter.mUnsaved) registrationsItems.sort((o1, o2) -> o1.getContactName().compareToIgnoreCase(o2.getContactName()));
             Log.d("BatchDelete", "reCheckList: " + registrationsItems.size());
             binding.noCriteriaTextView.setVisibility(View.GONE);
             if (registrationsItems.size() > 0) binding.batchDeleteFab.show();
@@ -243,7 +241,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
         if (registrationsItems.size() > 0) binding.batchDeleteFab.show();
         else binding.batchDeleteFab.hide();
 
-        regLogAdapter.setData(registrationsItems);
+        recordingsAdapter.notifyDataSetChanged();
 
         binding.batchDeleteRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -267,11 +265,6 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
             binding.swipeUpFab.hide();
         });
 
-        new FastScrollerBuilder(binding.batchDeleteRecyclerView)
-                //.setThumbDrawable(Objects.requireNonNull(ContextCompat.getDrawable(requireContext(), R.drawable.track)))
-                .setPadding(0, 0, 10, 0)
-                .build();
-
     }
 
     private void reCheckItems() {
@@ -284,10 +277,10 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.pickDateButton) {
-            if (!(NewHome.yourListOfItems.size() >0))
-                return;
+            if (sortedList == null) return;
+            if (!(sortedList.size() >0)) return;
 
-            CallLogItem lastItemLog = (CallLogItem)NewHome.yourListOfItems.get(NewHome.yourListOfItems.size()-1);
+            CallLogItem lastItemLog = sortedList.get(sortedList.size()-1);
             // Start date is today
             long startDate = lastItemLog.getTimestampDate();
             // Get the end date (in milliseconds) for today
@@ -353,8 +346,8 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
 
                 final int position = viewHolder.getBindingAdapterPosition();
-                final CallLogItem item = regLogAdapter.callLogItemsFiltered.get(position);
-                regLogAdapter.removeItem(position);
+                final CallLogItem item = (CallLogItem) registrationsItems.get(position);
+                recordingsAdapter.removeItem(position);
                 registrationsItems.remove(position);
 
                 reCheckItems();
@@ -363,7 +356,7 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
                         .setAnchorView(binding.batchDeleteFab);
                 snackbar.setAction("UNDO", view -> {
 
-                    regLogAdapter.restoreItem(item, position);
+                    recordingsAdapter.restoreItem(item, position);
                     registrationsItems.add(position, item);
                     binding.batchDeleteRecyclerView.scrollToPosition(position);
                 });
@@ -415,11 +408,5 @@ public class BatchDelete extends Fragment implements View.OnClickListener {
             return currentItem.getDuration() >= mFilterAdapter.getStartDuration() && currentItem.getDuration() <= mFilterAdapter.getEndDuration();
         }
         return true;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Objects.requireNonNull(((AppCompatActivity) requireActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(false);
     }
 }

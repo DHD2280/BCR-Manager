@@ -90,6 +90,20 @@ public class ThemeUtils {
         return typedValue.data;
     }
 
+    public static @ColorInt int getColorSurfaceHigh(Context context) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainerHigh, typedValue, true);
+        return typedValue.data;
+    }
+
+    public static @ColorInt int getColorSurfaceContainer(Context context) {
+        TypedValue typedValue = new TypedValue();
+        Resources.Theme theme = context.getTheme();
+        theme.resolveAttribute(com.google.android.material.R.attr.colorSurfaceContainer, typedValue, true);
+        return typedValue.data;
+    }
+
     public static boolean isSystemAccent() {
         return DynamicColors.isDynamicColorAvailable() && PreferenceUtils.getAppPreferences().getBoolean(PreferenceUtils.Keys.PREFS_KEY_DYNAMIC_COLOR, true);
     }

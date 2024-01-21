@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 1.2.0 - 2024-01-21
+- Improved Code Quality
+  - Using View Model for getting recordings and share data between fragments
+  - MediaPlayerService use ExoPlayer from media3
+  - Using RxJava for async loading and deleting recordings
+  - Breakpoint dialog and Delete dialog moved to new classes instead of inner classes
+  - Moved CallLogAdapter to new class
+  - All fragments now use CallLogAdapter
+- Improved UI
+  - Bottom Player has now color container
+
 ## 1.1.1 - 2024-01-17
 - Fixed bug in Sim Number [Issue #2](https://github.com/DHD2280/BCR-Manager/issues/2)
 - Added Sim Filter in Home
