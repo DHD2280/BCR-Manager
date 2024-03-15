@@ -8,10 +8,12 @@ import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
 import android.text.TextUtils;
@@ -533,7 +535,7 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
                 mStarredAdapter.notifyItemChanged(starredListFiltered.indexOf(currentlyPlaying));
         });
         binding.playerInfoBarContainer.setOnLongClickListener(v -> {
-            binding.recyclerView.smoothScrollToPosition(sortedListFiltered.indexOf(currentlyPlaying));
+            highlightRecording();
             return true;
         });
     }
@@ -1268,6 +1270,17 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
         }
         FragmentManager fm = requireActivity().getSupportFragmentManager();
         fm.beginTransaction().replace(R.id.frame_layout, new TrimAudioFragment(item)).addToBackStack(null).commit();
+    }
+
+    private void highlightRecording() {
+        if (binding == null) return;
+        if (!sortedListFiltered.contains(currentlyPlaying)) return;
+        int pos = sortedListFiltered.indexOf(currentlyPlaying);
+        binding.recyclerView.scrollToPosition(pos);
+        binding.recyclerView.postDelayed(() -> {
+            mRegAdapter.highLight(pos);
+            //highlightFallback(prefsFragment, prefResult);
+        }, 200);
     }
 
 }

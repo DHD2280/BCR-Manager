@@ -26,8 +26,8 @@ android {
         applicationId = "it.dhd.bcrmanager"
         minSdk = 28
         targetSdk = 34
-        versionCode = 16
-        versionName = "1.2.0"
+        versionCode = 20
+        versionName = "1.2.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
         resourceConfigurations.addAll(listOf(

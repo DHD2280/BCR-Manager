@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,10 +66,21 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private boolean hasExpansion = true;
     private boolean hasContactsActionsEnabled = true;
 
+    private int highlightPos = RecyclerView.NO_POSITION;
+
     public void filter(List<Object> filteredList) {
         callLogItems.clear();
         callLogItems.addAll(filteredList);
         notifyDataSetChanged();
+    }
+
+    public void highLight(int pos) {
+        highlightPos = pos;
+        notifyItemChanged(pos);
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            highlightPos = RecyclerView.NO_POSITION;
+            notifyItemChanged(pos);
+        }, 350);
     }
 
     public interface onActionPlayListener {
@@ -340,6 +353,14 @@ public class CallLogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             // Set card stuff
             if (position == expandedPosition) {
                 binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceContainer(mContext));
+            } else {
+                binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(mContext, R.color.trans));
+            }
+
+            if (position == highlightPos) {
+                binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceHighest(mContext));
+            } else if (position == expandedPosition) {
+                binding.rootLayout.setCardBackgroundColor(ThemeUtils.getColorSurfaceHigh(mContext));
             } else {
                 binding.rootLayout.setCardBackgroundColor(ContextCompat.getColor(mContext, R.color.trans));
             }
