@@ -19,9 +19,6 @@ android {
             keyPassword = keystoreProperties["keyPassword"] as String
         }
     }
-    androidResources {
-        generateLocaleConfig = true
-    }
     namespace = "it.dhd.bcrmanager"
     compileSdk = 34
 
@@ -33,6 +30,11 @@ android {
         versionName = "1.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         setProperty("archivesBaseName", rootProject.name + "-v" + versionName + "-" + versionCode)
+        resourceConfigurations.addAll(listOf(
+            "en",
+            "it",
+            "lv"
+        ))
     }
 
     buildTypes {
