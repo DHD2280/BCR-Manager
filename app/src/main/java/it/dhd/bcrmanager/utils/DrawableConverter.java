@@ -1,15 +1,11 @@
 package it.dhd.bcrmanager.utils;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 
 public class DrawableConverter {
 
@@ -61,20 +57,5 @@ public class DrawableConverter {
             drawable.draw(canvas);
         }
         return bitmap;
-    }
-
-    @Nullable
-    public static Drawable getRoundedDrawable(
-            @NonNull Context context, @Nullable Drawable photo, int width, int height) {
-        Bitmap bitmap = drawableToBitmap(photo);
-        if (bitmap != null) {
-            Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, width, height, false);
-            RoundedBitmapDrawable drawable =
-                    RoundedBitmapDrawableFactory.create(context.getResources(), scaledBitmap);
-            drawable.setAntiAlias(true);
-            drawable.setCornerRadius((float) drawable.getIntrinsicHeight() / 2);
-            return drawable;
-        }
-        return null;
     }
 }

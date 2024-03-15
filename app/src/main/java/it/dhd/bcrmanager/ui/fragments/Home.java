@@ -472,11 +472,19 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
                     binding.bottomPlayerLayout.starredIcon.setVisibility(currentlyPlaying.isStarred() ? View.VISIBLE : View.GONE);
                 }
 
+                resetAllList();
+
             }
         };
 
         ItemTouchHelper itemTouchhelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchhelper.attachToRecyclerView(binding.recyclerView);
+    }
+
+    private void resetAllList() {
+        allList.clear();
+        allList.addAll(starredListFiltered);
+        allList.addAll(sortedListFiltered);
     }
 
     private void setupRecyclerOrientation(int orientation) {
@@ -678,6 +686,7 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
 
         mRegAdapter.filter(filteredRegList);
         mStarredAdapter.filter(filteredStarredList);
+        resetAllList();
         setupBadge(getFilteredCount());
     }
 
@@ -896,7 +905,6 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
 
             mediaPlayerService.startPlayback(item);
             mediaPlayerService.setOnCompletionListener(() -> {
-                //finish(); // finish current activity
                 binding.bottomPlayerLayout.playerProgressBar.setProgressCompat(100, true);
                 stopUpdater();
                 mRegAdapter.notifyItemChanged(sortedListFiltered.indexOf(currentlyPlaying));
@@ -1072,6 +1080,7 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
                             starredList.add(new DateHeader(getString(R.string.starred)));
                         starredList.add(item);
                         mRegAdapter.notifyItemChanged(sortedListFiltered.indexOf(item));
+                        resetAllList();
                     }
 
                     @Override
@@ -1084,6 +1093,7 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
                             starredList.clear();
                         }
                         mRegAdapter.notifyItemChanged(sortedListFiltered.indexOf(item));
+                        resetAllList();
                     }
                 },
                 (oldItem, newItem) -> {

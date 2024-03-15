@@ -738,7 +738,7 @@ public class DataRepository {
                 default -> shortCount = 3;
             }
             List<ContactItem> contactHolder = new ArrayList<>(contactList);
-            contactList.sort((item1, item2) -> Integer.compare(item2.getCount(), item1.getCount()));
+            contactHolder.sort((item1, item2) -> Integer.compare(item2.getCount(), item1.getCount()));
             List<ContactItem> shortCutter = new ArrayList<>();
             for (ContactItem contact : contactHolder) {
                 boolean nameExists = false;

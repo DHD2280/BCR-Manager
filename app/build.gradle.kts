@@ -97,7 +97,7 @@ materialThemeBuilder {
 
 dependencies {
 
-    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("androidx.media3:media3-ui:1.3.0")
     val lifecycleVersion = "2.7.0"
 
     // AndroidX support
@@ -130,6 +130,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")
 
     // Media 3
-    implementation("androidx.media3:media3-exoplayer:1.2.1")
-    implementation ("androidx.media3:media3-common:1.2.1")
+    implementation("androidx.media3:media3-exoplayer:1.3.0")
+    implementation ("androidx.media3:media3-common:1.3.0")
 }
