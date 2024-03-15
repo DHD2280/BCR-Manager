@@ -1,0 +1,209 @@
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" translatable="false">Zvanu ierakstītāja BCR pārvaldnieks</string>
+
+    <!-- Permission Fragment Strings -->
+    <string name="wellcome_title">Laipni lūgti BCR Pārvaldniekā!</string>
+    <string name="wellcome_message">Šī lietotne ir paredzēta zvanu ierakstītāja BCR Magisk moduļa lietotājam. Tā padarīs ērtāku zvanu ierakstu meklēšanu un atskaņošanu.\nNeaizmirstiet iestatīt BCR ierakstu glabāšanas mapi, kura atšķirtos no noklusējuma (jo šī lietotne nevar lasīt citas lietotnes mapē) un iespējot \'Veidot metadatu failu\' lietotnes \'Vienkāršais zvanu ierakstītājs BCR\' iestatījumos! JSON metadati nav obligāti, taču tie būtiski palīdzēs lietotnei apstrādāt ierakstus. Lietotne jebkurā gadījumā mēģina iegūt ierakstus arī bez JSON metadatiem.</string>
+    <string name="setup_permissions_title">Iestatiet atļaujas</string>
+    <string name="setup_permissions_call_log_title">Lasīt zvanu žurnālu (call log)</string>
+    <string name="setup_permissions_call_log_message">Zvanu žurnāla lasīšanas atļauja nepieciešama, lai zvanu žurnālā pārbaudītu pašreizējo kontakta vārdu.</string>
+    <string name="setup_permissions_contact_title">Lasīt kontaktus</string>
+    <string name="setup_permissions_contact_message">Kontaktu lasīšanas atļauja nepieciešama, lai pārbaudītu kontakta vārdu (ja Zvanu žurnālā neizdodas) un kontakta bildi.</string>
+    <string name="setup_permissions_phone_state_title">Lasīt tālruņa stāvokli</string>
+    <string name="setup_permissions_phone_state_message">Tālruņa statusa lasīšanas atļauja nepieciešama, lai pārbaudītu aktīvo SIMkaršu skaitu un to, vai zvanītājs ir Balss pasts.</string>
+    <string name="setup_permissions_grant">Dot atļaujas</string>
+    <string name="setup_permissions_granted">Darīts!</string>
+
+    <!-- BCR Dialog Strings -->
+    <string name="bcr_not_installed_title">BCR nav instalēts</string>
+    <string name="bcr_not_installed_message">BCR jūsu ierīcē nav instalēta. Lūdzu, instalējiet to no GitHub (tostarp, ar Obtainium).</string>
+    <string name="bcr_not_installed_positive">Instalēt</string>
+
+    <!-- BCR Directory Dialog Strings -->
+    <string name="bcr_directory_title">BCR mape (ierakstu saglabāšanai)</string>
+    <string name="bcr_directory_message">Lūdzu, izvēlieties mapi, kurā BCR saglabā ierakstus.</string>
+    <string name="bcr_directory_positive">Izvēlēties</string>
+
+    <!-- Action Mode -->
+    <string name="selected_count">%d atlasīti</string>
+
+    <!-- Menu Strings -->
+    <string name="search">Meklēt</string>
+    <string name="batch_delete">Dzēst vairumā</string>
+    <string name="settings">Iestatījumi</string>
+
+    <!-- Filter Menu Strings -->
+    <string name="filter">filtrs</string>
+    <string name="date">Datums</string>
+    <string name="single_date">Viens datums</string>
+    <string name="pick_date">Izvēlēties datumu</string>
+    <string name="range_date">Datumu diapazons</string>
+    <string name="contact">Kontakts</string>
+    <string name="direction">Virziens</string>
+    <string name="ingoing">Ienākošie</string>
+    <string name="outgoing">Izejošie</string>
+    <string name="conference">Konference</string>
+    <string name="all">Visi</string>
+    <string name="duration">Ilgums</string>
+    <string name="sim">SIM-karte</string>
+
+    <!-- File Error string -->
+    <string name="error_files">Šie faili nav korekti parsēti.\Iespējams, Jūs izmantojat citu datuma/laika formātu.</string>
+
+    <!-- Contact Observer string -->
+    <plurals name="contact_changed">
+        <item quantity="one">Kontakts mainījies: %1$s</item>
+        <item quantity="other">%1$d Kontakti mainījušies.</item>
+    </plurals>
+
+    <!-- Home Strings - Tutorial -->
+    <string name="tutorial_item_title">Šī ir Jūsu reģistrācija!</string>
+    <string name="tutorial_item_message">Jūs varat pielāgot vienību izskatu iestatījumos.\pieskarieties vienumam, lai atklātu citas iespejamās darbības.</string>
+    <string name="tutorial_contact_icon">Šī ir kontakta ikona.</string>
+    <string name="tutorial_contact_icon_message">Jūs varat iestatīt kontakta ikonas izskatu iestatījumos.\pieskarieties kontakta ikonai, lai veiktu ātro meklēšanu.</string>
+
+    <!-- Delete Dialog -->
+    <string name="delete_dialog_title">Dzēst</string>
+    <string name="delete_dialog_message">Vai tiešām vēlaties dzēst šo failu?</string>
+    <string name="delete_dialog_positive">Dzēst</string>
+    <string name="delete_dialog_negative">Atcelt dzēšanu</string>
+
+    <!-- Breakpoints Strings -->
+    <string name="breakpoints">Grāmatzīmes</string>
+    <string name="delete_breakpoint">Dzēst</string>
+    <string name="edit_breakpoint">Rediģēt</string>
+    <string name="title_breakpoint">Nosaukums</string>
+    <string name="breakpoints_title_empty">Nosaukums nevar būt tukšs!</string>
+    <string name="description_breakpoint">Apraksts</string>
+    <string name="add_breakpoint">Pievienot</string>
+    <string name="add_breakpoint_title">Jauna Grāmatzīme</string>
+    <string name="cancel_breakpoint">Atcelt</string>
+
+    <!-- Time Strings -->
+    <string name="today">Šodien</string>
+    <string name="yesterday">Vakar</string>
+    <string name="last_month">Pēdējā mēneša laikā</string>
+    <string name="format_sec">%d sek</string>
+    <string name="format_min">%1$s min %2$s sek</string>
+
+    <string name="starred">Favorīti</string>
+
+    <!-- Expanded Layout -->
+    <string name="call">Zvanīt</string>
+    <string name="create_new_contact">Izveidot jaunu kontaktu</string>
+    <string name="edit_contact">Rediģēt kontaktu</string>
+    <string name="send_message">Sūtīt ziņu</string>
+    <string name="send_sms">Sūtīt SMS</string>
+    <string name="save_contact">Saglabāt</string>
+    <string name="share">Kopīgot</string>
+    <string name="open_with">Atvērt ar</string>
+    <string name="trim_audio_clip">Apgraizīt audio</string>
+    <string name="delete">Dzēst</string>
+
+    <string name="divider" translatable="false">·</string>
+
+    <!-- Batch Delete Strings -->
+    <string name="select_criteria">Izvēlieties vismaz vienu kritēriju</string>
+    <string name="no_items">Nav izvēlēta neviena vienība</string>
+    <plurals name="deleted_registrations">
+        <item quantity="one">%1$d ieraksts dzēsts.</item>
+        <item quantity="other">%1$d ieraksti dzēsti.</item>
+    </plurals>
+    <string name="sure_delete">Vai tiešām?</string>
+    <string name="sure_delete_message">Šī darbība ir neatgriezeniska!</string>
+    <string name="unsaved_contacts">Nesaglabātie kontakti</string>
+
+    <!-- Settings Strings -->
+    <string name="theme_settings">Tēmas iestatījumi</string>
+    <string name="dynamic_colors">Izmantot dinamiskas krāsas</string>
+    <string name="dynamic_colors_summary">Izmantot lietotnes sistēmas krāsas</string>
+
+    <string name="theme_color">Tēmas krāsa</string>
+    <!-- Theme Strings -->
+    <string name="color_sakura">Sakura</string>
+    <string name="color_red">Sarkana</string>
+    <string name="color_pink">Rozā</string>
+    <string name="color_purple">Lillā</string>
+    <string name="color_deep_purple">Tumši lillā</string>
+    <string name="color_indigo">Indigo</string>
+    <string name="color_blue">Zila</string>
+    <string name="color_light_blue">Gaiši zila</string>
+    <string name="color_cyan">Ciāna</string>
+    <string name="color_teal">Zilganzaļa</string>
+    <string name="color_green">Zaļa</string>
+    <string name="color_light_green">Gaiši zaļa</string>
+    <string name="color_lime">Laima</string>
+    <string name="color_yellow">Dzeltena</string>
+    <string name="color_amber">Dzintara</string>
+    <string name="color_orange">Oranža</string>
+    <string name="color_deep_orange">Tumši oranža</string>
+    <string name="color_brown">Brūna</string>
+    <string name="color_blue_grey">Zili pelēka</string>
+
+    <string name="night_theme">Nakts tēma</string>
+    <!-- Night Theme Strings -->
+    <string name="night_theme_on">Vienmēr iespējota</string>
+    <string name="night_theme_off">Vienmēr atspējota</string>
+    <string name="night_theme_follow_system">Atbilstoša sistēmas iestatījumiem</string>
+
+    <!-- Style Category -->
+    <string name="style_settings">Stilu iestatījumi</string>
+    <string name="show_headers">Rīdīt galvenes</string>
+    <string name="show_headers_summary">Rādīt galvenes zvanu žurnālā</string>
+    <string name="item_entry_appearance">Ieraksta vienības izskats</string>
+    <string name="item_entry_appearance_summary">Izvēlieties, kā attēlot ierakstu vienību</string>
+    <string name="bottom_player">Apakšējais atskaņotājs</string>
+    <string name="bottom_player_summary">Izvēlieties, kā attēlot apakšējo atskaņotāju</string>
+
+    <!-- Miscellanous Category -->
+    <string name="app_settings">App iestatījumi</string>
+    <string name="vibrate_title">Vibrēt</string>
+    <string name="vibrate_summary">Vibrēt pie lietotāja saskarnes izmaiņām</string>
+    <string name="miscellaneous">Dažādi</string>
+    <string name="version">Versija</string>
+
+    <!-- Item Entry Settings -->
+    <string name="refresh">Atsvaidzināt</string>
+    <string name="contact_icon_category">Kontakta ikona</string>
+    <string name="show_contact">Rādīt kontakta ikonu</string>
+    <string name="show_colored_tiles">Rādīt krāsainas flīzes</string>
+    <string name="show_colored_tiles_summary">Rādīt krāsainās flīzes zvanu žurnālā</string>
+    <string name="show_dark_letters_title">Rādīt tumšus burtus</string>
+    <string name="show_dark_letters_summary">Rādīt tumšus burtus, kad sistēmas tēma ir tumša</string>
+
+    <!-- Call Info Category -->
+    <string name="call_info">Zvana informācija</string>
+    <string name="show_sim_info">Rādīt SIM numuru</string>
+    <string name="never">Nē</string>
+    <string name="automatic">Automātiski</string>
+    <string name="always">Jā</string>
+    <string name="show_number_label">Rādīt numura birku (label)</string>
+    <!-- Call Info Colors -->
+    <string name="call_info_colors">Zvanu informācijas ikonas krāsas</string>
+    <string name="direction_color">Virziena krāsa</string>
+    <string name="color_default">Noklusējuma krāsa</string>
+    <string name="primary_color">Primārā krāsa</string>
+    <string name="surface_color">Virsmas krāsa</string>
+    <string name="based_on_direction">Balstoties uz virzienu (ienākošs/izejošs/konference)</string>
+    <string name="color_incoming">Ienākošā krāsa</string>
+    <string name="color_outgoing">Izejošā krāsa</string>
+    <string name="color_conference">Konferences zvana krāsa</string>
+    <string name="sim_color">SIM krāsa</string>
+    <string name="color_number_label">Numura birkas krāsa</string>
+
+    <!-- Player Settings -->
+    <string name="player_settings">Atskaņotāja iestatījumi</string>
+    <string name="player_type">Atskaņotāja tips</string>
+    <string name="player_type_compat">Kompakts</string>
+    <string name="player_type_medium">Vidējs</string>
+    <string name="player_type_full">Pilns</string>
+
+    <!-- Player Strings -->
+    <string name="speed">Temps</string>
+
+    <!-- Error Report Strings -->
+    <string name="error_report_title">Kļūdas ziņojums</string>
+    <string name="error_report_message">Nosūtīt šo ziņojumu izstrādātājam.</string>
+    <string name="save_to_file">Saglabāt failā</string>
+
+</resources>
