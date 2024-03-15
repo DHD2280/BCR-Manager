@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.2.2 - 2024-03-15
+- Added locales config
+- Longpress on bottom player to highlight recording
+
+## 1.2.1 - 2024-03-15
+- Fixed bug #4: [Issue #4](https://github.com/DHD2280/BCR-Manager/issues/4)
+- Added Latvian Language
+
 ## 1.2.0 - 2024-01-21
 - Improved Code Quality
   - Using View Model for getting recordings and share data between fragments
