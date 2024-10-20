@@ -1,7 +1,5 @@
 # Changelog
 
-## Unreleased
-
 ## 1.2.2 - 2024-03-15
 - Added locales config
 - Longpress on bottom player to highlight recording
