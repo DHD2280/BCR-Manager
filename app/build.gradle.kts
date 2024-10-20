@@ -6,19 +6,8 @@ plugins {
     id("dev.rikka.tools.materialthemebuilder")
 }
 
-val keystorePropertiesFile: File = rootProject.file("keystore/keystore.properties")
-val keystoreProperties = Properties()
-keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-
 android {
-    signingConfigs {
-        create("release") {
-            storeFile = File(keystoreProperties["storeFile"] as String)
-            storePassword = keystoreProperties["storePassword"] as String
-            keyAlias = keystoreProperties["keyAlias"] as String
-            keyPassword = keystoreProperties["keyPassword"] as String
-        }
-    }
+
     namespace = "it.dhd.bcrmanager"
     compileSdk = 34
 
@@ -37,16 +26,37 @@ android {
         ))
     }
 
+    val keystorePropertiesFile = rootProject.file("keystore.properties")
+    var releaseSigning = signingConfigs.getByName("debug")
+
+    try {
+        val keystoreProperties = Properties()
+        FileInputStream(keystorePropertiesFile).use { inputStream ->
+            keystoreProperties.load(inputStream)
+        }
+
+        releaseSigning = signingConfigs.create("release") {
+            keyAlias = keystoreProperties.getProperty("keyAlias")
+            keyPassword = keystoreProperties.getProperty("keyPassword")
+            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+            storePassword = keystoreProperties.getProperty("storePassword")
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    } catch (ignored: Exception) {
+    }
+
     buildTypes {
         release {
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = releaseSigning
         }
         getByName("debug") {
             versionNameSuffix = ".debug"
+            signingConfig = releaseSigning
         }
     }
     buildFeatures{
