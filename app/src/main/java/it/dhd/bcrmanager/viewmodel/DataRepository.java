@@ -371,11 +371,13 @@ public class DataRepository {
                 String path = FileUtils.getPathFromUri(context, pickedDir.getUri());
                 if (path != null) {
                     File dir = new File(path);
-                    List<String> filesInFolder = new ArrayList<>(Arrays.asList(dir.list()));
-                    // Remove stored regs if file is not present
-                    if (PreferenceUtils.getLastTimeFiles() != filesInFolder.size() &&
-                            PreferenceUtils.getLastTimeFiles() != 0 && recordingsList.size() != 0) {
-                        recordingsList.removeIf(callLogItem -> filesInFolder.contains(callLogItem.getFileName()));
+                    if (dir.list() != null) {
+                        List<String> filesInFolder = new ArrayList<>(Arrays.asList(dir.list()));
+                        // Remove stored regs if file is not present
+                        if (PreferenceUtils.getLastTimeFiles() != filesInFolder.size() &&
+                                PreferenceUtils.getLastTimeFiles() != 0 && recordingsList.size() != 0) {
+                            recordingsList.removeIf(callLogItem -> filesInFolder.contains(callLogItem.getFileName()));
+                        }
                     }
                 }
 
