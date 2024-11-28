@@ -365,7 +365,9 @@ public class DataRepository {
                 if (recordingsList != null && recordingsList.size() != 0) {
                     // Store a List of file parsed
                     for (CallLogItem callLogItem : recordingsList) {
-                        fileNames.add(callLogItem.getFileName());
+                        if(callLogItem != null){
+                            fileNames.add(callLogItem.getFileName());
+                        }
                     }
                 }
                 String path = FileUtils.getPathFromUri(context, pickedDir.getUri());
