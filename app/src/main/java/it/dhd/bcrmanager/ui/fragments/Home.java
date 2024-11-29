@@ -950,7 +950,7 @@ public class Home extends Fragment implements ContactObserver.DataUpdateListener
         }
         FragmentManager fm = requireActivity().getSupportFragmentManager();
         DeleteDialog deleteDialog = new DeleteDialog(item, () -> {
-            if (TextUtils.equals(currentlyPlaying.getFileName(), item.getFileName())) {
+            if (currentlyPlaying != null && TextUtils.equals(currentlyPlaying.getFileName(), item.getFileName())) {
                 fileModel.setPlayingItem(null);
             }
             List<CallLogItem> items = new ArrayList<>();
