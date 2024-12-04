@@ -109,12 +109,11 @@ materialThemeBuilder {
 
 dependencies {
 
-    implementation("androidx.media3:media3-ui:1.4.1")
-    val lifecycleVersion = "2.8.6"
+    implementation("androidx.media3:media3-ui:1.5.0")
 
     // AndroidX support
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
     implementation("androidx.preference:preference:1.2.1")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
@@ -122,7 +121,7 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     // Gson
-    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     // Picasso
     implementation("com.squareup.picasso:picasso:2.8")
@@ -136,12 +135,12 @@ dependencies {
     implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
 
     // LiveData
-    implementation("androidx.lifecycle:lifecycle-livedata:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
 
     // Media 3
-    implementation("androidx.media3:media3-exoplayer:1.4.1")
-    implementation ("androidx.media3:media3-common:1.4.1")
+    implementation("androidx.media3:media3-exoplayer:1.5.0")
+    implementation ("androidx.media3:media3-common:1.5.0")
 }
