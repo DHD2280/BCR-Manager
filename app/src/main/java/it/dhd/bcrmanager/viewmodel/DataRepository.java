@@ -140,10 +140,10 @@ public class DataRepository {
                 starredListWithHeaders.add(item);
             }
         }
-        if (starredListWithHeaders.size() > 0) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
+        if (!starredListWithHeaders.isEmpty()) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
         FileUtils.saveObjectList(context, rec, FileUtils.STORED_REG, CallLogItem.class);
         FileUtils.saveObjectList(context, contactList, FileUtils.STORED_CONTACTS, ContactItem.class);
-        setupContactShortcuts(context, starredListWithHeaders.size() > 0);
+        setupContactShortcuts(context, !starredListWithHeaders.isEmpty());
         data = new DataWrapper(sortedListWithHeaders, starredListWithHeaders, contactList, new ArrayList<>(), mMaxDuration);
         return data;
     }
@@ -619,8 +619,8 @@ public class DataRepository {
             }
 
         }
-        if (starredListWithHeaders.size() > 0) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
-        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(context, starredListWithHeaders.size() > 0);
+        if (!starredListWithHeaders.isEmpty()) starredListWithHeaders.add(0, new DateHeader(context.getString(R.string.starred)));
+        if (!onlyStarred && !onlySelectedContact && hasReadContactsPermission) setupContactShortcuts(context, !starredListWithHeaders.isEmpty());
 
         // Now, sortedListWithHeaders contains both CallLogItem and DateHeader objects
         List<Object> sortedOrderedList = new ArrayList<>(sortedListWithHeaders);
@@ -733,7 +733,7 @@ public class DataRepository {
     private void setupContactShortcuts(Context context, boolean addStarred) {
         ShortcutManagerCompat.removeAllDynamicShortcuts(context);
         int shortCount;
-        if (contactList != null && contactList.size() > 0) {
+        if (contactList != null && !contactList.isEmpty()) {
             switch (contactList.size()) {
                 case 1 -> shortCount = 1;
                 case 2 -> shortCount = 2;
@@ -759,6 +759,7 @@ public class DataRepository {
             shortCutter.sort((item1, item2) -> Integer.compare(item2.getCount(), item1.getCount()));
             ShortcutUtils shortcutUtils = new ShortcutUtils(context);
             if (addStarred) shortcutUtils.addDynamicShortcutStarred();
+            if (shortCutter.isEmpty()) return;
             switch (shortCount) {
                 case 1 -> shortcutUtils.addDynamicShortcut(shortCutter.get(0));
                 case 2 -> {
