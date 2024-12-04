@@ -144,3 +144,7 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation (libs.androidx.media3.common)
 }
+
+tasks.register("printVersionName") {
+    println(android.defaultConfig.versionName?.replace(".debug".toRegex(), ""))
+}
