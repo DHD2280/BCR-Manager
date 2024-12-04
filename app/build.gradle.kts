@@ -2,8 +2,8 @@ import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
-    id("dev.rikka.tools.materialthemebuilder")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.rikka.materialthemebuilder)
 }
 
 android {
@@ -109,38 +109,38 @@ materialThemeBuilder {
 
 dependencies {
 
-    implementation("androidx.media3:media3-ui:1.5.0")
+    implementation(libs.androidx.media3.ui)
 
     // AndroidX support
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
-    implementation("androidx.preference:preference:1.2.1")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.recyclerview)
 
     // Material Design
-    implementation("com.google.android.material:material:1.12.0")
+    implementation(libs.material)
 
     // Gson
-    implementation("com.google.code.gson:gson:2.11.0")
+    implementation(libs.gson)
 
     // Picasso
-    implementation("com.squareup.picasso:picasso:2.8")
+    implementation(libs.picasso)
 
 
     // FastScroll
-    implementation("me.zhanghai.android.fastscroll:library:1.3.0")
+    implementation(libs.library)
 
     // Rx Java
-    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
-    implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
+    implementation(libs.rxjava)
+    implementation (libs.rxandroid)
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel:2.8.7")
+    implementation(libs.androidx.lifecycle.viewmodel)
 
     // LiveData
-    implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
+    implementation(libs.androidx.lifecycle.livedata)
 
     // Media 3
-    implementation("androidx.media3:media3-exoplayer:1.5.0")
-    implementation ("androidx.media3:media3-common:1.5.0")
+    implementation(libs.androidx.media3.exoplayer)
+    implementation (libs.androidx.media3.common)
 }
