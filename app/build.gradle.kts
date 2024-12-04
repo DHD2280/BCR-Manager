@@ -9,7 +9,7 @@ plugins {
 android {
 
     namespace = "it.dhd.bcrmanager"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "it.dhd.bcrmanager"
